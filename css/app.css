@@ -178,3 +178,25 @@ button {
 .err{
     color: red;
 }
+
+.password-rules {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.password-rules .rule {
+    color: #e74c3c;           /* default = red */
+    margin: 3px 0;
+    transition: color 0.3s ease;
+}
+
+.password-rules .rule.valid {
+    color: #27ae60;           /* green when valid */
+    font-weight: 500;
+}
+
+.password-rules .rule.valid::before {
+    content: "✓ ";
+    font-weight: bold;
+}

@@ -69,19 +69,6 @@ function temp($key, $value = null) {
       echo "<input type='text' id='$key' name='$key' value='$value' $attr>";
   }
 
-// Generate <input type='radio'> list
-function html_radios($key, $items, $br = false) {
-    $value = encode($GLOBALS[$key] ?? '');
-    echo '<div>';
-    foreach ($items as $id => $text) {
-        $state = $id == $value ? 'checked' : '';
-        echo "<label><input type='radio' id='{$key}_$id' name='$key' value='$id' $state>$text</label>";
-        if ($br) {
-            echo '<br>';
-        }
-    }
-    echo '</div>';
-}
 
 // Generate <select>
 function html_select($key, $items, $default = '- Select One -', $attr = '') {
@@ -126,6 +113,30 @@ function is_unique($value, $table, $field){
     $stm = $_db->prepare("SELECT COUNT(*) FROM $table WHERE $field = ?");
     $stm->execute([$value]);
     return $stm->fetchColumn() > 0;
+}
+
+function get_next_id(string $table): int
+{
+    global $_db; // your PDO instance
+
+    try {
+        // Lock the table to prevent race conditions
+        $_db->exec("LOCK TABLES $table WRITE");
+
+        // Get current highest ID + 1
+        $sql = "SELECT IFNULL(MAX(id), 0) + 1 FROM $table";
+        $next_id = $_db->query($sql)->fetchColumn();
+
+        // Unlock
+        $_db->exec("UNLOCK TABLES");
+
+        return (int)$next_id;
+
+    } catch (Exception $e) {
+        $_db->exec("UNLOCK TABLES"); // make sure it's unlocked
+        error_log("get_next_id($table) failed: " . $e->getMessage());
+        throw new Exception("Cannot generate ID. Please try again.");
+    }
 }
 
 // ============================================================================

@@ -23,7 +23,7 @@ if (is_post()) {
 
     //Validate name
     if(empty($name)){
-        $$_err['name'] = "Required";
+        $_err['name'] = "Required";
     }
     else if (!is_unique($name, 'customer', 'name')) {
         $_err['name'] = "Duplicate Name";
@@ -107,6 +107,57 @@ if (is_post()) {
         $_err['postcode'] = "Invalid Postcode Format";
     }
 
+if (empty($_err)) {
+    try {
+        $_db->beginTransaction();
+
+        // Get next customer ID safely
+        $customer_id = get_next_id('customer');
+
+        // Insert customer
+        $sql = "INSERT INTO customer 
+                (id, name, email, password, phone, birthdate, gender, created_at) 
+                VALUES 
+                (:id, :name, :email, :password, :phone, :birthdate, :gender, NOW())";
+
+        $stm = $_db->prepare($sql);
+        $stm->execute([
+            ':id'        => $customer_id,
+            ':name'      => $name,
+            ':email'     => $email,
+            ':password'  => password_hash($password, PASSWORD_DEFAULT),
+            ':phone'     => $phone,
+            ':birthdate' => $birthdate ?: null,
+            ':gender'    => $gender
+        ]);
+
+        // Insert address
+        $sql2 = "INSERT INTO customer_address 
+                 (customer_id, address, city, state, postcode, is_default) 
+                 VALUES (:customer_id, :address, :city, :state, :postcode, 1)";
+
+        $stm2 = $_db->prepare($sql2);
+        $stm2->execute([
+            ':customer_id' => $customer_id,
+            ':address'     => $address,
+            ':city'        => $city,
+            ':state'       => $state,
+            ':postcode'    => $postcode
+        ]);
+
+        $_db->commit();
+
+        // Login user
+        $_SESSION['customer_id'] = $customer_id;
+        $_SESSION['customer_name'] = $name;
+
+        redirect('login.php?registered=1');
+
+    } catch (Exception $e) {
+        $_db->rollBack();
+        $_err['db'] = "Registration failed. Please try again.";
+    }
+}
 
 }
 ?>
@@ -134,11 +185,18 @@ if (is_post()) {
             <?= err('email') ?>
             
             <label for="password">Password *</label>
-            <?= html_text('password', 'type="password" maxlength="11" ') ?>
+            <input type ='password' name='password' id='password' maxlength="11"> 
             <?= err('password') ?>
+            <div class="password-rules">
+                <p class="rule" id="rule-length">Minimum 8 characters</p>
+                <p class="rule" id="rule-upper">At least one uppercase letter</p>
+                <p class="rule" id="rule-lower">At least one lowercase letter</p>
+                <p class="rule" id="rule-number">At least one number</p>
+                <p class="rule" id="rule-special">At least one special character</p>
+            </div>
 
             <label for="confirm_password">Confirm Password *</label>
-            <?= html_text('confirm_password', 'type="password" maxlength="11" ') ?>
+            <input type ='confirm-password' name='confirm-password' id='confirm-password'>
             <?= err('confirm_password') ?>
 
             <button type="button" class="btn-next">Next</button>
@@ -153,12 +211,15 @@ if (is_post()) {
             <?= err('phone') ?>
 
             <label for="birthdate">Date of Birth</label>
-            <?= html_text('birthdate', 'type="date"') ?>
+            <input type='date' id="birthdate" name="birthdate">
             <?= err('birthdate') ?>
 
             <label>Gender</label>
-            <?= html_radios('gender', $_genders) ?>
-            <?= err('gender') ?>
+            <select>
+                <option value="">Select Gender</option>
+                <option>Male</option>
+                <option>Female</option>
+            </select>
 
             <div class="btn">
                 <button type="button" class="btn-prev">Previous</button>
