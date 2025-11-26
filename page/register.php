@@ -116,7 +116,6 @@ if (is_post()) {
     }
     
 if (!$_err) {
-    echo "Validation passed!<br>";
     
     try {
         echo "Starting transaction...<br>";
@@ -128,7 +127,6 @@ if (!$_err) {
                 (:name, :email, :password, :phone, :birthdate, :gender, NOW())";
 
         $stm = $_db->prepare($sql);
-        echo "Prepared first query<br>";
         
         $stm->execute([
             ':name'      => $name,
@@ -138,18 +136,15 @@ if (!$_err) {
             ':birthdate' => $birthdate ?: null,
             ':gender'    => $gender
         ]);
-        echo "Inserted customer record<br>";
 
         // Get the auto-generated customer ID
         $customer_id = $_db->lastInsertId();
-         echo "Customer ID: " . $customer_id . "<br>";
 
         $sql2 = "INSERT INTO customer_address 
                 (customer_id, address, city, state, postcode) 
                 VALUES (:customer_id, :address, :city, :state, :postcode)";
 
         $stm2 = $_db->prepare($sql2);
-        echo "Prepared second query<br>";
         
         $stm2->execute([
             ':customer_id' => $customer_id,
@@ -158,15 +153,12 @@ if (!$_err) {
             ':state'       => $state,
             ':postcode'    => $postcode
         ]);
-        echo "Inserted address record<br>";
 
         $_db->commit();
-        echo "Transaction committed!<br>";
 
         $_SESSION['customer_id']   = $customer_id;
         $_SESSION['customer_name'] = $name;
 
-        echo "About to redirect...<br>";
         redirect('/');
         
     } catch (Exception $e) {
