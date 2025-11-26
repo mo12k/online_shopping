@@ -54,6 +54,30 @@ function temp($key, $value = null) {
     }
 }
 
+// Obtain uploaded file --> cast to object
+function get_file($key) {
+    $f = $_FILES[$key] ?? null;
+    
+    if ($f && $f['error'] == 0) {
+        return (object)$f;
+    }
+
+    return null;
+}
+
+// Crop, resize and save photo
+function save_photo($f, $folder, $width = 200, $height = 200) {
+    $photo = uniqid() . '.jpg';
+    
+    require_once 'lib/SimpleImage.php';
+    $img = new SimpleImage();
+    $img->fromFile($f->tmp_name)
+        ->thumbnail($width, $height)
+        ->toFile("$folder/$photo", 'image/jpeg');
+
+    return $photo;
+}
+
 // ============================================================================
 // HTML Helpers
 // ============================================================================
@@ -64,14 +88,9 @@ function encode($value) {
 }
 
   // Generate <input type='text'>
-function html_text($name, $attr = '') {
-    $value = $_POST[$name] ?? '';
-    $value = htmlspecialchars($value, ENT_QUOTES);
-    echo "<input type=\"text\" id=\"$name\" name=\"$name\" value=\"$value\" $attr>";
-}
-
-function html_password($name, $attr = '') {
-    echo "<input type=\"password\" id=\"$name\" name=\"$name\" $attr>";
+function html_text($key, $attr = '') {
+    $value = encode($GLOBALS[$key] ?? '');
+    echo "<input type='text' id='$key' name='$key' value='$value' $attr>";
 }
 
 // Generate <select>
@@ -87,6 +106,12 @@ function html_select($key, $items, $default = '- Select One -', $attr = '') {
     }
     echo '</select>';
 }
+
+// Generate <input type='file'>
+function html_file($key, $accept = '', $attr = '') {
+    echo "<input type='file' id='$key' name='$key' accept='$accept' $attr>";
+}
+
 
 // ============================================================================
 // Error Handlings
@@ -119,27 +144,18 @@ function is_unique($value, $table, $field) {
     return $stm->rowCount() === 0;
 }
 
-function get_next_id(string $table): int
-{
+function verify_credentials($username, $password) {
     global $_db;
+    $stm = $_db->prepare("SELECT * FROM customer WHERE username = ? LIMIT 1");
+    $stm->execute([$username]);
+    $user = $stm->fetch();
 
-    try {
-        // Get current highest ID + 1 without locking
-        // The transaction in the calling code will handle concurrency
-        $sql = "SELECT IFNULL(MAX(id), 0) + 1 as next_id FROM $table";
-        $result = $_db->query($sql)->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$result || !isset($result['next_id'])) {
-            throw new Exception("Failed to get next ID");
-        }
-        
-        return (int)$result['next_id'];
-
-    } catch (Exception $e) {
-        error_log("get_next_id($table) failed: " . $e->getMessage());
-        throw new Exception("Cannot generate ID. Please try again.");
+    if ($user && password_verify($password, $user->password)) {
+        return $user;
     }
+    return null;
 }
+
 
 // ============================================================================
 // Global Constants and Variables

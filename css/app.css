@@ -91,7 +91,7 @@ body.register-page {
     background-size: cover;
 }
 
-.container{
+.container-register {
     width: 450px;
     margin: 40px auto;
     background: white;
@@ -137,12 +137,15 @@ label {
 }
 
 input, select {
-    width: 100%;
     padding: 10px;
     margin-top: 5px;
     border: 1px solid #ccc;
     border-radius: 6px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
 }
+
 
 button {
     margin-top: 20px;
@@ -175,8 +178,12 @@ button {
     display: block;
 }
 
-.err{
+.err {
     color: red;
+    font-size: 14px;
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
 }
 
 .password-rules {
@@ -200,3 +207,151 @@ button {
     content: "✓ ";
     font-weight: bold;
 }
+
+.already-account {
+    text-align: center;
+    margin-top: 30px;
+    color: #666;
+    font-size: 14px;
+}
+
+.already-account .login-link {
+    color: #1976d2;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.already-account .login-link:hover {
+    color: #0a54a6;
+    text-decoration: underline;
+}
+
+
+/* ------------------------------------------------------------------------ */
+/* login page */
+/* --- Page Layout --- */
+body.login-page {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #4f73ff, #6ad1ff);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- Container --- */
+.container-login {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+/* --- Form Wrapper --- */
+.wrapper {
+    background: #ffffff;
+    padding: 30px 35px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.wrapper h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 600;
+    font-size: 28px;
+    color: #333;
+}
+
+/* --- Form Fields --- */
+.field {
+    margin-bottom: 18px;
+}
+
+.field label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.field input {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s ease;
+}
+
+.field input:focus {
+    border-color: #4f73ff;
+    box-shadow: 0 0 0 3px rgba(79, 115, 255, 0.2);
+}
+
+/* --- Input Icons --- */
+.field i {
+    position: relative;
+    left: -30px;
+    top: -32px;
+    float: right;
+    font-size: 18px;
+    color: #777;
+    pointer-events: none;
+}
+
+/* --- Forgot Password --- */
+.remember-forgot {
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.remember-forgot .link {
+    color: #4f73ff;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.remember-forgot .link:hover {
+    text-decoration: underline;
+}
+
+/* --- Button --- */
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: #4f73ff;
+    color: white;
+    font-size: 15px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.25s;
+    margin-top: 5px;
+}
+
+button[type="submit"]:hover {
+    background: #3f5ee0;
+}
+
+/* --- Register Link --- */
+.register-link {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.register-link .link {
+    color: #4f73ff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.register-link .link:hover {
+    text-decoration: underline;
+}
+
+

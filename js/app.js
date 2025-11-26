@@ -1,21 +1,46 @@
 $(() => {
-    $('.btn-next').click(function() {
-        let currentStep = $(this).closest('.form-step');
+    // Helper: update progress bar based on which .form-step is active
+    function updateProgressBar() {
+        const activeStepIndex = $('.form-step.active').index(); // 0, 1, or 2
+        
+        $('.progress-bar .step').removeClass('active').attr('aria-current', null);
+        $('.progress-bar .step')
+            .eq(activeStepIndex)
+            .addClass('active')
+            .attr('aria-current', 'step');
+    }
 
-        let nextStep = currentStep.next('.form-step');
-        currentStep.removeClass('active');
-        nextStep.addClass('active');
+    // NEXT button
+    $('.btn-next').click(function (e) {
+        e.preventDefault(); // Prevent form submission if button is inside a form
+        let currentStep = $(this).closest('.form-step');
+        let nextStep    = currentStep.next('.form-step');
+
+        if (nextStep.length) {
+            currentStep.removeClass('active');
+            nextStep.addClass('active');
+            updateProgressBar();           // ← update progress bar
+        }
     });
 
-    $('.btn-prev').click(function() {
+    // PREVIOUS button
+    $('.btn-prev').click(function (e) {
+        e.preventDefault(); // Prevent form submission if button is inside a form
         let currentStep = $(this).closest('.form-step');
-        let prevStep = currentStep.prev('.form-step');
+        let prevStep    = currentStep.prev('.form-step');
 
-        currentStep.removeClass('active');
-        prevStep.addClass('active');
+        if (prevStep.length) {
+            currentStep.removeClass('active');
+            prevStep.addClass('active');
+            updateProgressBar();           // ← update progress bar
+        }
     });
 
-    let $password = $('#password');
+    // Optional: initialize correctly on page load (in case you reload on step 2/3)
+    updateProgressBar();
+
+    // ——— Your existing password validation (unchanged) ———
+   let $password = $('#password');
 
     $password.on('input',function(){
         let pwd = $(this).val();
