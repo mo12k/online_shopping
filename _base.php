@@ -59,16 +59,20 @@ function temp($key, $value = null) {
 // ============================================================================
 
   // Encode HTML special characters
-  function encode($value) {
-      return htmlentities($value);
-  }
+function encode($value) {
+    return htmlentities($value);
+}
 
   // Generate <input type='text'>
-  function html_text($key, $attr = '') {
-      $value = encode($GLOBALS[$key] ?? '');
-      echo "<input type='text' id='$key' name='$key' value='$value' $attr>";
-  }
+function html_text($name, $attr = '') {
+    $value = $_POST[$name] ?? '';
+    $value = htmlspecialchars($value, ENT_QUOTES);
+    echo "<input type=\"text\" id=\"$name\" name=\"$name\" value=\"$value\" $attr>";
+}
 
+function html_password($name, $attr = '') {
+    echo "<input type=\"password\" id=\"$name\" name=\"$name\" $attr>";
+}
 
 // Generate <select>
 function html_select($key, $items, $default = '- Select One -', $attr = '') {
@@ -108,32 +112,30 @@ $_db = new PDO('mysql:dbname=bookstore', 'root', '', [
 ]);
 
 //Is unique?
-function is_unique($value, $table, $field){
+function is_unique($value, $table, $field) {
     global $_db;
-    $stm = $_db->prepare("SELECT COUNT(*) FROM $table WHERE $field = ?");
+    $stm = $_db->prepare("SELECT 1 FROM $table WHERE $field = ? LIMIT 1");
     $stm->execute([$value]);
-    return $stm->fetchColumn() > 0;
+    return $stm->rowCount() === 0;
 }
 
 function get_next_id(string $table): int
 {
-    global $_db; // your PDO instance
+    global $_db;
 
     try {
-        // Lock the table to prevent race conditions
-        $_db->exec("LOCK TABLES $table WRITE");
-
-        // Get current highest ID + 1
-        $sql = "SELECT IFNULL(MAX(id), 0) + 1 FROM $table";
-        $next_id = $_db->query($sql)->fetchColumn();
-
-        // Unlock
-        $_db->exec("UNLOCK TABLES");
-
-        return (int)$next_id;
+        // Get current highest ID + 1 without locking
+        // The transaction in the calling code will handle concurrency
+        $sql = "SELECT IFNULL(MAX(id), 0) + 1 as next_id FROM $table";
+        $result = $_db->query($sql)->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$result || !isset($result['next_id'])) {
+            throw new Exception("Failed to get next ID");
+        }
+        
+        return (int)$result['next_id'];
 
     } catch (Exception $e) {
-        $_db->exec("UNLOCK TABLES"); // make sure it's unlocked
         error_log("get_next_id($table) failed: " . $e->getMessage());
         throw new Exception("Cannot generate ID. Please try again.");
     }

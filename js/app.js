@@ -17,7 +17,7 @@ $(() => {
 
     let $password = $('#password');
 
-    $('password').on('input',function(){
+    $password.on('input',function(){
         let pwd = $(this).val();
 
         if (pwd.length >=8){
@@ -48,7 +48,7 @@ $(() => {
         }
 
         // At least one special char    
-        if (/[@$!%*?&]/.test(pwd)) {
+        if (/[^A-Za-z0-9]/.test(pwd)) {
             $('#rule-special').addClass('valid');
         } else {
             $('#rule-special').removeClass('valid');

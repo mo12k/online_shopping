@@ -13,6 +13,8 @@ if (is_post()) {
     $name = req('name');
     $email = req('email');
     $password = req('password');
+    var_dump($password);
+    $confirm_password = req('confirm_password');
     $phone = req('phone');
     $birthdate = req('birthdate');  
     $gender = req('gender');  
@@ -25,36 +27,43 @@ if (is_post()) {
     if(empty($name)){
         $_err['name'] = "Required";
     }
-    else if (!is_unique($name, 'customer', 'name')) {
-        $_err['name'] = "Duplicate Name";
-    }
     else if(strlen($name) > 100){
         $_err['name'] = "Maximum length 100";
+    }
+    else if (!is_unique($name, 'customer', 'name')) {
+        $_err['name'] = "Duplicate Name";
     }
 
     //Validate email
     if(empty($email)){
         $_err['email'] = "Required";
     }
-    else if (!is_unique($email, 'customer', 'email')) {
-        $_err['email'] = "Duplicate Email";
-    }
     else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_err['email'] = "Invalid Email Format";
+    }
+    else if (!is_unique($email, 'customer', 'email')) {
+        $_err['email'] = "Duplicate Email";
     }
 
     //Validate password
     if(empty($password)){
         $_err['password'] = "Required";
     }
-    else if (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
-        $_err['password'] = "Invalid Password Format";
+    else if(strlen($password) < 8){
+        $_err['password'] = "Minimum length 8 characters";
     }
     else if(strlen($password) > 11){
         $_err['password'] = "Maximum length 11";
     }
-    else if($password !== req('confirm_password')){
-        $_err['confirm_password'] = "Password Mismatch";
+    elseif (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])/', $password)) {
+        $_err['password'] = "Must contain uppercase, lowercase, number and special character (@$!%*?&)";
+    }
+    //Validate confirm password
+    if (empty(req('confirm_password'))) {
+        $_err['confirm_password'] = "Required";
+    } 
+    else if (req('confirm_password') !== $password) {
+        $_err['confirm_password'] = "Passwords do not match";
     }
 
     //Validate phone
@@ -106,23 +115,26 @@ if (is_post()) {
     else if (!preg_match('/^[0-9]{5}$/', $postcode)) {
         $_err['postcode'] = "Invalid Postcode Format";
     }
+    echo "<pre>";
+    print_r($_err);
+    echo "</pre>";
 
 if (empty($_err)) {
+    echo "Validation passed!<br>";
+    
     try {
+        echo "Starting transaction...<br>";
         $_db->beginTransaction();
 
-        // Get next customer ID safely
-        $customer_id = get_next_id('customer');
-
-        // Insert customer
         $sql = "INSERT INTO customer 
-                (id, name, email, password, phone, birthdate, gender, created_at) 
+                (name, email, password, phone, birthdate, gender, created_at) 
                 VALUES 
-                (:id, :name, :email, :password, :phone, :birthdate, :gender, NOW())";
+                (:name, :email, :password, :phone, :birthdate, :gender, NOW())";
 
         $stm = $_db->prepare($sql);
+        echo "Prepared first query<br>";
+        
         $stm->execute([
-            ':id'        => $customer_id,
             ':name'      => $name,
             ':email'     => $email,
             ':password'  => password_hash($password, PASSWORD_DEFAULT),
@@ -130,13 +142,19 @@ if (empty($_err)) {
             ':birthdate' => $birthdate ?: null,
             ':gender'    => $gender
         ]);
+        echo "Inserted customer record<br>";
 
-        // Insert address
+        // Get the auto-generated customer ID
+        $customer_id = $_db->lastInsertId();
+         echo "Customer ID: " . $customer_id . "<br>";
+
         $sql2 = "INSERT INTO customer_address 
-                 (customer_id, address, city, state, postcode, is_default) 
-                 VALUES (:customer_id, :address, :city, :state, :postcode, 1)";
+                (customer_id, address, city, state, postcode) 
+                VALUES (:customer_id, :address, :city, :state, :postcode)";
 
         $stm2 = $_db->prepare($sql2);
+        echo "Prepared second query<br>";
+        
         $stm2->execute([
             ':customer_id' => $customer_id,
             ':address'     => $address,
@@ -144,21 +162,25 @@ if (empty($_err)) {
             ':state'       => $state,
             ':postcode'    => $postcode
         ]);
+        echo "Inserted address record<br>";
 
         $_db->commit();
+        echo "Transaction committed!<br>";
 
-        // Login user
-        $_SESSION['customer_id'] = $customer_id;
+        $_SESSION['customer_id']   = $customer_id;
         $_SESSION['customer_name'] = $name;
 
-        redirect('login.php?registered=1');
-
+        echo "About to redirect...<br>";
+        redirect('index.php');
+        
     } catch (Exception $e) {
-        $_db->rollBack();
+        echo "ERROR: " . $e->getMessage() . "<br>";
+        if ($_db->inTransaction()) {
+            $_db->rollBack();
+        }
         $_err['db'] = "Registration failed. Please try again.";
     }
 }
-
 }
 ?>
 
@@ -196,7 +218,7 @@ if (empty($_err)) {
             </div>
 
             <label for="confirm_password">Confirm Password *</label>
-            <input type ='confirm-password' name='confirm-password' id='confirm-password'>
+            <input type="password" name="confirm_password" id="confirm_password">
             <?= err('confirm_password') ?>
 
             <button type="button" class="btn-next">Next</button>
@@ -210,16 +232,23 @@ if (empty($_err)) {
             <?= html_text('phone', 'type="tel" placeholder="0123456789"') ?>
             <?= err('phone') ?>
 
-            <label for="birthdate">Date of Birth</label>
-            <input type='date' id="birthdate" name="birthdate">
+            <label for="birthdate">Date of Birth *</label>
+            <input type="date" 
+                id="birthdate" 
+                name="birthdate" 
+                value="<?= htmlspecialchars($_POST['birthdate'] ?? '') ?>"
+                max="<?= date('Y-m-d') ?>">
             <?= err('birthdate') ?>
 
             <label>Gender</label>
-            <select>
+            <label>Gender</label>
+            <select name="gender" id="gender" required>
                 <option value="">Select Gender</option>
-                <option>Male</option>
-                <option>Female</option>
+                <?php foreach ($_genders as $value => $label): ?>
+                    <option value="<?= $value ?>" <?= ($gender ?? '') == $value ? 'selected' : '' ?>><?= $label ?></option>
+                <?php endforeach; ?>
             </select>
+            <?= err('gender') ?>
 
             <div class="btn">
                 <button type="button" class="btn-prev">Previous</button>
@@ -240,24 +269,33 @@ if (empty($_err)) {
             <?= err('city') ?>
 
             <label for="state">State *</label>
-            <select>
-                <option value="">Select State</option>
-                <option>Johor</option>
-                <option>Kedah</option>
-                <option>Kelantan</option>
-                <option>Malacca</option>
-                <option>Negeri Sembilan</option>
-                <option>Pahang</option>
-                <option>Penang</option>
-                <option>Perak</option>
-                <option>Perlis</option>
-                <option>Sabah</option>
-                <option>Sarawak</option>
-                <option>Selangor</option>
-                <option>Terengganu</option>
-                <option>Federal Territory of Kuala Lumpur</option>
-                <option>Federal Territory of Labuan</option>
-                <option>Federal Territory of Putrajaya</option>
+            <select name="state" id="state">
+                <option value="">- Select State -</option>
+                <?php 
+                $states = [
+                    'Johor' => 'Johor',
+                    'Kedah' => 'Kedah',
+                    'Kelantan' => 'Kelantan',
+                    'Malacca' => 'Malacca',
+                    'Negeri Sembilan' => 'Negeri Sembilan',
+                    'Pahang' => 'Pahang',
+                    'Penang' => 'Penang',
+                    'Perak' => 'Perak',
+                    'Perlis' => 'Perlis',
+                    'Sabah' => 'Sabah',
+                    'Sarawak' => 'Sarawak',
+                    'Selangor' => 'Selangor',
+                    'Terengganu' => 'Terengganu',
+                    'Kuala Lumpur' => 'Federal Territory of Kuala Lumpur',
+                    'Labuan' => 'Federal Territory of Labuan',
+                    'Putrajaya' => 'Federal Territory of Putrajaya'
+                ];
+                $selected = $_POST['state'] ?? '';
+                foreach ($states as $value => $label): ?>
+                    <option value="<?= $value ?>" <?= $selected === $value ? 'selected' : '' ?>>
+                        <?= $label ?>
+                    </option>
+                <?php endforeach; ?>
             </select>
             <?= err('state') ?>
 

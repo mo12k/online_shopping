@@ -186,13 +186,13 @@ button {
 }
 
 .password-rules .rule {
-    color: #e74c3c;           /* default = red */
+    color: #e74c3c;           
     margin: 3px 0;
     transition: color 0.3s ease;
 }
 
 .password-rules .rule.valid {
-    color: #27ae60;           /* green when valid */
+    color: #27ae60;           
     font-weight: 500;
 }
 
