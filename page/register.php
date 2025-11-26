@@ -13,7 +13,6 @@ if (is_post()) {
     $name = req('name');
     $email = req('email');
     $password = req('password');
-    var_dump($password);
     $confirm_password = req('confirm_password');
     $phone = req('phone');
     $birthdate = req('birthdate');  
@@ -115,10 +114,7 @@ if (is_post()) {
     else if (!preg_match('/^[0-9]{5}$/', $postcode)) {
         $_err['postcode'] = "Invalid Postcode Format";
     }
-    echo "<pre>";
-    print_r($_err);
-    echo "</pre>";
-
+    
 if (!$_err) {
     echo "Validation passed!<br>";
     
