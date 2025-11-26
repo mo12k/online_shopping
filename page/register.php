@@ -119,7 +119,7 @@ if (is_post()) {
     print_r($_err);
     echo "</pre>";
 
-if (empty($_err)) {
+if (!$_err) {
     echo "Validation passed!<br>";
     
     try {
@@ -171,7 +171,7 @@ if (empty($_err)) {
         $_SESSION['customer_name'] = $name;
 
         echo "About to redirect...<br>";
-        redirect('index.php');
+        redirect('/');
         
     } catch (Exception $e) {
         echo "ERROR: " . $e->getMessage() . "<br>";
