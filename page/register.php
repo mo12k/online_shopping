@@ -101,9 +101,9 @@ if (!$_err) {
         $_db->beginTransaction();
 
         $sql = "INSERT INTO customer 
-                (username, email, password, phone, birthdate, gender, created_at) 
+                (username, email, password, phone, birthdate, gender, created_at, photo) 
                 VALUES 
-                (:username, :email, :password, :phone, :birthdate, :gender, NOW())";
+                (:username, :email, :password, :phone, :birthdate, :gender, NOW(), :photo)";
 
         $stm = $_db->prepare($sql);
         
@@ -113,7 +113,8 @@ if (!$_err) {
             ':password'  => password_hash($password, PASSWORD_DEFAULT),
             ':phone'     => $phone,
             ':birthdate' => $birthdate ?: null,
-            ':gender'    => $gender
+            ':gender'    => $gender,
+            ':photo'     => 'default_pic.jpg'
         ]);
 
         // Get the auto-generated customer ID

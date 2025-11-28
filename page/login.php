@@ -25,8 +25,9 @@ if(is_post()) {
         if($user){
             //Login success
             $_SESSION['customer_id'] = $user->customer_id;
-            $_SESSION['customer_name'] = $user->username;
-            redirect('/');
+            $_SESSION['customer_username'] = $user->username;
+            $_SESSION['profile_picture'] = $user->photo ?? 'default_pic.jpg';
+            redirect('../index.php');
 
         } else {
             //Login failed
@@ -55,7 +56,7 @@ if(is_post()) {
             </div>
 
             <div class="remember-forgot">
-                <a href="forgot_password.php" class="link"> Forgot Password? </a>
+                <a href="forgot-password.php" class="link"> Forgot Password? </a>
             </div>
 
             <button type="submit" name="submit" value="login"> Login </button>

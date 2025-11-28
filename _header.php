@@ -1,5 +1,10 @@
 <?php
+require '_base.php';
 
+$arr = glob('/../images/profile/*.jpg');
+$arr = array_map('basename', $arr);
+
+$profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
 ?>
 <header>
     <div class="header-left">
@@ -10,11 +15,22 @@
             <a href="/page/demo2.php">Demo 2</a>
         </nav>
     </div>
+    
+    <?php if (!($_SESSION['customer_username'] ?? false)): ?>
+        <div class="header-right">
+            <a href="/page/register.php">Sign up</a> |
+            <a href="/page/login.php">Log in</a>
+        </div>
+    <?php endif; ?>
 
-    <div class="header-right">
-        <a href="/page/register.php">Sign up</a> |
-        <a href="/page/login.php">Log in</a>
-    </div>
+    <?php if ($_SESSION['customer_username'] ?? false): ?>
+        <div class="header-right">
+            <img src="/images/profile/<?= htmlspecialchars($profile_pic) ?>" alt="Profile">
+            <span class="username"><?= htmlspecialchars($_SESSION['customer_username']) ?></span>
+            |
+            <a href="/page/logout.php">Logout</a>
+        </div>
+    <?php endif; ?>
 
 
 </header>
