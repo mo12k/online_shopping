@@ -63,7 +63,9 @@ if (is_post()) {
             $m->Body = "<h2>Hello {$user->username}</h2>
                         <p>Click the button below to reset your password (expires in 5 minutes):</p>
                         <p style='text-align:center'>
-                            <a href='$reset_url' style='padding:15px 30px;background:#007bff;color:white;text-decoration:none;border-radius:5px;'>
+                            <a href='$reset_url' 
+                            target='_self'
+                            style='display:inline-block; padding:16px 36px; background:#007bff; color:white; text-decoration:none; border-radius:8px; font-size:16px; font-weight:600;'>
                                 Reset Password
                             </a>
                         </p>";
