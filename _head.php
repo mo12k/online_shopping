@@ -14,5 +14,6 @@
     <script src="/js/app.js"></script>
 </head>
 <body class="<?= $_body_class ?? '' ?>">
+    <div id="info"><?= temp('info') ?></div>
 
 

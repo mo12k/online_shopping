@@ -3,7 +3,7 @@ $_body_class = 'login-page';
 $_page_title = "Login";
 
 require '../_base.php';
-require '../_head.php';
+include '../_head.php';
 
 if(is_post()) {
     $username = trim(req('username'));
@@ -38,7 +38,7 @@ if(is_post()) {
 ?>
 
 <div class="container-login">
-    <div class="wrapper">
+    <div class="wrapper-login">
         <h1> Login </h1>
         <form method="post" action="">
             <div class="field input">

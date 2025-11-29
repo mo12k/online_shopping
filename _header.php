@@ -1,5 +1,4 @@
 <?php
-require '_base.php';
 
 $arr = glob('/../images/profile/*.jpg');
 $arr = array_map('basename', $arr);

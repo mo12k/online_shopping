@@ -4,7 +4,7 @@ $_body_class = 'register-page';
 $_page_title = "Register";
 
 require '../_base.php';
-require '../_head.php';
+include '../_head.php';
 
 if (is_post()) {
 

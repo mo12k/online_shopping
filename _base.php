@@ -156,6 +156,44 @@ function verify_credentials($username, $password) {
     return null;
 }
 
+function get_user_by_email($email) {
+    global $_db;
+    $stm = $_db->prepare("SELECT * FROM customer WHERE email = ? LIMIT 1");
+    $stm->execute([$email]);
+    return $stm->fetch();
+}
+
+function get_mail() {
+    require_once 'lib/PHPMailer.php';
+    require_once 'lib/SMTP.php';
+
+    $m = new PHPMailer(true);
+    $m->isSMTP();
+    $m->SMTPAuth = true;
+    $m->Host = 'smtp.gmail.com';
+    $m->Port = 587;
+    $m->Username = 'mokcb-wm24@student.tarc.edu.my';
+    $m->Password = 'pqks aenl ivwm suup';
+    $m->CharSet = 'utf-8';
+    
+    return $m;
+}
+
+function root($path = '') {
+    return "$_SERVER[DOCUMENT_ROOT]/$path";
+}
+
+
+function base($path = '') {
+    return "http://$_SERVER[SERVER_NAME]:$_SERVER[SERVER_PORT]/$path";
+}
+
+function is_exists($value, $table, $field) {
+    global $_db;
+    $stm = $_db->prepare("SELECT COUNT(*) FROM $table WHERE $field = ?");
+    $stm->execute([$value]);
+    return $stm->fetchColumn() > 0;
+}
 
 // ============================================================================
 // Global Constants and Variables
