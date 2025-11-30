@@ -12,6 +12,7 @@
     </div>
 
     <div class="header-right">
+        <a href="/admin/index.php">Admin Log in</a>|
         <a href="/page/register.php">Sign up</a> |
         <a href="/page/login.php">Log in</a>
     </div>
