@@ -15,27 +15,27 @@
 
     <ul>
         <li class="<?= $current == 'user' ? 'active' : '' ?>">
-        <a href="index.php?view=dashboard">User</a>
+        <a href="/admin/page/customer.php">User</a>
         </li> 
         
         <li class="<?= $current == 'dashboard' ? 'active' : '' ?>">
-        <a href="../admin/page/dashboard.php">Dashboard</a>
+        <a href="/admin/page/dashboard.php">Dashboard</a>
         </li>
 
         <li class="<?= $current == 'customer' ? 'active' : '' ?>">
-        <a href="../admin/page/customer.php" >Customer List</a>
+        <a href="/admin/page/customer.php" >Customer List</a>
         </li>
 
         <li class="<?= $current == 'product' ? 'active' : '' ?>">
-        <a href="../admin/page/product.php">Product List</a>
+        <a href="/admin/page/product.php">Product List</a>
         </li>
 
         <li class="<?= $current == 'order' ? 'active' : '' ?>">
-        <a href="../admin/page/order.php">Order List</a>
+        <a href="/admin/page/order.php">Order List</a>
         </li>
 
         <li class="<?= $current == 'staff' ? 'active' : '' ?>">
-        <a href="../admin/page/staff.php">Staff List</a>
+        <a href="/admin/page/staff.php">Staff List</a>
         </li>
     </ul>
 </div>
