@@ -93,6 +93,12 @@ function html_text($key, $attr = '') {
     echo "<input type='text' id='$key' name='$key' value='$value' $attr>";
 }
 
+// Generate <input type='password'>
+function html_password($key, $attr = '') {
+    $value = encode($GLOBALS[$key] ?? '');
+    echo "<input type='password' id='$key' name='$key' value='$value' $attr>";
+}
+
 // Generate <select>
 function html_select($key, $items, $default = '- Select One -', $attr = '') {
     $value = encode($GLOBALS[$key] ?? '');

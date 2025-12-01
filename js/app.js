@@ -1,4 +1,6 @@
 $(() => {
+    
+    
     // Helper: update progress bar based on which .form-step is active
     function updateProgressBar() {
         const activeStepIndex = $('.form-step.active').index(); // 0, 1, or 2
@@ -80,3 +82,4 @@ $(() => {
         }
     });
 });
+

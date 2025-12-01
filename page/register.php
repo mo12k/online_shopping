@@ -3,8 +3,8 @@
 $_body_class = 'register-page';
 $_page_title = "Register";
 
-require_once '../_base.php';
-include_once '../_head.php';
+require '../_base.php';
+include '../_head.php';
 
 if (is_post()) {
 
@@ -50,36 +50,62 @@ if (is_post()) {
     }
 
     if (!$_err) {
-        // Optional fields not collected now
-        $phone = null;
-        $birthdate = null;
-        $gender = null;
-
         $_db->beginTransaction();
 
         $sql = "INSERT INTO customer 
-                (username, email, password, phone, birthdate, gender, created_at, photo) 
-                VALUES 
-                (?, ?, SHA1(?), ?, ?, ?, NOW(), 'default_pic.jpg')";
-
+                            (username, email, is_verified,password, created_at, photo, ) 
+                            VALUES (?, ?, 0, SHA1(?), NOW(), 'default_pic.jpg')";
         $stm = $_db->prepare($sql);
-        $stm->execute([$username, $email, $password, $phone, $birthdate, $gender]);
+        $stm->execute([$username, $email, $password]);
 
         $customer_id = $_db->lastInsertId();
+
+        // GENERATE 6-DIGIT OTP 
+        $otp = str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);  
+        $otp_hash = sha1($otp);
+
+        // ← SAVE OTP TO token 
+        $stm = $_db->prepare("INSERT INTO token 
+            (customer_id, token_hash, token_type, expires_at) 
+            VALUES (?, ?, 'verify', DATE_ADD(NOW(), INTERVAL 15 MINUTE))");
+        $stm->execute([$customer_id, $otp_hash]);
+
         $_db->commit();
 
-        $_SESSION['customer_id'] = $customer_id;
+        // Save to session so verify_otp.php knows who is verifying
+        $_SESSION['customer_id']       = $customer_id;
         $_SESSION['customer_username'] = $username;
+        $_SESSION['raw_otp']           = $otp;   
 
-        redirect('/');
+        // Send email
+        $m = get_mail();
+        $m->setFrom('mokcb-wm24@student.tarc.edu.my', 'PaperNest');
+        $m->addAddress($email);
+        $m->isHTML(true);
+        $m->Subject = 'Your Verification Code - PaperNest';
+        $m->Body = "<h2>Verify Your Email</h2>
+                    <p>Hi {$username},</p>
+                    <p>Your verification code is:</p>
+                    <h1 style='font-size:48px; letter-spacing:10px; text-align:center; color:#1976d2;'>$otp</h1>
+                    <p style='text-align:center; color:#555;'>
+                        Valid for 15 minutes only
+                    </p>";
+
+        try {
+            $m->send();
+            temp('info', 'Check your email! OTP sent.');
+            redirect('verify_otp.php');
+        } catch (Exception $e) {
+            temp('info', "Email not sent Otp: $otp");
+            redirect('verify_otp.php');
+        }
     }
 }
 ?>
 
 <div class="container-register">
-    <form id="register-form" method="POST" action="register.php">
+    <form id="register-form" method="POST" action="">        
         <h2>Account Details</h2>
-
         <label for="username">Username *</label>
         <?= html_text('username', 'maxlength="100"') ?>
         <?= err('username') ?>
@@ -89,7 +115,7 @@ if (is_post()) {
         <?= err('email') ?>
 
         <label for="password">Password *</label>
-        <input type="password" name="password" id="password" maxlength="11">
+        <?=  html_password('password', 'maxlength="11"') ?>
         <?= err('password') ?>
         <div class="password-rules">
             <p class="rule" id="rule-length">Minimum 8 characters</p>
@@ -100,10 +126,10 @@ if (is_post()) {
         </div>
 
         <label for="confirm_password">Confirm Password *</label>
-        <input type="password" name="confirm_password" id="confirm_password">
+        <?=  html_password('confirm_password') ?>
         <?= err('confirm_password') ?>
 
-        <button type="submit">Create Account</button>
+        <button type="submit" id="create_account" name="create_account">Create Account</button>
 
         <div class="already-account">
             Already have an account?
