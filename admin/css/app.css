@@ -204,7 +204,47 @@
     gap: 12px;
     flex-wrap: wrap;
     flex: 1;
-    max-width: 900px;
+    max-width: 400px;
+}
+
+/* wrap input bar to put in icon */
+.search-input-wrapper {
+    position: relative;
+    display: inline-block;
+    min-width: 180px;
+}
+
+/* space for icon*/
+.search-input-wrapper input {
+    padding-right: 20px;
+    height: 20px;
+    font-size: 15px;
+    width: 600px;
+    max-width: 100%;
+    
+}
+
+/* boxicons icon*/
+.search-input-wrapper .search-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #666;
+    pointer-events: auto; /*allow clicks */
+    cursor: pointer; /*clickable cursor */
+    z-index: 0;
+    transition: color 0.3s ease;
+}
+
+.search-input-wrapper .search-icon:hover {
+    color: #333;
+}
+
+.search-input-wrapper .search-icon:active {
+    color: #000;
+    transform: translateY(-50%) scale(0.95); /*press effect */
 }
 
 /* html search /html select */
@@ -218,11 +258,20 @@
     background: white;
 }
 
-.search-form input[type="text"] {
+.search-form input[type="text"]{
     width: 300px;
-    max-width: 100%;
+    max-width: 100%;   
 }
 
+/* remove the X button (cause type="search") */
+.search-form input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    display: none;
+}
+
+.search-form input[type="search"]::-ms-clear {
+    display: none;
+}
 
 .btn-search {
     padding: 10px 28px;

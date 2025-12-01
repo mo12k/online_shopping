@@ -10,19 +10,17 @@ $name = trim(req('name')?? '');
 
 // searhing all possible 
 // use
-
-
 //header set sort
 $fields = [
     
-    'p.photo_name'         => 'Picture',
-    'p.id'       => 'Id',
-    'p.title'         => 'Title',
-    'p.author'       => 'Author',
-    'c.category_code'     => 'Category',
-    'p.price' => 'Price',
-    'p.stock'     => 'Stock',
-    'p.status' => 'Status',
+    'p.photo_name'          => 'Picture',
+    'p.id'                  => 'Id',
+    'p.title'               => 'Title',
+    'p.author'              => 'Author',
+    'c.category_code'       => 'Category',
+    'p.price'               => 'Price',
+    'p.stock'               => 'Stock',
+    'p.status'              => 'Status',
 ];
 
 
@@ -69,25 +67,29 @@ $info = temp('info');
 include '../_head.php';
 
 ?>
-      
-      
+          
 <div class="content">
     
-          
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:20px;">
-            
+        <div style="display:flex; 
+                    justify-content:space-between; 
+                    align-items:center; 
+                    margin-bottom:25px; 
+                    flex-wrap:wrap; 
+                    gap:20px;">
+
             <div class = "search-bar">
-            <form method ="get" class="search-form">                   
-            <?= html_select('category_id', $_category, 'All category' , '', true) ?>
-            <?= html_search('name','Searching by id , title , author') ?>
-            <button>Search</button>
+                <form method ="get" class="search-form">                   
+                    <?= html_select('category_id', $_category, 'All category' , '', true) ?>
 
+                <div class="search-input-wrapper">
+                    <input type="search" id="name" name="name" value="" placeholder="Searching by id, title, author">
+                        <i class='bx bx-search search-icon' onclick="this.closest('form').submit();"></i>
+                </div>
             </div>
+            </form>
             <!-- add button -->
-            <a href="/admin/product/insert.php" class="btn-add">+ Add New Book</a>
+                    <a href="/admin/product/insert.php" class="btn-add">+ Add New Book</a>
         </div>
-         
-
        
         <?php if ($info): ?>
         <div class="alert-success-fixed">
@@ -105,7 +107,7 @@ include '../_head.php';
            
     <table >
         <tr>
-            <!-- table title can click ,have link to baase php -->
+            <!-- table title can click ,have link to base php -->
             <?= table_headers($fields, $sort, $dir ,"page=$page") ?>
             <td>Action</td>
         </tr>
