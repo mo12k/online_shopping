@@ -144,6 +144,8 @@ function is_unique($value, $table, $field) {
     return $stm->rowCount() === 0;
 }
 
+$user = $_SESSION['customer'] ?? null;
+
 function verify_credentials($username, $password) {
     global $_db;
     $stm = $_db->prepare("SELECT * FROM customer WHERE username = ? LIMIT 1");
