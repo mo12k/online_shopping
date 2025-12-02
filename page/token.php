@@ -1,100 +1,108 @@
 <?php
-$_body_class = 'verify-otp-page';
-$_page_title = "Verify Email";
-
-require '../_base.php';
-include '../_head.php';
+include '../_base.php';
 
 
+// ------------------------------------------------------------------
+// 1. Get token and email from URL
+$raw_token = trim(req('token') ?? '');
+$email     = trim(req('email') ?? '');
+
+temp('info', null);  // clears old messages
+
+if ($raw_token === '' || $email === '') {
+    temp('info', 'Invalid reset link');
+    redirect('/login.php');
+}
+
+// 2. Hash the token that came from the email link
+$token_hash = sha1($raw_token);
+
+$stm = $_db->prepare("
+    SELECT c.*
+    FROM customer c
+    JOIN token t ON c.customer_id = t.customer_id
+    WHERE t.token_hash = ?
+      AND c.email = ?
+      AND t.token_type = 'reset'
+      AND t.expires_at > NOW()
+");
+$stm->execute([$token_hash, $email]);
+$user = $stm->fetch();
+
+if (!$user) {
+    temp('info', 'Invalid or expired reset link. Please request a new one.');
+    redirect('login.php');
+}
+
+// ------------------------------------------------------------------
+// If we reach here → token is valid and not expired
 
 if (is_post()) {
-    $otp = trim(req('otp'));
+    $password = req('password');
+    $confirm  = req('confirm');
 
-    if (strlen($otp) !== 6 || !ctype_digit($otp)) {
-        $err = "Please enter a valid 6-digit code";
-    } else {
-        $otp_hash = sha1($otp);
-        $token_id = $_SESSION['pending_otp_token_id'] ?? 0;
+    // ---- Validation ----
+    if (!$password) {
+        $_err['password'] = 'Required';
+    } elseif (strlen($password) < 8 || strlen($password) > 11) {
+        $_err['password'] = 'Between 8–11 characters';
+    }elseif (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])/', $password)) {
+        $_err['password'] = "Must contain uppercase, lowercase, number and special character";
+    }
 
-        $stm = $_db->prepare("
-            SELECT * FROM token 
-            WHERE token_id = ? 
-              AND token_hash = ? 
-              AND token_type = 'verify' 
-              AND expires_at > NOW()
-        ");
-        $stm->execute([$token_id, $otp_hash]);
-        $token = $stm->fetch();
+    if (!$confirm) {
+        $_err['confirm'] = 'Required';
+    } elseif ($confirm !== $password) {
+        $_err['confirm'] = 'Passwords do not match';
+    }
 
-        if ($token) {
-            // OTP correct → NOW create the account
-            $data = $_SESSION['pending_register'];
+    // ---- If no errors → update password ----
+    if (empty($_err)) {
+        $new_hash = password_hash($password, PASSWORD_DEFAULT);
 
-            $_db->beginTransaction();
+        // Update password
+        $_db->prepare("UPDATE customer SET password = ? WHERE customer_id = ?")
+            ->execute([$new_hash, $user->customer_id]);
 
-            $stm = $_db->prepare("
-                INSERT INTO customer 
-                (username, email, password, email_verified, created_at, photo)
-                VALUES (?, ?, SHA1(?), 1, NOW(), 'default_pic.jpg')
-            ");
-            $stm->execute([$data['username'], $data['email'], $data['password']]);
+        // Delete the used token (important!)
+        $_db->prepare("DELETE FROM token WHERE customer_id = ?")
+            ->execute([$user->customer_id]);
 
-            $customer_id = $_db->lastInsertId();
-
-            // Delete used OTP
-            $_db->prepare("DELETE FROM token WHERE token_id = ?")->execute([$token_id]);
-
-            $_db->commit();
-
-            // Login user
-            $_SESSION['customer_id'] = $customer_id;
-            $_SESSION['customer_username'] = $data['username'];
-            unset($_SESSION['pending_register'], $_SESSION['pending_otp_token_id']);
-
-            temp('info', 'Account created successfully! Welcome!');
-            redirect('/'); // or profile.php
-        } else {
-            $error = "Invalid or expired OTP";
-        }
+        temp('info', 'Your password has been changed successfully!');
+        redirect('login.php');
     }
 }
+
+// ------------------------------------------------------------------
+$_body_class = 'token-page';
+$_page_title = 'Reset Password';
+require '../_head.php';   
 ?>
 
-<div class="box">
-    <h2>Email Verification</h2>
-    <p>We sent a 6-digit code to <strong><?= htmlspecialchars($_SESSION['pending_register']['email']) ?></strong></p>
+<div class="container-token">
+    <div class="wrapper-token">
+        <h1>Reset Your Password</h1>
+    
+        <form method="post" class="form">
+            <div class="field input">
+                <label>New Password</label>
+                <input type="password" id="password" name="password" required>
+                <?= err('password') ?>
+                <div class="password-rules">
+                    <p class="rule" id="rule-length">Minimum 8 characters</p>
+                    <p class="rule" id="rule-upper">At least one uppercase letter</p>
+                    <p class="rule" id="rule-lower">At least one lowercase letter</p>
+                    <p class="rule" id="rule-number">At least one number</p>
+                    <p class="rule" id="rule-special">At least one special character</p>
+                </div>
 
-    <?php if ($error): ?>
-        <div style="color:red; margin:15px 0; text-align:center;"><?= $error ?></div>
-    <?php endif; ?>
-
-    <form method="POST" style="text-align:center;">
-        <!-- 6 separate boxes version (beautiful) -->
-        <div style="display:flex; justify-content:center; gap:10px; margin:20px 0;">
-            <?php for ($i = 0; $i < 6; $i++): ?>
-                <input type="text" name="otp[]" maxlength="1" required 
-                       style="width:50px; height:60px; font-size:28px; text-align:center; border:2px solid #ddd; border-radius:8px;"
-                       oninput="this.value=this.value.replace(/[^0-9]/g,''); if(this.value) this.nextElementSibling?.focus();"
-                       <?= $i===0 ? 'autofocus' : '' ?>>
-            <?php endfor; ?>
+                <label>Confirm New Password</label>
+                <input type="password" name="confirm" required>
+                <?= err('confirm') ?>
+            </div>
+            <div class="field button">
+                <button type="submit">Update Password</button>
+            </div>
         </div>
-
-        <button type="submit" style="padding:12px 40px; background:#1976d2; color:white; border:none; border-radius:6px; font-size:16px;">Verify & Create Account</button>
     </form>
-
-    <script>
-        // Allow paste full 6-digit code
-        document.querySelectorAll('input[name="otp[]"]').forEach((input, idx) => {
-            input.addEventListener('paste', e => {
-                const paste = e.clipboardData.getData('text').replace(/\D/g,'').slice(0,6);
-                if (paste.length === 6) {
-                    paste.split('').forEach((char, i) => {
-                        const box = document.querySelectorAll('input[name="otp[]"]')[i];
-                        if (box) box.value = char;
-                    });
-                    e.preventDefault();
-                }
-            });
-        });
-    </script>
 </div>

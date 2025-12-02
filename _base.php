@@ -180,8 +180,8 @@ function get_mail() {
     $m->SMTPAuth = true;
     $m->Host = 'smtp.gmail.com';
     $m->Port = 587;
-    $m->Username = 'mokcb-wm24@student.tarc.edu.my';
-    $m->Password = 'pqks aenl ivwm suup';
+    $m->Username = 'triedexample@gmail.com';
+    $m->Password = 'lyin euay ljcg yope';
     $m->CharSet = 'utf-8';
     
     return $m;

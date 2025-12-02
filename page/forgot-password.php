@@ -26,37 +26,37 @@ if (is_post()) {
 
         // Check if there's already a VALID (non-expired) token
         $stm = $_db->prepare("
-            SELECT 1 FROM token 
-            WHERE customer_id = ? 
-              AND reset_token_expire_at > NOW()
-        ");
+                        SELECT 1 FROM token 
+                        WHERE customer_id = ? 
+                        AND token_type = 'reset' 
+                        AND expires_at > NOW()
+                    ");
         $stm->execute([$user->customer_id]);
         $existing_token = $stm->fetch();
 
         if ($existing_token) {
-            // Token still valid → don't send new email!
+            // Token still valid don't send new email!
             temp('info', 'A reset link has already been sent to your email. Please check your inbox (valid for 5 minutes).');
             redirect('forgot-password.php');
         } else {
-            // No valid token → safe to generate new one
+            // No valid token generate new one
             $raw_token  = bin2hex(random_bytes(32));
-            $token_hash = hash('sha256', $raw_token);
+            $token_hash = sha1($raw_token);
 
             // Remove any old/expired tokens
-            $_db->prepare("DELETE FROM token WHERE customer_id = ?")
-                ->execute([$user->customer_id]);
-
+            $_db->prepare("DELETE FROM token WHERE customer_id = ? AND token_type = 'reset'")
+                        ->execute([$user->customer_id]);
             // Insert new 5-minute token
             $_db->prepare("
-                INSERT INTO token (reset_token_hash, reset_token_expire_at, customer_id)
-                VALUES (?, DATE_ADD(NOW(), INTERVAL 5 MINUTE), ?)
-            ")->execute([$token_hash, $user->customer_id]);
+                INSERT INTO token (customer_id, token_hash, token_type, type, expires_at)
+                VALUES (?,?,'reset','link', DATE_ADD(NOW(), INTERVAL 5 MINUTE))
+            ")->execute([$user->customer_id, $token_hash]);
 
             $reset_url = base('page/token.php') . '?token=' . $raw_token . '&email=' . urlencode($email);
 
             // Send email
             $m = get_mail();
-            $m->setFrom('mokcb-wm24@student.tarc.edu.my', 'PaperNest');
+            $m->setFrom('noreply@papernest.com', 'PaperNest');
             $m->addAddress($email);
             $m->isHTML(true);
             $m->Subject = 'Password Reset - PaperNest';

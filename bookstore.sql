@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 01, 2025 at 01:23 PM
+-- Generation Time: Dec 02, 2025 at 06:52 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,20 @@ SET time_zone = "+00:00";
 --
 -- Database: `bookstore`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin`
+--
+
+CREATE TABLE `admin` (
+  `admin_id` int(11) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` int(255) NOT NULL,
+  `id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -60,23 +74,26 @@ CREATE TABLE `customer` (
   `customer_id` int(11) NOT NULL,
   `username` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
+  `is_verified` tinyint(1) DEFAULT 0,
   `password` varchar(255) NOT NULL,
   `phone` varchar(20) NOT NULL,
   `birthdate` date NOT NULL,
   `gender` char(1) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `photo` varchar(100) NOT NULL
+  `photo` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `customer`
 --
 
-INSERT INTO `customer` (`customer_id`, `username`, `email`, `password`, `phone`, `birthdate`, `gender`, `created_at`, `photo`) VALUES
-(1, 'asdf', '123@gmail.com', '$2y$10$DiD49ihsk.toJYHVV/mxNOrsFwC9/mdrIPgQKkewOdFvpm2w5PgwG', '0123456789', '2025-10-30', 'F', '2025-11-26 09:30:34', 'default_pic.jpg'),
-(2, 'afsdgasf', 'lclyjiushi@gmail.com', '$2y$10$9PNrWlSvlozguI8e13UtROnUkxveuxL3/e3rkRNc5jd7AhYpxeUoi', '0123456789', '2025-10-29', 'F', '2025-11-26 18:25:37', 'default_pic.jpg'),
-(3, '2413492', '123456@gmail.com', '$2y$10$w8nCPhbATzf9NXrjsE0gP.4rJ0ahXcZqDewnY3J90zc82Q.TRgr4y', '01298765543', '2025-10-26', 'M', '2025-11-26 21:21:36', 'default_pic.jpg'),
-(4, 'Bing_123', 'mokchun549@gmail.com', '$2y$10$E4De3bShvklCAkO2QcWxG.7oz2LXzUwm1yd23FYtquvZXJ4H3fuvG', '0164564996', '2024-04-08', 'M', '2025-11-27 14:59:36', 'default_pic.jpg');
+INSERT INTO `customer` (`customer_id`, `username`, `email`, `is_verified`, `password`, `phone`, `birthdate`, `gender`, `created_at`, `photo`) VALUES
+(1, 'asdf', '123@gmail.com', 1, '$2y$10$DiD49ihsk.toJYHVV/mxNOrsFwC9/mdrIPgQKkewOdFvpm2w5PgwG', '0123456789', '2025-10-30', 'F', '2025-11-26 09:30:34', 'default_pic.jpg'),
+(2, 'afsdgasf', 'lclyjiushi@gmail.com', 1, '$2y$10$9PNrWlSvlozguI8e13UtROnUkxveuxL3/e3rkRNc5jd7AhYpxeUoi', '0123456789', '2025-10-29', 'F', '2025-11-26 18:25:37', 'default_pic.jpg'),
+(3, '2413492', '123456@gmail.com', 1, '$2y$10$w8nCPhbATzf9NXrjsE0gP.4rJ0ahXcZqDewnY3J90zc82Q.TRgr4y', '01298765543', '2025-10-26', 'M', '2025-11-26 21:21:36', 'default_pic.jpg'),
+(4, 'Bing_123', 'mokchun549@gmail.com', 1, '$2y$10$NPwrelq4Uc986r684jGNJeEBg9pM1g5sNuyZP8CYI9kBcNMwmZlOO', '0164564996', '2024-04-08', 'M', '2025-11-27 14:59:36', 'default_pic.jpg'),
+(5, 'mok', 'mokbingchun@gmail.com', 1, '01bc634ce656696cff9dd426464c0d21e32d5433', '', '0000-00-00', '', '2025-12-02 12:59:51', 'default_pic.jpg'),
+(7, 'mo12k', 'mokcb-wm24@student.tarc.edu.my', 1, '$2y$10$kzupMP5VEcrTWhygHfeezOUAqBiVQtXStALR9r1DSp9LiRbQV7zSq', '', '0000-00-00', '', '2025-12-02 13:27:27', 'default_pic.jpg');
 
 -- --------------------------------------------------------
 
@@ -186,22 +203,27 @@ INSERT INTO `product` (`id`, `photo_name`, `title`, `author`, `category_id`, `pr
 --
 
 CREATE TABLE `token` (
-  `Token_Id` int(100) NOT NULL,
-  `reset_token_hash` varchar(64) DEFAULT NULL,
-  `reset_token_expire_at` datetime DEFAULT NULL,
-  `customer_id` int(11) NOT NULL
+  `Token_Id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `token_hash` varchar(255) NOT NULL,
+  `token_type` enum('verify','reset','remember') NOT NULL,
+  `type` enum('otp','link') NOT NULL DEFAULT 'link',
+  `otp_code` varchar(6) DEFAULT NULL,
+  `expires_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `token`
---
-
-INSERT INTO `token` (`Token_Id`, `reset_token_hash`, `reset_token_expire_at`, `customer_id`) VALUES
-(21, 'f2372ab0206b0e28d9ce44df9827454b9b07f6ce84417dbead915c3b0cef7a74', '2025-11-29 17:17:29', 4);
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `admin`
+--
+ALTER TABLE `admin`
+  ADD PRIMARY KEY (`admin_id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `gmail` (`email`),
+  ADD KEY `id` (`id`);
 
 --
 -- Indexes for table `category`
@@ -215,7 +237,8 @@ ALTER TABLE `category`
 --
 ALTER TABLE `customer`
   ADD PRIMARY KEY (`customer_id`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `username` (`username`);
 
 --
 -- Indexes for table `customer_address`
@@ -237,12 +260,18 @@ ALTER TABLE `product`
 --
 ALTER TABLE `token`
   ADD PRIMARY KEY (`Token_Id`),
-  ADD UNIQUE KEY `reset_token_hash` (`reset_token_hash`),
+  ADD UNIQUE KEY `unique_token` (`token_hash`,`token_type`),
   ADD KEY `customer_id` (`customer_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `admin`
+--
+ALTER TABLE `admin`
+  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `category`
@@ -254,7 +283,7 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT for table `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `customer_address`
@@ -272,11 +301,17 @@ ALTER TABLE `product`
 -- AUTO_INCREMENT for table `token`
 --
 ALTER TABLE `token`
-  MODIFY `Token_Id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `Token_Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `admin`
+--
+ALTER TABLE `admin`
+  ADD CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`id`) REFERENCES `product` (`id`);
 
 --
 -- Constraints for table `customer_address`
@@ -294,7 +329,7 @@ ALTER TABLE `product`
 -- Constraints for table `token`
 --
 ALTER TABLE `token`
-  ADD CONSTRAINT `token_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`);
+  ADD CONSTRAINT `token_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

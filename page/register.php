@@ -31,14 +31,17 @@ if (is_post()) {
         $_err['email'] = "Duplicate Email";
     }
 
-    // Validate password
-    if (!$password) {
+    //Validate password
+    if(!$password){
         $_err['password'] = "Required";
-    } else if (strlen($password) < 8) {
+    }
+    else if(strlen($password) < 8){
         $_err['password'] = "Minimum length 8 characters";
-    } else if (strlen($password) > 11) {
+    }
+    else if(strlen($password) > 11){
         $_err['password'] = "Maximum length 11";
-    } elseif (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])/', $password)) {
+    }
+    elseif (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])/', $password)) {
         $_err['password'] = "Must contain uppercase, lowercase, number and special character";
     }
 
@@ -50,13 +53,15 @@ if (is_post()) {
     }
 
     if (!$_err) {
-        $_db->beginTransaction();
+        
+        $_db->beginTransaction();   
 
         $sql = "INSERT INTO customer 
-                            (username, email, is_verified,password, created_at, photo, ) 
-                            VALUES (?, ?, 0, SHA1(?), NOW(), 'default_pic.jpg')";
+                (username, email, is_verified, password, created_at, photo) 
+                VALUES (?, ?, 0, SHA1(?), NOW(), 'default_pic.jpg')";
         $stm = $_db->prepare($sql);
         $stm->execute([$username, $email, $password]);
+
 
         $customer_id = $_db->lastInsertId();
 
@@ -65,21 +70,24 @@ if (is_post()) {
         $otp_hash = sha1($otp);
 
         // ← SAVE OTP TO token 
-        $stm = $_db->prepare("INSERT INTO token 
-            (customer_id, token_hash, token_type, expires_at) 
-            VALUES (?, ?, 'verify', DATE_ADD(NOW(), INTERVAL 15 MINUTE))");
-        $stm->execute([$customer_id, $otp_hash]);
+        $stm = $_db->prepare("
+            INSERT INTO token 
+                (customer_id, token_hash, token_type, expires_at, type, otp_code)
+            VALUES 
+                (?, ?, 'verify', DATE_ADD(NOW(), INTERVAL 15 MINUTE), 'otp', ?)
+        ");
+        $stm->execute([$customer_id, $otp_hash, $otp]);
+
 
         $_db->commit();
 
         // Save to session so verify_otp.php knows who is verifying
         $_SESSION['customer_id']       = $customer_id;
         $_SESSION['customer_username'] = $username;
-        $_SESSION['raw_otp']           = $otp;   
 
         // Send email
         $m = get_mail();
-        $m->setFrom('mokcb-wm24@student.tarc.edu.my', 'PaperNest');
+        $m->setFrom('noreply@papernest.com', 'PaperNest');
         $m->addAddress($email);
         $m->isHTML(true);
         $m->Subject = 'Your Verification Code - PaperNest';
@@ -104,7 +112,7 @@ if (is_post()) {
 ?>
 
 <div class="container-register">
-    <form id="register-form" method="POST" action="">        
+    <form id="register-form" method="POST" action="register.php">        
         <h2>Account Details</h2>
         <label for="username">Username *</label>
         <?= html_text('username', 'maxlength="100"') ?>

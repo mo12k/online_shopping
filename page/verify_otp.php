@@ -14,38 +14,34 @@ if(!isset($_POST['create_account'])) {
 
         //validate otp
         if (strlen($otp) !== 6 || !ctype_digit($otp)) {
-            $err = "Please enter a valid 6-digit code";
+            $_err['otp'] = "Please enter a valid 6-digit code";
         }else{
             $otp_hash = sha1($otp);
 
             $stm = $_db->prepare("
                 SELECT * FROM token 
                 WHERE customer_id = ? 
-                  AND token_hash = ? 
-                  AND token_type = 'verify' 
-                  AND expires_at > NOW()
+                AND token_hash = ? 
+                AND token_type = 'verify' 
+                AND expires_at > NOW()
             ");
             $stm->execute([$_customer_id, $otp_hash]);
             $token = $stm->fetch();
 
             if ($token) {
-                // OTP correct → NOW update the account
+
+                // Update account verified
                 $stm = $_db->prepare("
                     UPDATE customer 
-                    SET email_verified = 1 
+                    SET is_verified = 1 
                     WHERE customer_id = ?
                 ");
                 $stm->execute([$_customer_id]);
-
-                // Delete used OTP
-                $stm = $_db->prepare("
-                    DELETE FROM token 
-                    WHERE token_id = ?
-                ");
-                $stm->execute([$token->token_id]);
-
+                temp('info', 'Your email has been verified.');
+                redirect('../index.php');
+                exit;
             } else {
-                $err = "Invalid or expired OTP";
+                $_err['otp'] = "Invalid or expired OTP";
             }
         }
     }
