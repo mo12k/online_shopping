@@ -158,10 +158,10 @@ if (!isset($_SESSION['customer_id']) && isset($_COOKIE['remember_me']) && isset(
           AND t.expires_at > NOW()
         LIMIT 1
     ");
-    $stmt->execute([$customer_id]);
+    $stmt->execute([$customer_id, sha1($token)]);
     $row = $stmt->fetch();
 
-    if ($row && password_verify($token, $row->token_hash)) {
+    if ($row && $row->token_hash === sha1($token)) {
         // Success → log in
         $_SESSION['customer_id'] = $row->customer_id;
         $_SESSION['customer_username'] = $row->username;
