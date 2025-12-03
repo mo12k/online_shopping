@@ -7,42 +7,68 @@ require '../_base.php';
 include '../_head.php';
 
 // Must come from registration
-$_customer_id = $_SESSION['customer_id'] ?? null;
-if(!isset($_POST['create_account'])) {
-    if(is_post()){
-        $otp = trim(req('otp'));
+$pending = $_SESSION['pending_registration'] ?? null;
 
-        //validate otp
-        if (strlen($otp) !== 6 || !ctype_digit($otp)) {
-            $_err['otp'] = "Please enter a valid 6-digit code";
-        }else{
-            $otp_hash = sha1($otp);
+if (!$pending) {
+    temp('error', 'No pending registration found. Please register first.');
+    redirect('register.php');
+    exit;
+}
+
+if(time() > $pending['otp_expires_at']) {
+    unset($_SESSION['pending_registration']);
+    temp('error', 'OTP has expired. Please register again.');
+    redirect('register.php');
+    exit;
+}
+
+if (is_post()) {
+    $otp_input = trim(req('otp'));
+
+    if (strlen($otp_input) !== 6 || !ctype_digit($otp_input)) {
+        $_err['otp'] = 'Please enter a valid 6-digit code';
+    }
+    // Compare hashed OTP
+    elseif (sha1($otp_input) !== $pending['otp_hash']) {
+        $_err['otp'] = 'Invalid or expired verification code';
+    }
+    else {
+        // SUCCESS: OTP IS CORRECT → NOW CREATE ACCOUNT
+        try {
+            $_db->beginTransaction();
+
+            $password_hash = sha1($pending['password']); // Hash password before storing
 
             $stm = $_db->prepare("
-                SELECT * FROM token 
-                WHERE customer_id = ? 
-                AND token_hash = ? 
-                AND token_type = 'verify' 
-                AND expires_at > NOW()
+                INSERT INTO customer 
+                (username, email, password, is_verified, created_at, photo)
+                VALUES (?, ?, ?, 1, NOW(), 'default_pic.jpg')
             ");
-            $stm->execute([$_customer_id, $otp_hash]);
-            $token = $stm->fetch();
+            $stm->execute([
+                $pending['username'],
+                $pending['email'],
+                $password_hash
+            ]);
 
-            if ($token) {
+            $customer_id = $_db->lastInsertId();
 
-                // Update account verified
-                $stm = $_db->prepare("
-                    UPDATE customer 
-                    SET is_verified = 1 
-                    WHERE customer_id = ?
-                ");
-                $stm->execute([$_customer_id]);
-                temp('info', 'Your email has been verified.');
-                redirect('../index.php');
-                exit;
-            } else {
-                $_err['otp'] = "Invalid or expired OTP";
-            }
+            // Auto login
+            $_SESSION['customer_id']       = $customer_id;
+            $_SESSION['customer_username'] = $pending['username'];
+
+            // Clear pending data
+            unset($_SESSION['pending_registration']);
+
+            $_db->commit();
+
+            temp('info', 'Account created and verified successfully!');
+            redirect('../index.php');
+            exit;
+
+        } catch (Exception $e) {
+            $_db->rollBack();
+            error_log("Account creation failed: " . $e->getMessage());
+            temp('error', 'Something went wrong. Please try again.');
         }
     }
 }

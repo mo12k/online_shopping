@@ -53,37 +53,18 @@ if (is_post()) {
     }
 
     if (!$_err) {
-        
-        $_db->beginTransaction();   
-
-        $sql = "INSERT INTO customer 
-                (username, email, is_verified, password, created_at, photo) 
-                VALUES (?, ?, 0, SHA1(?), NOW(), 'default_pic.jpg')";
-        $stm = $_db->prepare($sql);
-        $stm->execute([$username, $email, $password]);
-
-
-        $customer_id = $_db->lastInsertId();
-
+    
         // GENERATE 6-DIGIT OTP 
         $otp = str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);  
         $otp_hash = sha1($otp);
 
-        // ← SAVE OTP TO token 
-        $stm = $_db->prepare("
-            INSERT INTO token 
-                (customer_id, token_hash, token_type, expires_at, type, otp_code)
-            VALUES 
-                (?, ?, 'verify', DATE_ADD(NOW(), INTERVAL 15 MINUTE), 'otp', ?)
-        ");
-        $stm->execute([$customer_id, $otp_hash, $otp]);
-
-
-        $_db->commit();
-
-        // Save to session so verify_otp.php knows who is verifying
-        $_SESSION['customer_id']       = $customer_id;
-        $_SESSION['customer_username'] = $username;
+        $_SESSION['pending_registration'] = [
+            'username' => $username,
+            'email'    => $email,
+            'password' => $password,
+            'otp_hash' => $otp_hash,
+            'expires_at' => time() + (15 * 60) // 15 minutes from now
+        ];
 
         // Send email
         $m = get_mail();
