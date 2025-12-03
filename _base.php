@@ -3,6 +3,7 @@
 date_default_timezone_set('Asia/Kuala_Lumpur');
 session_start();
 
+
 // ============================================================================
 // General Page Functions
 // ============================================================================
@@ -141,6 +142,37 @@ function err($key) {
 $_db = new PDO('mysql:dbname=bookstore', 'root', '', [
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
 ]);
+
+
+// Auto login from Remember Me (WORKS AFTER RESTART!)
+if (!isset($_SESSION['customer_id']) && isset($_COOKIE['remember_me']) && isset($_COOKIE['remember_me_user'])) {
+    $customer_id = $_COOKIE['remember_me_user'];
+    $token = $_COOKIE['remember_me'];
+
+    $stmt = $_db->prepare("
+        SELECT c.*, t.token_hash 
+        FROM token t
+        JOIN customer c ON t.customer_id = c.customer_id
+        WHERE t.customer_id = ? 
+          AND t.token_type = 'remember' 
+          AND t.expires_at > NOW()
+        LIMIT 1
+    ");
+    $stmt->execute([$customer_id]);
+    $row = $stmt->fetch();
+
+    if ($row && password_verify($token, $row->token_hash)) {
+        // Success → log in
+        $_SESSION['customer_id'] = $row->customer_id;
+        $_SESSION['customer_username'] = $row->username;
+        $_SESSION['profile_picture'] = $row->photo ?? 'default_pic.jpg';
+    } else {
+        // Invalid or expired → clear cookies
+        setcookie('remember_me', '', time()-3600, '/');
+        setcookie('remember_me_user', '', time()-3600, '/');
+    }
+}
+
 
 //Is unique?
 function is_unique($value, $table, $field) {
