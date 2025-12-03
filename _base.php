@@ -144,34 +144,34 @@ $_db = new PDO('mysql:dbname=bookstore', 'root', '', [
 ]);
 
 
-// Auto login from Remember Me (WORKS AFTER RESTART!)
-if (!isset($_SESSION['customer_id']) && isset($_COOKIE['remember_me']) && isset($_COOKIE['remember_me_user'])) {
-    $customer_id = $_COOKIE['remember_me_user'];
-    $token = $_COOKIE['remember_me'];
+// // Auto login from Remember Me (WORKS AFTER RESTART!)
+// if (!isset($_SESSION['customer_id']) && isset($_COOKIE['remember_me']) && isset($_COOKIE['remember_me_user'])) {
+//     $customer_id = $_COOKIE['remember_me_user'];
+//     $token = $_COOKIE['remember_me'];
 
-    $stmt = $_db->prepare("
-        SELECT c.*, t.token_hash 
-        FROM token t
-        JOIN customer c ON t.customer_id = c.customer_id
-        WHERE t.customer_id = ? 
-          AND t.token_type = 'remember' 
-          AND t.expires_at > NOW()
-        LIMIT 1
-    ");
-    $stmt->execute([$customer_id, sha1($token)]);
-    $row = $stmt->fetch();
+//     $stmt = $_db->prepare("
+//         SELECT c.*, t.token_hash 
+//         FROM token t
+//         JOIN customer c ON t.customer_id = c.customer_id
+//         WHERE t.customer_id = ? 
+//           AND t.token_type = 'remember' 
+//           AND t.expires_at > NOW()
+//         LIMIT 1
+//     ");
+//     $stmt->execute([$customer_id, sha1($token)]);
+//     $row = $stmt->fetch();
 
-    if ($row && $row->token_hash === sha1($token)) {
-        // Success → log in
-        $_SESSION['customer_id'] = $row->customer_id;
-        $_SESSION['customer_username'] = $row->username;
-        $_SESSION['profile_picture'] = $row->photo ?? 'default_pic.jpg';
-    } else {
-        // Invalid or expired → clear cookies
-        setcookie('remember_me', '', time()-3600, '/');
-        setcookie('remember_me_user', '', time()-3600, '/');
-    }
-}
+//     if ($row && $row->token_hash === sha1($token)) {
+//         // Success → log in
+//         $_SESSION['customer_id'] = $row->customer_id;
+//         $_SESSION['customer_username'] = $row->username;
+//         $_SESSION['profile_picture'] = $row->photo ?? 'default_pic.jpg';
+//     } else {
+//         // Invalid or expired → clear cookies
+//         setcookie('remember_me', '', time()-3600, '/');
+//         setcookie('remember_me_user', '', time()-3600, '/');
+//     }
+// }
 
 
 //Is unique?
@@ -186,15 +186,22 @@ $user = $_SESSION['customer'] ?? null;
 
 function verify_credentials($username, $password) {
     global $_db;
+
+    // Hash entered password using SHA-1
+    $hashed = sha1($password);
+
     $stm = $_db->prepare("SELECT * FROM customer WHERE username = ? LIMIT 1");
     $stm->execute([$username]);
     $user = $stm->fetch();
 
-    if ($user && password_verify($password, $user->password)) {
+    // Compare SHA-1 hash
+    if ($user && $hashed === $user->password) {
         return $user;
     }
+
     return null;
 }
+
 
 function get_user_by_email($email) {
     global $_db;
