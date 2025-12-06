@@ -11,19 +11,19 @@ body {
     height: 100vh;
     display: grid;
     grid: auto auto 1fr auto / auto;
-    background: rgba(255, 255, 255, 0.475);
+    background: rgba(17, 24, 39, 0.475);
 }
 body {
     margin: 0;
     min-height: 100vh; /* ensures body is at least full viewport */
     display: grid;
     grid-template-rows: auto 1fr auto; /* header auto, main fills remaining space, footer auto */
-    background: rgba(255, 255, 255, 0.475);
+    background: rgba(249, 250, 251, 0.475);
 }
 header, footer {
     padding: 10px 50px;
-    background: grey;
-    color: black;
+    background: #6D4C41;
+    color: #FFFFFF;
 }
 
 header h1 {
@@ -76,22 +76,46 @@ header {
 }
 
 
-nav {
-    padding: 0 50px;
-    background: #b53232b3; /* keeps your demo nav color */
-    display: flex;
-    gap: 5px;
-}
-
-nav a {
-    padding: 5px 10px;
-    color: #fff;
+.navbar a {
+    position: relative;
+    display: inline-block;
+    padding: 10px 15px;
+    color: #FFF;
     text-decoration: none;
-    white-space: nowrap;
+    font-size: 16px;
+    transition: color 0.3s ease;
 }
 
-nav a:hover {
-    background: #4facfe;
+/* Hover 时文字变橘色 */
+.navbar a:hover {
+    color: #FFB74D; /* 辅助色 */
+}
+
+/* 下划线动画（从中间展开） */
+.navbar a::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background-color: #FFB74D;
+    transition: 0.3s ease;
+}
+
+/* Hover 时下划线伸展开 */
+.navbar a:hover::after {
+    left: 0;
+    width: 100%;
+}
+
+ul{
+    display: flex;
+}
+
+li{
+    list-style: none;
+    margin: 1rem;
 }
 
 main {
@@ -471,8 +495,6 @@ body.token-page {
     left: 50%;
     translate: -50% 0;
     z-index: 999;
-
-    /* TODO */
     top: -100px;
     opacity: 0;
     
@@ -488,3 +510,33 @@ body.token-page {
      90% { top:  100px; opacity: 1; }
     100% { top: -100px; opacity: 0; }
 } 
+
+/* Bottom icon-card ----------------------------------------------------------- */
+
+.icon-card{
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.144);
+    border-radius: 10px;
+    box-shadow: 0 20px 20px rgba(0, 0, 0, 0.205),
+    inset 0 20px 20px rgba(253, 253, 253, 0.205);
+    margin: 15px;
+    display: felx;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    font-size: 1.5em;
+    color: rgba(255, 255, 255, 0.336);
+    position: relative;
+    transition: box-shadow .4s, color .8s, transform .4s;
+}
+
+.icon-card:hover{
+    color: #ffffff;
+    box-shadow: 0 20px 20px rgba(0, 0, 0, 0.205),
+    inset  0px 20px 10px rgba(253, 253, 253, 0.287),
+    inset  10px 0px 20px rgb(255, 58, 58),
+    inset -20px 0px 20px rgb(104, 255, 58),
+    inset -30px 0px 20px rgb(71, 58, 255);
+    transform: translateY(-10px); 
+}
