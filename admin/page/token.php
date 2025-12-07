@@ -1,6 +1,7 @@
 <?php
 include '../_base.php';
-$_body_class = 'token-page';
+
+
 
 // ------------------------------------------------------------------
 // 1. Get token and email from URL

@@ -184,6 +184,12 @@ function table_headers($fields, $sort, $dir, $href = '') {
     }
 }
 
+// Generate <input type='password'>
+function html_password($key, $attr = '') {
+    $value = encode($GLOBALS[$key] ?? '');
+    echo "<input type='password' id='$key' name='$key' value='$value' $attr>";
+}
+
 
     // ============================================================================
     // Error Handlings
@@ -231,7 +237,19 @@ function table_headers($fields, $sort, $dir, $href = '') {
         return $stm->fetchColumn() > 0;
     }
 
+    function verify_credentials($username, $password) {
+        global $_db;
+        
+        $hased_password = SHA1($password);
+        $stm = $_db->prepare("SELECT * FROM admin WHERE username = ? LIMIT 1");
+        $stm->execute([$username]);
+        $user = $stm->fetch();
 
+        if ($user && $hased_password === $user->password) {
+            return $user;
+        }
+        return null;
+    }
 
     // ============================================================================
     // Global Constants and Variables

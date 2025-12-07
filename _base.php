@@ -154,11 +154,13 @@ if (!isset($_SESSION['customer_id']) && isset($_COOKIE['remember_me']) && isset(
         FROM token t
         JOIN customer c ON t.customer_id = c.customer_id
         WHERE t.customer_id = ? 
-          AND t.token_type = 'remember' 
-          AND t.expires_at > NOW()
+        AND t.token_type = 'remember'
+        AND t.token_hash = ?          
+        AND t.expires_at > NOW()
         LIMIT 1
     ");
-    $stmt->execute([$customer_id, sha1($token)]);
+
+    $stmt->execute([$customer_id, sha1($token)]);  // Now matches: 2 params
     $row = $stmt->fetch();
 
     if ($row && $row->token_hash === sha1($token)) {
@@ -186,11 +188,13 @@ $user = $_SESSION['customer'] ?? null;
 
 function verify_credentials($username, $password) {
     global $_db;
+    
+    $hased_password = SHA1($password);
     $stm = $_db->prepare("SELECT * FROM customer WHERE username = ? LIMIT 1");
     $stm->execute([$username]);
     $user = $stm->fetch();
 
-    if ($user && password_verify($password, $user->password)) {
+    if ($user && $hased_password === $user->password) {
         return $user;
     }
     return null;

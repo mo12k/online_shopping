@@ -9,7 +9,6 @@
         background: #f1f2f6;
     }
 
-
     
     /* --- Sidebar --- */
     .sidebar {
@@ -50,35 +49,61 @@
     }
 
     /* --- Header --- */
-    .header {
-        height: 70px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 30px;
-        background: #fff;
-        border-bottom: 1px solid #e5e5e5;
-        position: fixed;
-        top: 0;
-        left: 170px;
-        right: 0;
-        z-index: 10;
-    }
+.header {
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+    position: fixed;
+    top: 0;
+    left: 170px;
+    right: 0;
+    z-index: 10;
+}
 
-    .header h2 {
-        margin: 0;
-        font-size: 22px;
-        font-weight: 600;
-    }
+.header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+}
 
-    .logout a {
-        text-decoration: none;
-        font-size: 16px;
-        color: #666;
-    }
-    .logout a:hover {
-        color: #000;
-    }
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* spacing between image, username, logout */
+}
+
+.user-info img {
+    width: 40px;       /* bigger, clean size */
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd; /* optional small border */
+}
+
+.user-info span {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+}
+
+.user-info a.logout {
+    text-decoration: none;
+    font-size: 15px;
+    color: #666;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: 0.2s ease;
+}
+
+.user-info a.logout:hover {
+    color: #000;
+    border-color: #888;
+}
 
     /* --- Content  --- */
     .content {
@@ -779,4 +804,218 @@ small { color: #888; font-size: 14px; }
     border-radius: 50px;
     font-size: 16px;
     display: inline-block;
+}
+
+/*===============================================*/
+/* login page admincss */
+body.login-page {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #4f73ff, #6ad1ff);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- Container --- */
+.container-login {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+/* --- Form Wrapper --- */
+.wrapper-login {
+    background: #ffffff;
+    padding: 30px 35px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.wrapper h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 600;
+    font-size: 28px;
+    color: #333;
+}
+
+/* --- Form Fields --- */
+.field {
+    margin-bottom: 18px;
+}
+
+.field label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.field input {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s ease;
+}
+
+.field input:focus {
+    border-color: #4f73ff;
+    box-shadow: 0 0 0 3px rgba(79, 115, 255, 0.2);
+}
+
+/* --- Input Icons --- */
+.field i {
+    position: relative;
+    left: -30px;
+    top: -32px;
+    float: right;
+    font-size: 18px;
+    color: #777;
+    pointer-events: none;
+}
+
+/* --- Forgot Password --- */
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0 30px 0;          
+    font-size: 13px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+    line-height: 1;                
+}
+
+.remember-me input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: #4f73ff;          
+    transform: translateY(-0.5px); 
+}
+
+.remember-forgot .link {
+    color: #4f73ff;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.remember-forgot .link:hover {
+    text-decoration: underline;
+}
+
+/* --- Button --- */
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: #4f73ff;
+    color: white;
+    font-size: 15px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.25s;
+    margin-top: 5px;
+}
+
+button[type="submit"]:hover {
+    background: #3f5ee0;
+}
+
+/* ------------------------------------------------------------------------ */
+/* Token Page */
+body.token-page {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #4f73ff, #6ad1ff);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container-token {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.wrapper-token {
+    background: #ffffff;
+    padding: 30px 35px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.wrapper-token h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 600;
+    font-size: 28px;
+    color: #333;
+}
+
+/* ------------------------------------------------------------------------ */
+/* Forgot Password Page */
+body.forgot-password-page {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #4f73ff, #6ad1ff);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container-forgot-password {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.wrapper-forgot-password {
+    background: #ffffff;
+    padding: 30px 35px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.wrapper-forgot-password h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 600;
+    font-size: 28px;
+    color: #333;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.login-link .link {
+    color: #4f73ff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-link .link:hover {
+    text-decoration: underline;
 }
