@@ -248,6 +248,39 @@ function table_headers($fields, $sort, $dir, $href = '') {
     $_status = [1 => 'Published', 0 => 'Draft'];
 
   
+    // ============================================================================
+    // Shopping Cart
+    // ============================================================================
 
+    // Get shopping cart
+    function get_cart() {
+    return $_SESSION['cart'] ?? [];
+    }
+
+    // Set shopping cart
+    function set_cart($cart = []) {
+    $_SESSION['cart'] = $cart;
+    }
+
+    // Update shopping cart
+    function update_cart($id, $unit) {
+    $cart = get_cart();
+
+    if ($unit >= 1 && $unit <= 10 && is_exists($id, 'product', 'id')) {
+            $cart[$id] = $unit;
+            ksort($cart);
+        }
+        else {
+            unset($cart[$id]);
+    }
+
+    set_cart($cart);
+    }
+
+    // Generate <input type='hidden'>
+    function html_hidden($key, $attr = '') {
+        $value ??= encode($GLOBALS[$key] ?? '');
+        echo "<input type='hidden' id='$key' name='$key' value='$value' $attr>";
+    }
     
    

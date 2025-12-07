@@ -19,10 +19,134 @@ if (!$s) {
     redirect('../page/product.php');
 }
 
+if (is_post()) {
+    $id   = req('id');
+    $quantity = req('quantity');
+    update_cart($id, $quantity);
+    redirect();
+}
+
+$arr = $_db->query('SELECT * FROM product');
+
 include '../_head.php';
 ?>
 
 <link rel="stylesheet" href="/css/product-detail.css">
+
+<style>
+
+/* Quantity Selector — Warm Bookstore Style */
+.quantity-selector {
+    margin: 20px 0;
+    padding: 20px;
+    background: #FAF7F2; /* 柔和米白底 */
+    border-radius: 12px;
+    border: 1px solid #E4DCD3; /* 暖灰边框 */
+}
+
+.quantity-label {
+    display: block;
+    color: #4E342E; /* 深咖啡色，书店风 */
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 15px 0;
+}
+
+/* + / - 按钮 */
+.qty-btn {
+    width: 42px;
+    height: 42px;
+    border: 2px solid #D7CCC8; /* 柔和暖灰边框 */
+    background: #FFF;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 8px; /* 比较圆，有手工感 */
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-btn:hover {
+    background: #F2EBE5; /* 暖色 hover */
+    border-color: #6D4C41; /* 木质深棕 hover 边框 */
+}
+
+.qty-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Quantity input */
+#quantity {
+    width: 75px;
+    height: 42px;
+    text-align: center;
+    border: 2px solid #D7CCC8;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #4E342E;
+    background: #FFF;
+}
+
+/* Stock text */
+.stock-info {
+    color: #6D4C41; /* 柔和咖啡色 */
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.in-stock {
+    color: #2E7D32; /* 更自然的绿色 */
+    font-weight: 600;
+}
+
+.out-of-stock {
+    color: #D32F2F; /* 暖红色，更符合木质风 */
+    font-weight: 600;
+}
+
+/* Add to Cart button */
+.add-to-cart-btn {
+    padding: 16px 70px;
+    background: #6D4C41; /* 木质棕色 */
+    color: #FFF; /* 改成白色字更易读 */
+    border: none;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(109, 76, 65, 0.25);
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.add-to-cart-btn:hover {
+    background: #5A3E34; /* 深棕 hover 色 */
+    transform: translateY(-2px); /* 微互动感 */
+}
+
+.add-to-cart-btn:disabled {
+    background: #BCAAA4; /* 柔和淡棕灰 */
+    cursor: not-allowed;
+}
+
+/* Product actions spacing */
+.product-actions {
+    margin-top: 25px;
+}
+
+
+</style>
 
 <div class="content">
     <div class="product-detail-container">
@@ -40,20 +164,9 @@ include '../_head.php';
 
                 <h1 class="product-title"><?= encode($s->title) ?></h1>
 
-                <div style="margin:40px 0; 
-                            padding-top:30px; 
-                            border-top:2px dashed #eee;">
-
-                    <strong style="color:#333; 
-                                   font-size:19px; 
-                                   display:block; 
-                                   margin-bottom:15px">Description</strong>
-                    <div style="background:#f8f9fa; 
-                                padding:22px 28px; 
-                                border-radius:14px; 
-                                line-height:1.8; 
-                                min-height:120px; 
-                                font-size:16px; color:#444;">
+                <div style="margin:40px 0; padding-top:30px; border-top:2px dashed #eee;">
+                    <strong style="color:#333; font-size:19px; display:block; margin-bottom:15px">Description</strong>
+                    <div style="background:#f8f9fa; padding:22px 28px; border-radius:14px; line-height:1.8; min-height:120px; font-size:16px; color:#444;">
                         <?= $s->description ? nl2br(encode($s->description)) : '<span style="color:#aaa;">No description provided.</span>' ?>
                     </div>
                 </div>
@@ -78,57 +191,121 @@ include '../_head.php';
 
                 <div class="info-row">
                     <span class="info-label">Stock</span>
-                    <span class="info-label"><?= encode($s->stock) ?></span>
+                    <span class="info-label <?= $s->stock > 0 ? 'in-stock' : 'out-of-stock' ?>">
+                        <?= $s->stock > 0 ? $s->stock : 'Out of Stock' ?>
+                    </span>
                 </div>
 
-                <!-- 按鈕 -->
-                <!-- 數量選擇器和購物車按鈕 -->
-                <?php if ($s->stock > 0): ?>
-                    <div style="margin: 30px 0; padding: 25px; background: #f9f9f9; border-radius: 12px; border: 1px solid #eaeaea;">
-                        <div style="margin-bottom: 20px;">
-                            <div style="color: #333; font-weight: 600; margin-bottom: 10px; font-size: 16px;">Quantity</div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <button type="button" class="qty-btn minus" 
-                                        style="width: 40px; height: 40px; border: 2px solid #ddd; background: white; font-size: 18px; cursor: pointer; border-radius: 6px;">-</button>
-                                <input type="number" id="quantity" value="1" min="1" max="<?= $s->stock ?>"
-                                       style="width: 70px; height: 40px; text-align: center; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; font-weight: 600;">
-                                <button type="button" class="qty-btn plus" 
-                                        style="width: 40px; height: 40px; border: 2px solid #ddd; background: white; font-size: 18px; cursor: pointer; border-radius: 6px;">+</button>
-                                <span style="color: #666; font-size: 14px; margin-left: 10px;">Max: <?= $s->stock ?></span>
+            <!-- 数量选择器 -->
+            <div class="product-action">     
+                <div class="quantity-selector">
+                    <?php if ($s->stock > 0): ?>
+                        <form method="post" id="add-to-cart-form">
+                            <input type="hidden" name="id" value="<?= $s->id ?>">
+                            
+                            <span class="quantity-label">Quantity</span>
+                            
+                            <div class="quantity-control">
+                                <button type="button" class="qty-btn minus">-</button>
+                                <input type="number" id="quantity" name="quantity" value="1" min="1" max="<?= $s->stock ?>">
+                                <button type="button" class="qty-btn plus">+</button>
                             </div>
-                        </div>
-
-                        <?php if (isset($_SESSION['customer_id'])): ?>
-                            <a href="../cart/add.php?id=<?= encode($s->id) ?>&return=<?= urlencode($_SERVER['REQUEST_URI']) ?>" 
-                               class="btn-add-to-cart"
-                               style="width: 100%; padding: 14px 20px; background: #3498db; color: white; text-align: center; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600; display: block; transition: background 0.3s;">
+                            
+                            <div class="stock-info">
+                                <span class="in-stock">Max: <?= $s->stock ?> available</span>
+                            </div>
+                            
+                            <button type="submit" class="add-to-cart-btn">
                                 🛒 Add to Cart
-                            </a>
-                        <?php else: ?>
-                            <div style="text-align: center;">
-                                <div style="color: #666; margin-bottom: 15px; font-size: 15px;">Please login to add to cart</div>
-                                <div style="display: flex; gap: 10px;">
-                                    <a href="/customer/login.php?return=<?= urlencode($_SERVER['REQUEST_URI']) ?>" 
-                                       style="flex: 1; padding: 12px; background: #3498db; color: white; text-align: center; text-decoration: none; border-radius: 6px; font-weight: 600;">
-                                        Login
-                                    </a>
-                                    <a href="/customer/register.php" 
-                                       style="flex: 1; padding: 12px; background: #95a5a6; color: white; text-align: center; text-decoration: none; border-radius: 6px; font-weight: 600;">
-                                        Register
-                                    </a>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                <?php else: ?>
-                    <div style="margin: 30px 0; padding: 25px; background: #f9f9f9; border-radius: 12px; border: 1px solid #eaeaea; text-align: center;">
-                        <div style="color: #e74c3c; font-weight: 600; margin-bottom: 15px; font-size: 16px;">Out of Stock</div>
-                        <p style="color: #666;">This product is currently unavailable.</p>
-                    </div>
-                <?php endif; ?>
+                            </button>
+                        </form>
+                    <?php else: ?>
+                        <div style="text-align: center; padding: 20px;">
+                            <div class="out-of-stock" style="margin-bottom: 15px; font-size: 16px;">Out of Stock</div>
+                            <p style="color: #666;">This product is currently unavailable.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
+                <div class="product-actions">
+                    <a href="/admin/page/product.php" class="btn-back">Back to List</a>
+                </div>
+                
+            
         </div>
     </div>
 </div>
+
+<script>
+$(document).ready(function() {
+    // 获取元素
+    const $quantityInput = $('#quantity');
+    const $minusBtn = $('.qty-btn.minus');
+    const $plusBtn = $('.qty-btn.plus');
+    const maxStock = <?= $s->stock ?>;
+    
+    // 更新按钮状态
+    function updateButtonState() {
+        const currentValue = parseInt($quantityInput.val());
+        $minusBtn.prop('disabled', currentValue <= 1);
+        $plusBtn.prop('disabled', currentValue >= maxStock);
+    }
+    
+    // 初始化按钮状态
+    updateButtonState();
+    
+    // 减少数量
+    $minusBtn.on('click', function() {
+        let value = parseInt($quantityInput.val());
+        if (value > 1) {
+            $quantityInput.val(value - 1);
+            updateButtonState();
+        }
+    });
+    
+    // 增加数量
+    $plusBtn.on('click', function() {
+        let value = parseInt($quantityInput.val());
+        if (value < maxStock) {
+            $quantityInput.val(value + 1);
+            updateButtonState();
+        }
+    });
+    
+    // 输入框变化时验证
+    $quantityInput.on('change', function() {
+        let value = parseInt($(this).val());
+        if (isNaN(value) || value < 1) {
+            $(this).val(1);
+        } else if (value > maxStock) {
+            $(this).val(maxStock);
+        }
+        updateButtonState();
+    });
+    
+    // 表单提交前的验证
+    $('#add-to-cart-form').on('submit', function(e) {
+        let quantity = parseInt($quantityInput.val());
+        
+        if (isNaN(quantity) || quantity < 1 || quantity > maxStock) {
+            e.preventDefault();
+            alert('Please select a valid quantity (1-' + maxStock + ')');
+            $quantityInput.val(1);
+            updateButtonState();
+        }
+        
+        // 可以在这里添加AJAX提交，避免页面刷新
+        // e.preventDefault();
+        // $.ajax({
+        //     url: '',
+        //     type: 'POST',
+        //     data: $(this).serialize(),
+        //     success: function(response) {
+        //         // 处理成功响应
+        //     }
+        // });
+    });
+});
+</script>
 
 <?php include '../_foot.php'; ?>
