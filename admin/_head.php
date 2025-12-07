@@ -15,8 +15,8 @@
 
 <?php if (isset($_SESSION['admin_id'])): ?>
     <?php
-        $arr = glob('/../admin/images/profile/*.jpg');
-        $arr = array_map('basename', $arr);
+        $profile_pic = glob('/../admin/images/profile/*.jpg');
+        $profile_pic = array_map('basename', $profile_pic);
     ?>  
     <div class="sidebar">
         <ul>

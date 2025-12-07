@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 07, 2025 at 12:27 PM
+-- Generation Time: Dec 07, 2025 at 02:23 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,7 +40,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`admin_id`, `username`, `email`, `password`, `photo`) VALUES
-(1, 'admin1', '123@gmail.com', '6c7ca345f63f835cb353ff15bd6c5e052ec08e7a', 'default_pic.jpg');
+(1, 'admin1', 'leemh-wm24@student.tarc.edu.my', '6c7ca345f63f835cb353ff15bd6c5e052ec08e7a', 'default_pic.jpg');
 
 -- --------------------------------------------------------
 
