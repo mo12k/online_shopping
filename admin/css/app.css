@@ -1019,3 +1019,22 @@ body.forgot-password-page {
 .login-link .link:hover {
     text-decoration: underline;
 }
+
+
+/* ------------------------------------------------------------------------ */
+/* Customer sorting arrow */
+/* Sorting arrow styles */
+.customers-table th a {
+    color: inherit;
+    display: inline-block;
+}
+
+/* Up arrow */
+.customers-table th a.asc::after {
+    content: " ▴";
+}
+
+/* Down arrow */
+.customers-table th a.desc::after {
+    content: " ▾";
+}

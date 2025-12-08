@@ -86,7 +86,7 @@ require '../_head.php';
         <form method="post" class="form">
             <div class="field input">
                 <label>New Password</label>
-                <input type="password" id="password" name="password" required>
+                <?=  html_password('password', 'maxlength="11"') ?>                
                 <?= err('password') ?>
                 <div class="password-rules">
                     <p class="rule" id="rule-length">Minimum 8 characters</p>
@@ -97,7 +97,7 @@ require '../_head.php';
                 </div>
 
                 <label>Confirm New Password</label>
-                <input type="password" name="confirm" required>
+                <?=  html_password('confirm', 'maxlength="11"') ?>
                 <?= err('confirm') ?>
             </div>
             <div class="field button">

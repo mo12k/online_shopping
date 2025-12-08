@@ -1,5 +1,8 @@
 <?php
 require '../_base.php';
+
+admin_require_login();
+
 $current = 'order';
 $_title = 'Order List';
 include '../_head.php';

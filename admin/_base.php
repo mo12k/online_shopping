@@ -265,6 +265,16 @@ function html_password($key, $attr = '') {
 
     $_status = [1 => 'Published', 0 => 'Draft'];
 
+
+    // ============================================================================
+    // authentication check
+    // ============================================================================
+    function admin_require_login() {
+    if (!isset($_SESSION['admin_id'])) {
+        header("Location: /admin/auth/login.php");
+        exit;
+    }
+}
   
 
     

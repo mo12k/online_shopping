@@ -1,5 +1,8 @@
 <?php
 require '../_base.php';
+
+admin_require_login();
+
 $current = 'dashboard';
 $_title = 'Dashboard List';
 include '../_head.php';

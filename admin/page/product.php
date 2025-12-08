@@ -1,6 +1,8 @@
 <?php
 require '../_base.php';
 
+admin_require_login();
+
 $current = 'product';
 $_title = 'Product List';
 

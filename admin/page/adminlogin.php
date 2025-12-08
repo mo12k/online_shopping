@@ -1,6 +1,8 @@
 <?php
 $_title = "Login";
 $_body_class = 'login-page';
+
+admin_require_login();
 require '../_base.php';
 include '../_head.php';
 

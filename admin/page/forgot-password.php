@@ -3,6 +3,9 @@ $_body_class = 'forgot-password-page';
 $_page_title = "Forgot Password";
 
 require '../_base.php';
+
+admin_require_login();
+
 include '../_head.php';
 
 if (is_post()) {
@@ -14,24 +17,24 @@ if (is_post()) {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_err['email'] = "Invalid email format";
     } 
-    elseif (!is_exists($email, 'customer', 'email')) {
+    elseif (!is_exists($email, 'admin', 'email')) {
         $_err['email'] = "Email not found";
     }
 
     // If validation passed
     if (empty($_err)) {
-        $stm = $_db->prepare("SELECT * FROM customer WHERE email = ?");
+        $stm = $_db->prepare("SELECT * FROM admin WHERE email = ?");
         $stm->execute([$email]);
         $user = $stm->fetch();
 
         // Check if there's already a VALID (non-expired) token
         $stm = $_db->prepare("
                         SELECT 1 FROM token 
-                        WHERE customer_id = ? 
+                        WHERE admin_id = ? 
                         AND token_type = 'reset' 
                         AND expires_at > NOW()
                     ");
-        $stm->execute([$user->customer_id]);
+        $stm->execute([$user->admin_id]);
         $existing_token = $stm->fetch();
 
         if ($existing_token) {
@@ -44,15 +47,15 @@ if (is_post()) {
             $token_hash = sha1($raw_token);
 
             // Remove any old/expired tokens
-            $_db->prepare("DELETE FROM token WHERE customer_id = ? AND token_type = 'reset'")
-                        ->execute([$user->customer_id]);
+            $_db->prepare("DELETE FROM token WHERE expires_at <= NOW()")
+                        ->execute([$user->admin_id]);
             // Insert new 5-minute token
             $_db->prepare("
-                INSERT INTO token (customer_id, token_hash, token_type, type, expires_at)
+                INSERT INTO token (admin_id, token_hash, token_type, type, expires_at)
                 VALUES (?,?,'reset','link', DATE_ADD(NOW(), INTERVAL 5 MINUTE))
-            ")->execute([$user->customer_id, $token_hash]);
+            ")->execute([$user->admin_id, $token_hash]);
 
-            $reset_url = base('page/token.php') . '?token=' . $raw_token . '&email=' . urlencode($email);
+            $reset_url = base('../admin/page/token.php') . '?token=' . $raw_token . '&email=' . urlencode($email);
 
             // Send email
             $m = get_mail();
