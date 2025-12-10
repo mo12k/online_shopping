@@ -251,30 +251,152 @@ function table_headers($fields, $sort, $dir, $href = '') {
     // ============================================================================
     // Shopping Cart
     // ============================================================================
+ 
+    
 
-    // Get shopping cart
-    function get_cart() {
-    return $_SESSION['cart'] ?? [];
-    }
-
-    // Set shopping cart
-    function set_cart($cart = []) {
-    $_SESSION['cart'] = $cart;
-    }
-
-    // Update shopping cart
-    function update_cart($id, $unit) {
-    $cart = get_cart();
-
-    if ($unit >= 1 && $unit <= 10 && is_exists($id, 'product', 'id')) {
-            $cart[$id] = $unit;
-            ksort($cart);
+    function update_cart($product_id, $quantity, $customer_id = null) {
+        global $_db;
+        
+        // for guest
+        if (!$customer_id && isset($_SESSION['customer_id'])) {
+            $customer_id = $_SESSION['customer_id'];
         }
-        else {
-            unset($cart[$id]);
+        
+        $quantity = (int)$quantity;
+        
+        if ($customer_id) {
+            // for member
+            if ($quantity > 0) {
+                
+                $stm = $_db->prepare('
+                    INSERT INTO cart (customer_id, product_id, quantity) 
+                    VALUES (?, ?, ?)
+                    ON DUPLICATE KEY UPDATE quantity = ?
+                ');
+                $stm->execute([$customer_id, $product_id, $quantity, $quantity]);
+            } else {
+                // delete cart when quantity 0 <= 
+                $stm = $_db->prepare('DELETE FROM cart WHERE customer_id = ? AND product_id = ?');
+                $stm->execute([$customer_id, $product_id]);
+            }
+        } else {
+            // for guest use session
+            if (!isset($_SESSION['cart'])) {
+                $_SESSION['cart'] = [];
+            }
+            
+            if ($quantity > 0) {
+                $_SESSION['cart'][$product_id] = $quantity;
+            } else {
+                unset($_SESSION['cart'][$product_id]);
+            }
+            
+            if (empty($_SESSION['cart'])) {
+                unset($_SESSION['cart']);
+            }
+        }
     }
 
-    set_cart($cart);
+    function remove_from_cart($product_id, $customer_id = null) {
+        global $_db;
+        
+        if (!$customer_id && isset($_SESSION['customer_id'])) {
+            $customer_id = $_SESSION['customer_id'];
+        }
+        
+        if ($customer_id) {
+            $stm = $_db->prepare('DELETE FROM cart WHERE customer_id = ? AND product_id = ?');
+            $stm->execute([$customer_id, $product_id]);
+        } else {
+            // for guest
+            if (isset($_SESSION['cart'][$product_id])) {
+                unset($_SESSION['cart'][$product_id]);
+            }
+            
+            if (empty($_SESSION['cart'])) {
+                unset($_SESSION['cart']);
+            }
+        }
+    }
+
+    function get_cart_items($db, $customer_id = null) {
+        if (!$customer_id && isset($_SESSION['customer_id'])) {
+            $customer_id = $_SESSION['customer_id'];
+        }
+        
+        $cart_data = [];
+        
+        if ($customer_id) {
+            // get from database when is member
+            $stm = $db->prepare("
+                SELECT c.cart_id, c.product_id, c.quantity, 
+                    p.*, cat.category_name 
+                FROM cart c
+                JOIN product p ON c.product_id = p.id
+                LEFT JOIN category cat ON p.category_id = cat.category_id
+                WHERE c.customer_id = ?
+            ");
+            $stm->execute([$customer_id]);
+            $cart_data = $stm->fetchAll();
+            
+        } elseif (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
+            // get from session when is guest
+            $product_ids = array_keys($_SESSION['cart']);
+            if (!empty($product_ids)) {
+                $placeholders = implode(',', array_fill(0, count($product_ids), '?'));
+                $stm = $db->prepare("
+                    SELECT p.*, c.category_name 
+                    FROM product p 
+                    LEFT JOIN category c ON p.category_id = c.category_id 
+                    WHERE p.id IN ($placeholders)
+                ");
+                $stm->execute($product_ids);
+                $products = $stm->fetchAll();
+                
+                foreach ($products as $product) {
+                    $product->cart_id = null; // session won't save in database, do not have cart_id
+                    $product->quantity = $_SESSION['cart'][$product->id];
+                    $product->subtotal = $product->price * $product->quantity;
+                    $cart_data[] = $product;
+                }
+            }
+        }
+        
+        return $cart_data;
+    }
+
+    function get_cart_total($items) {
+        $total = 0;
+        foreach ($items as $item) {
+            // 如果已经有 subtotal 属性，直接使用
+            if (isset($item->subtotal)) {
+                $total += $item->subtotal;
+            } 
+            // 否则计算 price * quantity
+            elseif (isset($item->price) && isset($item->quantity)) {
+                $total += $item->price * $item->quantity;
+            }
+            // 如果是数组格式
+            elseif (is_array($item) && isset($item['price']) && isset($item['quantity'])) {
+                $total += $item['price'] * $item['quantity'];
+            }
+        }
+        return $total;
+    }
+
+    function clear_cart($customer_id = null) {
+        global $_db;
+        
+        if (!$customer_id && isset($_SESSION['customer_id'])) {
+            $customer_id = $_SESSION['customer_id'];
+        }
+        
+        if ($customer_id) {
+            $stm = $_db->prepare('DELETE FROM cart WHERE customer_id = ?');
+            $stm->execute([$customer_id]);
+        } else {
+            unset($_SESSION['cart']);
+        }
     }
 
     // Generate <input type='hidden'>

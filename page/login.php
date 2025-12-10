@@ -29,10 +29,14 @@ if(is_post()) {
             $_SESSION['profile_picture'] = $user->photo ?? 'default_pic.jpg';
             redirect('../index.php');
 
+            migrate_session_cart_to_db($customer->customer_id);
+            
         } else {
             //Login failed
             $_err['general'] = "Invalid username or password";
         }
+
+        
     }
 }
 ?>

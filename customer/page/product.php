@@ -1,5 +1,7 @@
 <?php
+
 require '../_base.php';
+include '../_head.php';
 
 $current = 'product';
 $_title = 'Product List';
@@ -47,8 +49,6 @@ if ($category_id !== '' && $category_id !== null) {
 }
 
 
-
-
 $sort = req('sort');
 key_exists($sort, $fields) || $sort = 'id';
 
@@ -66,11 +66,10 @@ $p = new SimplePager($sql, $params, 10, $page);
 $arr = $p->result;
 
 $info = temp('info');
-
-include '../_head.php';
-
 ?>
-          
+<link rel="stylesheet" href="/customer/css/app.css">
+
+
 <div class="content">
     
         <div style="display:flex; 

@@ -207,3 +207,38 @@ $_genders = [
 ];
 
 
+// session cart -> customer cart
+function formal_session_cart_to_db($customer_id) {
+    global $_db;
+    
+    // check if have any session cart
+    if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
+        
+        foreach ($_SESSION['cart'] as $product_id => $quantity) {
+            // validate product and stock
+            $stm = $_db->prepare('SELECT stock FROM product WHERE id = ?');
+            $stm->execute([$product_id]);
+            $product = $stm->fetch();
+            
+            if ($product && $quantity > 0 && $quantity <= $product->stock) {
+                // send to database
+                $stm = $_db->prepare('
+                    INSERT INTO cart (customer_id, product_id, quantity) 
+                    VALUES (?, ?, ?)
+                    ON DUPLICATE KEY UPDATE 
+                    quantity = IF(VALUES(quantity) > quantity, VALUES(quantity), quantity)
+                ');
+                $stm->execute([$customer_id, $product_id, $quantity]);
+            }
+        }
+        
+        // clear session car
+        unset($_SESSION['cart']);
+        
+        return true;
+    }
+    
+    return false; 
+}
+
+

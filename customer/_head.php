@@ -1,17 +1,30 @@
+<!DOCTYPE html>
 <?php
 
-$arr = glob('/../images/profile/*.jpg');
+$arr = glob('/../../images/profile/*.jpg');
 $arr = array_map('basename', $arr);
 
 $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
 ?>
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title><?= $_title ?? 'Test' ?></title>
+<link rel="shortcut icon" href="/images/favicon.png">
+<link href='https://cdn.boxicons.com/3.0.5/fonts/basic/boxicons.min.css' rel='stylesheet'>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="/admin/js/app.js"></script>
+<link rel="stylesheet" href="../../css/app.css">
+
+</head>
 <header>
     <div class="header-left">
         <h1>Welcome to the Bookstore</h1>
         <nav class="navbar">
             <a href="/">Index</a>
             <a href="/customer/page/product.php">Product</a>
-            <a href="/page/demo2.php">Demo 2</a>
+            <a href="/customer/cart/cart.php">shopping_cart</a>
         </nav>
     </div>
     <nav class="navbar">
@@ -37,3 +50,7 @@ $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
 
 
 </header>
+
+
+
+

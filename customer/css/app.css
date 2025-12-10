@@ -9,47 +9,6 @@ body {
     color: #5D4037; /* 主文字暖咖 */
 }
 
-/* --- Sidebar --- */
-.sidebar {
-    width: 170px;
-    height: 100vh;
-    background: #F3EDE7; /* 侧边暖米 */
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding-top: 20px;
-    color: #5D4037;
-    box-shadow: inset -1px 0 0 0 #E0D7D2;
-}
-
-.sidebar ul {
-    margin-bottom: 15px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.sidebar ul li a {
-    display: block;
-    padding: 12px 20px;
-    color: #5D4037; /* 链接用深咖 */
-    text-decoration: none;
-    font-size: 16px;
-    border-radius: 8px;
-    transition: background 0.18s ease, color 0.18s ease;
-}
-
-.sidebar ul li.active a {
-    background: #FFB74D; /* 次色用于 active */
-    color: #000 !important;
-    font-weight: bold;
-}
-
-.sidebar ul li a:hover {
-    background: #E8DFD7; /* hover 柔和 */
-    color: #4E342E;
-}
-
 /* --- Header --- */
 .header {
     height: 70px;
@@ -85,8 +44,8 @@ body {
 
 /* --- Content  --- */
 .content {
-    margin-left: 170px; /* 修正为与 sidebar 宽度一致 */
-    padding: 100px 40px 40px 40px;
+    margin-left: center; /* 修正为与 sidebar 宽度一致 */
+    padding: 40px 40px 40px 40px;
     color: #5D4037;
 }
 
@@ -193,7 +152,7 @@ table th {
     font-size: 13px;
     font-weight: bold;
     color: white;
-    background: #8DA8A0; /* 默认温和蓝绿（占位） */
+    background: #8DA8A0; 
 }
 .btn.edit {
     background: #6D4C41;
@@ -868,12 +827,6 @@ small { color: #98877b; font-size: 14px; }
 
 /*========================================================*/
 /* PRODUCT PAGE CSS FOR CUSTOMER*/
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 25px;
-    margin-top: 20px;
-}
 
 .product-card {
     background: #fff;

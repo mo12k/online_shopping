@@ -22,7 +22,25 @@ if (!$s) {
 if (is_post()) {
     $id   = req('id');
     $quantity = req('quantity');
-    update_cart($id, $quantity);
+    
+    // get customer_id
+    $customer_id = $_SESSION['customer_id'] ?? null;
+    
+    // validate stock
+    $stm = $_db->prepare('SELECT stock, title FROM product WHERE id = ?');
+    $stm->execute([$id]);
+    $product = $stm->fetch();
+    
+    if ($product && $quantity > 0 && $quantity <= $product->stock) {
+        // customer_id
+        update_cart($id, $quantity, $customer_id);
+        
+        // success / error information
+        temp('success', "Added <strong>{$product->title}</strong> (x$quantity) to cart!");
+    } else {
+        temp('error', 'Invalid quantity or insufficient stock!');
+    }
+    
     redirect();
 }
 
@@ -30,8 +48,7 @@ $arr = $_db->query('SELECT * FROM product');
 
 include '../_head.php';
 ?>
-
-<link rel="stylesheet" href="/css/product-detail.css">
+<link rel="stylesheet" href="/customer/css/app.css">
 
 <style>
 
@@ -42,6 +59,7 @@ include '../_head.php';
     background: #FAF7F2; /* 柔和米白底 */
     border-radius: 12px;
     border: 1px solid #E4DCD3; /* 暖灰边框 */
+    text-align: center;
 }
 
 .quantity-label {
@@ -57,6 +75,7 @@ include '../_head.php';
     align-items: center;
     gap: 12px;
     margin: 15px 0;
+    justify-content: center;
 }
 
 /* + / - 按钮 */
@@ -99,26 +118,24 @@ include '../_head.php';
 
 /* Stock text */
 .stock-info {
-    color: #6D4C41; /* 柔和咖啡色 */
-    font-size: 14px;
+    font-size: 15px;
     margin-top: 10px;
 }
 
 .in-stock {
-    color: #2E7D32; /* 更自然的绿色 */
+    color: #2E7D32;
     font-weight: 600;
 }
 
 .out-of-stock {
-    color: #D32F2F; /* 暖红色，更符合木质风 */
+    color: #D32F2F;
     font-weight: 600;
 }
 
-/* Add to Cart button */
 .add-to-cart-btn {
     padding: 16px 70px;
-    background: #6D4C41; /* 木质棕色 */
-    color: #FFF; /* 改成白色字更易读 */
+    background: #6D4C41; 
+    color: #FFF; 
     border: none;
     border-radius: 50px;
     font-size: 18px;
@@ -127,16 +144,16 @@ include '../_head.php';
     box-shadow: 0 10px 25px rgba(109, 76, 65, 0.25);
     text-decoration: none;
     display: inline-block;
-    transition: background 0.3s ease, transform 0.2s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .add-to-cart-btn:hover {
-    background: #5A3E34; /* 深棕 hover 色 */
-    transform: translateY(-2px); /* 微互动感 */
+    background: #5A3E34; 
+    transform: translateY(-2px); 
 }
 
 .add-to-cart-btn:disabled {
-    background: #BCAAA4; /* 柔和淡棕灰 */
+    background: #BCAAA4; 
     cursor: not-allowed;
 }
 
@@ -148,8 +165,63 @@ include '../_head.php';
 
 </style>
 
-<div class="content">
-    <div class="product-detail-container">
+    <div class="content">
+        <!-- 消息提示区域 -->
+        <?php if ($msg = temp('success')): ?>
+                    <div class="message success" style="
+                        max-width: 800px;
+                        margin: 20px auto;
+                        background: #d4edda;
+                        color: #155724;
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        border: 1px solid #c3e6cb;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span><?= $msg ?></span>
+                        </div>
+
+                        <button onclick="this.parentElement.remove()" style="
+                            background: none;
+                            border: none;
+                            font-size: 20px;
+                            color: #155724;
+                            cursor: pointer;
+                            padding: 0 5px;
+                        ">x</button>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($msg = temp('error')): ?>
+                    <div class="message error" style="
+                        max-width: 800px;
+                        margin: 20px auto;
+                        background: #f8d7da;
+                        color: #721c24;
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        border: 1px solid #f5c6cb;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span><?= $msg ?></span>
+                    </div>
+
+                    <button onclick="this.parentElement.remove()" style="
+                        background: none;
+                        border: none;
+                        font-size: 20px;
+                        color: #721c24;
+                        cursor: pointer;
+                        padding: 0 5px;
+                    ">×</button>
+            </div>
+        <?php endif; ?>
+        
+        <div class="product-detail-container">
         <div class="product-detail-wrapper">
 
             <!-- 左邊：圖片 + 標題 + 描述 -->
@@ -216,7 +288,7 @@ include '../_head.php';
                             </div>
                             
                             <button type="submit" class="add-to-cart-btn">
-                                🛒 Add to Cart
+                                 Add to Cart
                             </button>
                         </form>
                     <?php else: ?>
@@ -228,7 +300,7 @@ include '../_head.php';
                 </div>
             </div>
                 <div class="product-actions">
-                    <a href="/admin/page/product.php" class="btn-back">Back to List</a>
+                    <a href="/customer/page/product.php" class="btn-back">Back to List</a>
                 </div>
                 
             
@@ -294,16 +366,6 @@ $(document).ready(function() {
             updateButtonState();
         }
         
-        // 可以在这里添加AJAX提交，避免页面刷新
-        // e.preventDefault();
-        // $.ajax({
-        //     url: '',
-        //     type: 'POST',
-        //     data: $(this).serialize(),
-        //     success: function(response) {
-        //         // 处理成功响应
-        //     }
-        // });
     });
 });
 </script>
