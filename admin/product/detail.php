@@ -24,25 +24,29 @@ include '../_head.php';
     <div class="product-detail-container">
         <div class="product-detail-wrapper">
 
-            <!-- 左邊：圖片 + 標題 + 描述 -->
-            <div class="product-image-section">
-                <?php if ($s->photo_name && file_exists("../upload/{$s->photo_name}")): ?>
-                    <div class="product-image-frame">
-                        <img src="../upload/<?= encode($s->photo_name) ?>" alt="<?= encode($s->title) ?>" class="product-image">
-                    </div>
-                <?php else: ?>
-                    <div class="product-no-image">No Image</div>
-                <?php endif; ?>
+         
+          
+<div class="product-image-section">
+    <?php if ($s->photo_name && file_exists("../upload/{$s->photo_name}")): ?>
+        <div class="product-image-frame">
+            <img src="../upload/<?= $s->photo_name ?>" 
+                 alt="<?= $s->title ?>" 
+                 class="product-image">
+        </div>
+    <?php else: ?>
+        <div class="product-no-image">No Image</div>
+    <?php endif; ?>
 
-                <h1 class="product-title"><?= encode($s->title) ?></h1>
+    <h1 class="product-title"><?= $s->title ?></h1>
 
-                <div style="margin:40px 0; padding-top:30px; border-top:2px dashed #eee;">
-                    <strong style="color:#333; font-size:19px; display:block; margin-bottom:15px;">Description</strong>
-                    <div style="background:#f8f9fa; padding:22px 28px; border-radius:14px; line-height:1.8; min-height:120px; font-size:16px; color:#444;">
-                        <?= $s->description ? nl2br(encode($s->description)) : '<span style="color:#aaa;">No description provided.</span>' ?>
-                    </div>
-                </div>
-            </div>
+    
+    <div style="margin:40px 0; padding-top:30px; border-top:2px dashed #eee;">
+        <strong style="color:#333; font-size:19px; display:block; margin-bottom:15px;">Description</strong>
+        <div style="background:#f8f9fa; padding:22px 28px; border-radius:14px; line-height:1.8; min-height:120px; font-size:16px; color:#444;">
+            <?= $s->description ? nl2br($s->description) : '<span style="color:#aaa;">No description provided.</span>' ?>
+        </div>
+    </div>
+</div>
 
             <!-- 右邊：所有資訊 -->
             <div class="product-info-section">

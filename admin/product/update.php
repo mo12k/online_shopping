@@ -229,8 +229,9 @@ include '../_head.php';
                     <?= html_textarea('description', "rows='6'") ?>
 
                     <div class="actions">
-                        <button type="submit" class="btn-primary">Update Product</button>
+                        <button  class="btn-primary">Update Product</button>
                         <a href="/admin/page/product.php" class="btn-cancel">Cancel</a>
+                        
                     </div>
                 </div>
             </div>

@@ -150,12 +150,12 @@
     $checked = ($GLOBALS[$key] ?? $default) == 1 ? 'checked' : '';
     echo <<<HTML
     <div style="display:flex; align-items:center; gap:30px; margin:12px 0; font-size:15px; user-select:none;">
-        <span style="color:#999;">Unactive</span>
+        <span style="color:#999;">Draft</span>
         <label class="toggle-switch">
             <input type="checkbox" name="$key" value="1" $checked>
             <span class="slider round"></span>
         </label>
-        <span style="color:#333; font-weight:500;">Active</span>
+        <span style="color:#333; font-weight:500;">Publish</span>
     </div>
     HTML;
 }

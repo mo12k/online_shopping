@@ -82,7 +82,8 @@ include '../_head.php';
             <form method ="get" class="search-form">                   
             <?= html_select('category_id', $_category, 'All category' , '', true) ?>
             <?= html_search('name','Searching by id , title , author') ?>
-            <button>Search</button>
+            <button style="padding:14px 32px; background:yellow; color:black; border:none; border-radius:16px; ">
+                Search</button>
 
             </div>
             <!-- add button -->
@@ -105,7 +106,7 @@ include '../_head.php';
         </p>
 
            
-    <table >
+    <table class="product-table" >
         <tr>
             <!-- table title can click ,have link to baase php -->
             <?= table_headers($fields, $sort, $dir ,"page=$page") ?>
