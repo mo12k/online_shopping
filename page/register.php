@@ -4,6 +4,7 @@ $_body_class = 'register-page';
 $_page_title = "Register";
 
 require '../_base.php';
+$info = temp('info');
 include '../_head.php';
 
 if (is_post()) {
@@ -91,6 +92,14 @@ if (is_post()) {
     }
 }
 ?>
+<?php if ($info): ?>
+<div class="alert-success-fixed">
+    <div class="alert-content">
+        <strong>Success!</strong> <?= encode($info) ?>
+        <span class="alert-close">×</span>
+    </div>
+</div>
+<?php endif; ?>
 
 <div class="container-register">
     <form id="register-form" method="POST" action="register.php">        
@@ -119,6 +128,7 @@ if (is_post()) {
         <?= err('confirm_password') ?>
 
         <button type="submit" id="create_account" name="create_account">Create Account</button>
+        
 
         <div class="already-account">
             Already have an account?

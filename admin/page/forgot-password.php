@@ -4,7 +4,7 @@ $_page_title = "Forgot Password";
 
 require '../_base.php';
 
-admin_require_login();
+$info = temp('info');
 
 include '../_head.php';
 
@@ -47,7 +47,7 @@ if (is_post()) {
             $token_hash = sha1($raw_token);
 
             // Remove any old/expired tokens
-            $_db->prepare("DELETE FROM token WHERE expires_at <= NOW()")
+            $_db->prepare("DELETE FROM token WHERE admin_id = ? AND expires_at <= NOW()")
                         ->execute([$user->admin_id]);
             // Insert new 5-minute token
             $_db->prepare("
@@ -87,6 +87,16 @@ if (is_post()) {
 ?>
 
 <div class="container-forgot-password">
+
+    <?php if ($info): ?>
+    <div class="alert-success-fixed">
+        <div class="alert-content">
+            <strong>Success!</strong> <?= encode($info) ?>
+            <span class="alert-close">×</span>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <div class="wrapper-forgot-password">
         <h1>Forgot Password</h1>
         <form method="post">

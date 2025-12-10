@@ -65,6 +65,7 @@ if(is_post()){
 
             <div class="remember-forgot">
                 <a href="forgot-password.php" class="link">Forgot Password?</a>
+                <a href="dashboard.php" class="link">Back</a>
             </div>
 
             <button type="submit" name="submit" value='1'> Login </button>

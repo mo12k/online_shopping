@@ -481,32 +481,49 @@ body.token-page {
     color: #333;
 }
 
-/* Flash Message ----------------------------------------------------------- */
+/* temp  */
 
-#info {
+/* Message top  */
+.alert-success-fixed {
     position: fixed;
-    color: #fff;
-    background: #666;
-    border: 1px solid #333;
-    border-radius: 5px;
-    padding: 10px 20px;
+    top: 20px;
     left: 50%;
-    translate: -50% 0;
-    z-index: 999;
-
-    /* TODO */
-    top: -100px;
-    opacity: 0;
-    
+    transform: translateX(-50%);
+    z-index: 9999;
+    background: #d4edda;
+    color: #155724;
+    padding: 16px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    font-size: 17px;
+    font-weight: 500;
+    border: 1px solid #c3e6cb;
+    animation: slideDown 0.5s ease, fadeOut 0.6s ease 4s forwards;
+    max-width: 90%;
 }
 
-#info:not(:empty) {
-    animation: fade 5s;
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
 }
 
-@keyframes fade {
-      0% { top: -100px; opacity: 0; }
-     10% { top:  100px; opacity: 1; }
-     90% { top:  100px; opacity: 1; }
-    100% { top: -100px; opacity: 0; }
-} 
+.alert-close {
+    margin-left: 20px;
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
+    opacity: 0.7;
+}
+
+.alert-close:hover { opacity: 1; }
+
+@keyframes slideDown {
+    from { top: -100px; opacity: 0; }
+    to   { top: 20px; opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}

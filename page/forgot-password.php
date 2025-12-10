@@ -3,6 +3,9 @@ $_body_class = 'forgot-password-page';
 $_page_title = "Forgot Password";
 
 require '../_base.php';
+
+$info = temp('info');
+
 include '../_head.php';
 
 if (is_post()) {
@@ -84,6 +87,16 @@ if (is_post()) {
 ?>
 
 <div class="container-forgot-password">
+
+    <?php if ($info): ?>
+    <div class="alert-success-fixed">
+        <div class="alert-content">
+            <strong>Success!</strong> <?= encode($info) ?>
+            <span class="alert-close">×</span>
+        </div>
+    </div>
+    <?php endif; ?>
+    
     <div class="wrapper-forgot-password">
         <h1>Forgot Password</h1>
         <form method="post">
