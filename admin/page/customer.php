@@ -35,9 +35,17 @@ if ($keyword !== '') {
 
 $sql .= " ORDER BY $sort $dir";
 
-$stm = $_db->prepare($sql);
-$stm->execute($params);
-$customer_list = $stm->fetchAll();
+
+
+// (2) Paging
+$page = req('page', 1);
+
+require_once '../lib/SimplePager.php';
+$p = new SimplePager($sql, $params, 10, $page);
+$customer_list = $p->result;
+
+
+$info = temp('info');
 
 include '../_head.php';
 ?>
@@ -45,18 +53,27 @@ include '../_head.php';
 <div class="content">
 
     <form method="get" class="search-form" style="margin-bottom:20px; display:flex; gap:10px;">
-        <input type="text" name="keyword" placeholder="Search username or email"
-               value="<?= $keyword ?>"
-               style="padding:8px 12px; border:1px solid #ccc; border-radius:6px; width:250px;">
+        <?= html_search('keyword', 'Search username or email', 'style="padding:8px 12px; border:1px solid #ccc; border-radius:6px; width:250px;"') ?>
         <button style="padding:8px 16px;">Search</button>
     </form>
 
-    <p><?= count($customer_list) ?> record(s)</p>
-
+    <?php if ($info): ?>
+        <div class="alert-success-fixed">
+            <div class="alert-content">
+                <strong>Success!</strong> <?= encode($info) ?>
+                <span class="alert-close">×</span>
+            </div>
+        </div>
+        <?php endif; ?>
+        <p style="margin:20px 0; color:#666; font-size:15px;">
+           <?= $p->count ?> of <?= $p->item_count ?> record(s) |
+    Page <?= $p->page ?> of <?= $p->page_count ?>
+        </p>
+        
     <table class="customers-table">
         <thead>
             <tr>
-                <?= table_headers($fields, $sort, $dir) ?>
+                <?= table_headers($fields, $sort, $dir, "page=$page") ?>
             </tr>
         </thead>
 
@@ -76,6 +93,12 @@ include '../_head.php';
             <?php endif; ?>
         </tbody>
     </table>
+
+    <!-- Paging -->
+    <div style="margin-top:20px;">
+        <?= $p->html("sort=$sort&dir=$dir") ?>
+    </div>
+
 
 
 </div>

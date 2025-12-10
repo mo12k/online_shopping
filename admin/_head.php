@@ -45,7 +45,7 @@
             <div class="user-info">
                 <img src="/admin/images/profile/<?= htmlspecialchars($_SESSION['profile_picture']) ?>" alt="Profile">
                 <span><?= htmlspecialchars($_SESSION['admin_username']) ?></span>
-                <a href="/admin/auth/logout.php" class="logout">Logout</a>
+                <a href="/admin/page/adminlogout.php" class="logout">Logout</a>
             </div>
         </div>
 <?php endif; ?>

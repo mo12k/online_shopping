@@ -270,11 +270,11 @@ function html_password($key, $attr = '') {
     // authentication check
     // ============================================================================
     function admin_require_login() {
-    if (!isset($_SESSION['admin_id'])) {
-        header("Location: /admin/auth/login.php");
-        exit;
+        if (!isset($_SESSION['admin_id'])) {
+            header("Location: ../admin/page/adminlogin.php");
+            exit;
+        }
     }
-}
   
 
     

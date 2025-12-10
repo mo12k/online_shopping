@@ -1,9 +1,8 @@
 <?php
 $_title = "Login";
 $_body_class = 'login-page';
-
-admin_require_login();
 require '../_base.php';
+
 include '../_head.php';
 
 if(is_post()){
@@ -65,11 +64,6 @@ if(is_post()){
 
 
             <div class="remember-forgot">
-                <label class="remember-me">
-                    <input type="checkbox" name="remember_me" value="1">
-                    Remember me
-                </label>
-
                 <a href="forgot-password.php" class="link">Forgot Password?</a>
             </div>
 

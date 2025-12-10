@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 08, 2025 at 12:03 PM
+-- Generation Time: Dec 10, 2025 at 01:25 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -102,7 +102,37 @@ INSERT INTO `customer` (`customer_id`, `username`, `email`, `is_verified`, `pass
 (3, '2413492', '123456@gmail.com', 1, '$2y$10$w8nCPhbATzf9NXrjsE0gP.4rJ0ahXcZqDewnY3J90zc82Q.TRgr4y', 0, NULL, '01298765543', '2025-10-26', 'M', '2025-11-26 21:21:36', 'default_pic.jpg'),
 (4, 'Bing_123', 'mokchun549@gmail.com', 1, '$2y$10$NPwrelq4Uc986r684jGNJeEBg9pM1g5sNuyZP8CYI9kBcNMwmZlOO', 0, NULL, '0164564996', '2024-04-08', 'M', '2025-11-27 14:59:36', 'default_pic.jpg'),
 (5, 'mok', 'mokbingchun@gmail.com', 1, '01bc634ce656696cff9dd426464c0d21e32d5433', 0, NULL, '', '0000-00-00', '', '2025-12-02 12:59:51', 'default_pic.jpg'),
-(6, 'mo12k', 'mokcb-wm24@student.tarc.edu.my', 1, '$2y$10$kzupMP5VEcrTWhygHfeezOUAqBiVQtXStALR9r1DSp9LiRbQV7zSq', 0, NULL, '', '0000-00-00', '', '2025-12-02 13:27:27', 'default_pic.jpg');
+(6, 'mo12k', 'mokcb-wm24@student.tarc.edu.my', 1, '$2y$10$kzupMP5VEcrTWhygHfeezOUAqBiVQtXStALR9r1DSp9LiRbQV7zSq', 0, NULL, '', '0000-00-00', '', '2025-12-02 13:27:27', 'default_pic.jpg'),
+(7, 'user01', 'user01@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456701', '1999-01-10', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(8, 'user02', 'user02@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456702', '1998-04-12', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(9, 'user03', 'user03@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456703', '2000-09-20', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(10, 'user04', 'user04@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456704', '2001-03-25', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(11, 'user05', 'user05@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456705', '1997-07-14', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(12, 'user06', 'user06@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456706', '2002-11-30', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(13, 'user07', 'user07@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456707', '1996-05-08', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(14, 'user08', 'user08@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456708', '1995-12-12', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(15, 'user09', 'user09@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456709', '2003-02-18', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(16, 'user10', 'user10@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456710', '1994-10-01', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(17, 'user11', 'user11@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456711', '1998-08-22', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(18, 'user12', 'user12@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456712', '1999-06-11', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(19, 'user13', 'user13@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456713', '2001-09-09', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(20, 'user14', 'user14@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456714', '1996-03-17', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(21, 'user15', 'user15@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456715', '2000-12-25', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(22, 'user16', 'user16@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456716', '1997-09-05', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(23, 'user17', 'user17@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456717', '1995-01-01', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(24, 'user18', 'user18@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456718', '1994-05-27', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(25, 'user19', 'user19@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456719', '1999-07-16', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(26, 'user20', 'user20@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456720', '2003-11-11', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(27, 'user21', 'user21@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456721', '1998-02-28', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(28, 'user22', 'user22@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456722', '1996-10-19', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(29, 'user23', 'user23@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456723', '1997-06-06', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(30, 'user24', 'user24@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456724', '1998-12-03', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(31, 'user25', 'user25@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456725', '2002-03-15', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(32, 'user26', 'user26@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456726', '1995-04-21', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(33, 'user27', 'user27@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456727', '1999-11-30', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(34, 'user28', 'user28@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456728', '2000-05-02', 'F', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(35, 'user29', 'user29@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456729', '1997-09-09', 'M', '2025-12-09 19:54:55', 'default_pic.jpg'),
+(36, 'user30', 'user30@example.com', 1, 'cbfdac6008f9cab4083784cbd1874f76618d2a97', 0, NULL, '0123456730', '1996-02-14', 'F', '2025-12-09 19:54:55', 'default_pic.jpg');
 
 -- --------------------------------------------------------
 
@@ -294,7 +324,7 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT for table `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `customer_address`
