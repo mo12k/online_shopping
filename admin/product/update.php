@@ -92,7 +92,7 @@ if (is_post()) {
         $_db->prepare("UPDATE product SET title=?, author=?, category_id=?, price=?, stock=?, status=?, description=?, photo_name=? WHERE id=?")
             ->execute([$title, $author, $category_id, $price, $stock, $status, $description, $photo_name, $id]);
 
-        temp('info', 'Product updated successfully!');
+        temp('info', "Product ID $id updated successfully!");
         redirect('../page/product.php');
     }
 
@@ -102,7 +102,7 @@ if (is_post()) {
     $p = $stm->fetch();
 
     if (!$p) {
-        temp('info', 'Product not found');
+        temp('info', "Product not found");
         redirect('../page/product.php');
     }
 

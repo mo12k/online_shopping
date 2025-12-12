@@ -69,13 +69,9 @@ if (is_post()) {
 
     if (!$_err) {
         $photo_name = save_photo($f,"../upload");
-        
-        
-        $t = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', substr($title, 0, 8)));
-        $a = $author ? strtoupper(preg_replace('/[^A-Za-z0-9]/', '', substr($author, 0, 8))) : 'NA';
-        $c = strtoupper(substr($_category[$category_id] ?? 'OTH', 0, 3));
-        $seq = str_pad($_db->query("SELECT COUNT(*) FROM product WHERE id LIKE '$c%'")->fetchColumn() + 1, 3, '0', STR_PAD_LEFT);
-        $id = "$t-$a-$c$seq";
+
+        //檢查 database 有沒有 autoincrement 在合并的時候
+       
 
         $_db->prepare("
              INSERT INTO product (id, title, author, category_id, price, stock, status, description, photo_name)
@@ -136,7 +132,7 @@ include '../_head.php';
 
                     <div class="row">
                         <div>
-                            <label><span class="req">*</span> Price</label>
+                            <label><span class="req">*</span> Price(RM)</label>
                             <?= html_number('price', 1.00, 999999, '0.01', 'step="0.01" min="1.00" placeholder="1.00" required') ?>
                             <?= err('price') ?>
                         </div>
@@ -154,7 +150,7 @@ include '../_head.php';
                     <?= html_textarea('description', 'rows="6" placeholder="Enter product description, features ,......."') ?>
 
                     <div class="actions">
-                        <button type="submit" class="btn-primary">Add Product</button>
+                        <button  class="btn-primary">Add Product</button>
                         <a href="/admin/page/product.php" class="btn-cancel">Cancel</a>
                     </div>
                 </div>

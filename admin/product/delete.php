@@ -22,10 +22,10 @@ if (is_post()) {
         'name'=> get('name')  
     ]);
 
-
+    temp('info', "Record ID:$id deleted");
     $stm = $_db->prepare('DELETE FROM product WHERE id = ?');
     $stm->execute([$id]);
-    temp('info', 'Record deleted');
+   
     redirect('../page/product.php?'. $query);
 
 }

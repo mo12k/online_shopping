@@ -29,6 +29,11 @@
             <li class="<?= $current == 'product' ? 'active' : '' ?>">
                 <a href="/admin/page/product.php">Product List</a>
             </li>
+
+            <li class="<?= $current == 'category' ? 'active' : '' ?>">
+                <a href="/admin/page/category.php">Category List</a>
+            </li>
+
             <li class="<?= $current == 'order' ? 'active' : '' ?>">
                 <a href="/admin/page/order.php">Order List</a>
             </li>
@@ -36,9 +41,7 @@
                 <a href="/admin/page/staff.php">Staff List</a>
             </li>
 
-            <li class="<?= $current == 'category' ? 'active' : '' ?>">
-                <a href="/admin/page/category.php">Category List</a>
-            </li>
+            
         </ul>
     </div>
 

@@ -85,7 +85,12 @@ include '../_head.php';
             <button style="padding:14px 32px; background:yellow; color:black; border:none; border-radius:16px; ">
                 Search</button>
 
+
+                <!-- this just put good and if button will  get the data then no function -->
+            <a href="product.php" style="padding:14px 32px; background:yellow; color:black; border:none; border-radius:16px; text-decoration: none; ">
+                Reset</a> 
             </div>
+
             <!-- add button -->
             <a href="/admin/product/insert.php" class="btn-add">+ Add New Book</a>
         </div>
@@ -132,9 +137,9 @@ include '../_head.php';
                 <?php endif; ?>
                 <td><?= encode($s->id) ?></td>
                 <td >
-                    <?= encode(mb_strimwidth($s->title , 0 ,20 ,'...' , 'UTF-8'))?>
+                    <?= encode(mb_strimwidth($s->title , 0 ,15 ,'...' , 'UTF-8'))?>
                 </td>
-                <td><?= encode($s->author)?></td>
+                <td><?= encode(mb_strimwidth($s->author , 0 ,10 ,'...' , 'UTF-8'))?></td>
                 <td><?= encode($s->category_code) ?></td>
                 <td><?= encode($s->price ) ?></td>
                 <td style="<?= $s->stock <= 10 ? 'color:red;font-weight:bold;' : '' ?>">

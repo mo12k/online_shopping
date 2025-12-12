@@ -260,7 +260,7 @@ function html_password($key, $attr = '') {
         'M' => 'Male',
     ];
 
-    $_category = $_db->query('SELECT category_id, category_name FROM category ORDER BY sort_order')
+    $_category = $_db->query('SELECT category_id, category_name FROM category ')//記得刪除categopry  sort_order 的 data 
                  ->fetchAll(PDO::FETCH_KEY_PAIR);
 
     $_status = [1 => 'Published', 0 => 'Draft'];
