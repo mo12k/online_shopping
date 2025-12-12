@@ -461,13 +461,13 @@ function table_headers($fields, $sort, $dir, $href = '') {
     }
 
     // 在 _base.php 中添加或修改 create_order 函数
-function create_order($customer_id, $cart_item, $address_id, $payment_method) {
+function create_order($customer_id, $cart_items, $address_id, $payment_method) {  // 改为 $cart_items
     global $_db;
     
     try {
         $_db->beginTransaction();
         
-        // 1. 验证地址是否属于该客户
+        // 验证地址
         $stm = $_db->prepare('SELECT address_id FROM customer_address WHERE address_id = ? AND customer_id = ?');
         $stm->execute([$address_id, $customer_id]);
         $address = $stm->fetch();
@@ -476,10 +476,10 @@ function create_order($customer_id, $cart_item, $address_id, $payment_method) {
             throw new Exception('Invalid address selected');
         }
         
-        // 2. 计算总金额
-        $total_amount = get_cart_total($cart_item);
+        // 计算总金额
+        $total_amount = get_cart_total($cart_items);  // 改为 $cart_items
         
-        // 3. 插入订单主表
+        // 插入订单主表
         $stm = $_db->prepare('
             INSERT INTO orders (customer_id, address_id, total_amount, status, order_date) 
             VALUES (?, ?, ?, "pending", NOW())
@@ -487,37 +487,38 @@ function create_order($customer_id, $cart_item, $address_id, $payment_method) {
         $stm->execute([$customer_id, $address_id, $total_amount]);
         $order_id = $_db->lastInsertId();
         
-        // 4. 插入订单详情（order_items表）
+        // 插入订单详情
         $stm = $_db->prepare('
-            INSERT INTO order_item (order_id, product_id, quantity, price) 
-            VALUES (?, ?, ?, ?)
+            INSERT INTO order_item (order_id, product_id, quantity, price_each, subtotal) 
+            VALUES (?, ?, ?, ?, ?)
         ');
         
-        foreach ($cart_items as $item) {
+        foreach ($cart_items as $item) {  // 改为 $cart_items
             // 验证库存
             $stm_check = $_db->prepare('SELECT stock FROM product WHERE id = ?');
             $stm_check->execute([$item->id]);
             $product = $stm_check->fetch();
             
             if (!$product || $item->quantity > $product->stock) {
-                throw new Exception("Insufficient stock for product: {$item->title}");
+                throw new Exception("Insufficient stock for product ID: {$item->id}");
             }
+
+            $subtotal = $item->price * $item->quantity;
+            $stm->execute([$order_id, $item->id, $item->quantity, $item->price, $subtotal]);
             
-            $stm->execute([$order_id, $item->id, $item->quantity, $item->price]);
-            
-            // 更新产品库存
+            // 更新库存
             $stm_update = $_db->prepare('UPDATE product SET stock = stock - ? WHERE id = ?');
             $stm_update->execute([$item->quantity, $item->id]);
         }
         
-        // 5. 创建支付记录
+        // 创建支付记录
         $stm = $_db->prepare('
             INSERT INTO payment (order_id, method, status, amount, paid_at) 
             VALUES (?, ?, "pending", ?, NULL)
         ');
         $stm->execute([$order_id, $payment_method, $total_amount]);
         
-        // 6. 清空购物车
+        // 清空购物车
         clear_cart($customer_id);
         
         $_db->commit();
@@ -565,84 +566,123 @@ function create_order($customer_id, $cart_item, $address_id, $payment_method) {
      * 模拟支付处理函数
      * 只记录数据，不真正收款
      */
-    function process_simulated_checkout($customer_id, $cart_item, $address_id, $payment_method) {
-        global $_db;
+    function process_simulated_checkout($customer_id, $cart_items, $address_id, $payment_method) {
+    global $_db;
+    
+    error_log("=== process_simulated_checkout START ===");
+    error_log("Customer ID: $customer_id, Address ID: $address_id, Payment: $payment_method");
+    
+    try {
+        $_db->beginTransaction();
         
-        try {
-            $_db->beginTransaction();
-            
-            // 1. 验证地址
-            $stm = $_db->prepare('SELECT address_id FROM customer_address WHERE address_id = ? AND customer_id = ?');
-            $stm->execute([$address_id, $customer_id]);
-            $address = $stm->fetch();
-            
-            if (!$address) {
-                throw new Exception('Invalid address selected');
-            }
-            
-            // 2. 计算总金额
-            $total_amount = get_cart_total($cart_item);
-            
-            // 3. 插入订单主表
-            $stm = $_db->prepare('
-                INSERT INTO orders (customer_id, address_id, total_amount, status, order_date) 
-                VALUES (?, ?, ?, "pending", NOW())
-            ');
-            $stm->execute([$customer_id, $address_id, $total_amount]);
-            $order_id = $_db->lastInsertId();
-            
-            // 4. 插入订单详情
-            $stm = $_db->prepare('
-                INSERT INTO order_item (order_id, product_id, quantity, price) 
-                VALUES (?, ?, ?, ?)
-            ');
-            
-            foreach ($cart_item as $item) {
-                // 验证库存
-                $stm_check = $_db->prepare('SELECT stock FROM product WHERE id = ?');
-                $stm_check->execute([$item->id]);
-                $product = $stm_check->fetch();
-                
-                if (!$product || $item->quantity > $product->stock) {
-                    throw new Exception("Insufficient stock for product: {$item->title}");
-                }
-                
-                $stm->execute([$order_id, $item->id, $item->quantity, $item->price]);
-                
-                // 更新产品库存（模拟实际购买）
-                $stm_update = $_db->prepare('UPDATE product SET stock = stock - ? WHERE id = ?');
-                $stm_update->execute([$item->quantity, $item->id]);
-            }
-            
-            // 5. 创建模拟支付记录
-            $simulated_payment_id = 'SIM_' . time() . '_' . rand(1000, 9999);
-            
-            $stm = $_db->prepare('
-                INSERT INTO payment (order_id, method, status, amount, paid_at, payment_reference) 
-                VALUES (?, ?, "completed", ?, NOW(), ?)
-            ');
-            $stm->execute([$order_id, $payment_method, $total_amount, $simulated_payment_id]);
-            
-            // 6. 更新订单状态为已支付
-            $stm = $_db->prepare('UPDATE orders SET status = "paid" WHERE order_id = ?');
-            $stm->execute([$order_id]);
-            
-            // 7. 清空购物车
-            clear_cart($customer_id);
-            
-            $_db->commit();
-            
-            // 记录模拟支付日志
-            error_log("Simulated payment processed: Order #$order_id, Amount: RM $total_amount, Method: $payment_method");
-            
-            return $order_id;
-            
-        } catch (Exception $e) {
-            $_db->rollBack();
-            error_log("Simulated checkout failed: " . $e->getMessage());
-            return false;
+        // 1. 验证地址
+        error_log("Validating address...");
+        $stm = $_db->prepare('SELECT address_id FROM customer_address WHERE address_id = ? AND customer_id = ?');
+        $stm->execute([$address_id, $customer_id]);
+        $address = $stm->fetch();
+        
+        if (!$address) {
+            error_log("Address validation FAILED");
+            throw new Exception('Invalid address selected');
         }
+        error_log("Address validation PASSED");
+        
+        // 2. 计算总金额
+        error_log("Calculating total...");
+        $total_amount = 0;
+        foreach ($cart_items as $item) {
+            $total_amount += $item->price * $item->quantity;
+        }
+        error_log("Total amount: $total_amount");
+        
+        // 3. 插入订单主表
+        error_log("Inserting order...");
+        $stm = $_db->prepare('
+            INSERT INTO orders (customer_id, address_id, total_amount, status, order_date) 
+            VALUES (?, ?, ?, "pending", NOW())
+        ');
+        $stm->execute([$customer_id, $address_id, $total_amount]);
+        $order_id = $_db->lastInsertId();
+        error_log("Order created with ID: $order_id");
+        
+        // 4. 插入订单详情
+        error_log("Inserting order items...");
+        $stm = $_db->prepare('
+            INSERT INTO order_item (order_id, product_id, quantity, price_each, subtotal) 
+            VALUES (?, ?, ?, ?, ?)
+        ');
+        
+        foreach ($cart_items as $item) {
+            error_log("Processing item: ID={$item->id}, Qty={$item->quantity}, Price={$item->price}");
+            
+            // 验证库存
+            $stm_check = $_db->prepare('SELECT stock, title FROM product WHERE id = ?');
+            $stm_check->execute([$item->id]);
+            $product = $stm_check->fetch();
+            
+            if (!$product) {
+                error_log("Product not found: {$item->id}");
+                throw new Exception("Product not found: {$item->id}");
+            }
+            
+            error_log("Product stock: {$product->stock}");
+            
+            if ($item->quantity > $product->stock) {
+                error_log("Insufficient stock: requested {$item->quantity}, available {$product->stock}");
+                throw new Exception("Insufficient stock for product: {$product->title}");
+            }
+            
+            // 计算小计
+            $subtotal = $item->price * $item->quantity;
+            error_log("Subtotal: $subtotal");
+            
+            // 插入订单项目
+            $stm->execute([$order_id, $item->id, $item->quantity, $item->price, $subtotal]);
+            error_log("Order item inserted");
+            
+            // 更新产品库存
+            $stm_update = $_db->prepare('UPDATE product SET stock = stock - ? WHERE id = ?');
+            $stm_update->execute([$item->quantity, $item->id]);
+            error_log("Stock updated");
+        }
+        
+        // 5. 创建模拟支付记录
+        error_log("Creating payment record...");
+        $simulated_payment_id = 'SIM_' . time() . '_' . rand(1000, 9999);
+        
+        $stm = $_db->prepare('
+            INSERT INTO payment (order_id, method, status, amount, paid_at, payment_reference) 
+            VALUES (?, ?, "completed", ?, NOW(), ?)
+        ');
+        $stm->execute([$order_id, $payment_method, $total_amount, $simulated_payment_id]);
+        error_log("Payment record created: $simulated_payment_id");
+        
+        // 6. 更新订单状态为已支付
+        error_log("Updating order status...");
+        $stm = $_db->prepare('UPDATE orders SET status = "paid" WHERE order_id = ?');
+        $stm->execute([$order_id]);
+        
+        // 7. 清空购物车
+        error_log("Clearing cart...");
+        clear_cart($customer_id);
+        
+        $_db->commit();
+        
+        error_log("=== process_simulated_checkout SUCCESS ===");
+        return $order_id;
+        
+    } catch (Exception $e) {
+        error_log("=== process_simulated_checkout FAILED ===");
+        error_log("Exception: " . $e->getMessage());
+        
+        // 获取更详细的错误信息
+        $errorInfo = $_db->errorInfo();
+        error_log("SQL Error: " . print_r($errorInfo, true));
+        
+        $_db->rollBack();
+        return false;
     }
+}
 
     /**
      * 获取模拟支付历史
@@ -672,6 +712,12 @@ function create_order($customer_id, $cart_item, $address_id, $payment_method) {
     /**
  * 获取订单详情
  */
+/**
+ * 获取订单详情
+ */
+/**
+ * 获取订单详情
+ */
 function get_order_by_id($order_id, $customer_id = null) {
     global $_db;
     
@@ -699,7 +745,8 @@ function get_order_items($order_id) {
     global $_db;
     
     $stm = $_db->prepare('
-        SELECT oi.*, p.title, p.photo_name 
+        SELECT oi.*, p.title, p.photo_name,
+               oi.price_each as price  -- 使用别名保持兼容性
         FROM order_item oi 
         JOIN product p ON oi.product_id = p.id 
         WHERE oi.order_id = ? 
@@ -708,6 +755,8 @@ function get_order_items($order_id) {
     $stm->execute([$order_id]);
     return $stm->fetchAll();
 }
+
+
 
 
    

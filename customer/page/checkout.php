@@ -1,5 +1,28 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// 开始输出缓冲
+ob_start();
+
 require '../_base.php';
+
+// 直接显示调试信息（临时）
+echo '<pre style="background:#f0f0f0; padding:10px; margin:10px;">';
+echo "=== CHECKOUT DEBUG ===\n";
+echo "Current file: " . __FILE__ . "\n";
+echo "Current dir: " . __DIR__ . "\n";
+
+// 检查 order_confirm.php 是否存在
+$confirm_file = __DIR__ . '/order_confirm.php';
+echo "Looking for: " . $confirm_file . "\n";
+echo "File exists: " . (file_exists($confirm_file) ? 'YES' : 'NO') . "\n";
+
+// 检查 session
+echo "Session customer_id: " . (isset($_SESSION['customer_id']) ? $_SESSION['customer_id'] : 'NOT SET') . "\n";
+echo "</pre>";
+
+
 include '../../_head.php';
 include '../../_header.php';
 $current = 'checkout';
@@ -24,30 +47,181 @@ if (empty($cart_items)) {
 $addresses = get_customer_addresses($customer_id);
 
 // 处理结账
+// 在 checkout.php 的 POST 处理部分修改：
+
 if (is_post()) {
     $address_id = req('address_id');
     $payment_method = req('payment_method');
     
+    // 添加调试信息
+    echo '<pre style="background:#ffebee; padding:20px; margin:20px;">';
+    echo "=== CHECKOUT POST DEBUG ===\n";
+    echo "Address ID: " . ($address_id ?: 'EMPTY') . "\n";
+    echo "Payment Method: " . ($payment_method ?: 'EMPTY') . "\n";
+    echo "Customer ID: $customer_id\n";
+    echo "Cart items count: " . count($cart_items) . "\n";
+    
     if (empty($address_id)) {
+        echo "ERROR: No address selected\n";
+        echo "</pre>";
         temp('error', 'Please select a delivery address');
         redirect();
     }
     
     if (empty($payment_method)) {
+        echo "ERROR: No payment method selected\n";
+        echo "</pre>";
         temp('error', 'Please select a payment method');
         redirect();
     }
     
-    // 模拟支付处理
+    echo "Calling process_simulated_checkout...\n";
+    echo "</pre>";
+    
+    // 模拟支付处理 - 这里需要确保真正创建订单
     $order_id = process_simulated_checkout($customer_id, $cart_items, $address_id, $payment_method);
     
+    // 添加更多调试
+    echo '<pre style="background:#e8f5e8; padding:20px; margin:20px;">';
+    echo "=== ORDER CREATION RESULT ===\n";
+    echo "process_simulated_checkout returned: " . ($order_id ? "Order ID: $order_id" : "FALSE") . "\n";
+    
     if ($order_id) {
-        temp('success', "Order #$order_id placed successfully!");
-        redirect("order_confirm.php?id=$order_id");
+        // 验证订单是否真的创建了
+        global $_db;
+        $stm = $_db->prepare('SELECT * FROM orders WHERE order_id = ? AND customer_id = ?');
+        $stm->execute([$order_id, $customer_id]);
+        $order = $stm->fetch();
+        
+        if ($order) {
+            echo "✅ Order verified in database!\n";
+            echo "Order details:\n";
+            print_r($order);
+            
+            // 检查订单项目
+            $stm = $_db->prepare('SELECT COUNT(*) FROM order_item WHERE order_id = ?');
+            $stm->execute([$order_id]);
+            $item_count = $stm->fetchColumn();
+            echo "Order items count: $item_count\n";
+            
+            // 检查支付记录
+            $stm = $_db->prepare('SELECT * FROM payment WHERE order_id = ?');
+            $stm->execute([$order_id]);
+            $payment = $stm->fetch();
+            echo "Payment record: " . ($payment ? "FOUND" : "NOT FOUND") . "\n";
+        } else {
+            echo "❌ Order NOT FOUND in database!\n";
+        }
     } else {
-        temp('error', 'Failed to create order. Please try again.');
-        redirect();
+        echo "❌ Order creation FAILED!\n";
+        
+        // 检查数据库错误
+        echo "Database error info:\n";
+        print_r($_db->errorInfo());
     }
+    
+    echo "</pre>";
+    
+    // 临时：不重定向，显示测试链接
+    if ($order_id) {
+        echo '<div style="background:#d4edda; padding:20px; margin:20px; border:1px solid #c3e6cb;">';
+        echo '<h3>✅ Order Created Successfully!</h3>';
+        echo '<p>Order ID: <strong>' . $order_id . '</strong></p>';
+        echo '<p><a href="order_confirm.php?id=' . $order_id . '" style="font-size:18px; color:blue;">Click here to view Order Confirmation</a></p>';
+        echo '</div>';
+        
+        // 临时注释掉重定向
+        // temp('success', "Order #$order_id placed successfully!");
+        // redirect("order_confirm.php?id=$order_id");
+    } else {
+        echo '<div style="background:#f8d7da; padding:20px; margin:20px; border:1px solid #f5c6cb;">';
+        echo '<h3>❌ Order Creation Failed</h3>';
+        echo '<p>The order could not be created. Please check the debug information above.</p>';
+        echo '</div>';
+        
+        // temp('error', 'Failed to create order. Please try again.');
+        // redirect();
+    }
+    
+    exit(); // 停止执行，查看调试信息
+
+    
+    function manually_create_order($customer_id, $cart_items, $address_id, $payment_method) {
+    global $_db;
+    
+    echo '<pre style="background:#fff3cd; padding:20px;">';
+    echo "=== MANUALLY CREATING ORDER ===\n";
+    
+    try {
+        // 开始事务
+        $_db->beginTransaction();
+        
+        // 1. 计算总金额
+        $total_amount = 0;
+        foreach ($cart_items as $item) {
+            $total_amount += $item->price * $item->quantity;
+        }
+        
+        echo "Total amount: RM " . number_format($total_amount, 2) . "\n";
+        
+        // 2. 创建订单
+        $stm = $_db->prepare('
+            INSERT INTO orders (customer_id, address_id, total_amount, status, order_date) 
+            VALUES (?, ?, ?, "pending", NOW())
+        ');
+        $stm->execute([$customer_id, $address_id, $total_amount]);
+        $order_id = $_db->lastInsertId();
+        
+        echo "Order created with ID: $order_id\n";
+        
+        // 3. 添加订单项目
+        $stm = $_db->prepare('
+            INSERT INTO order_item (order_id, product_id, quantity, price) 
+            VALUES (?, ?, ?, ?)
+        ');
+        
+        foreach ($cart_items as $item) {
+            $stm->execute([$order_id, $item->id, $item->quantity, $item->price]);
+            echo "Added item: {$item->title} × {$item->quantity} @ RM {$item->price}\n";
+            
+            // 更新库存
+            $update_stm = $_db->prepare('UPDATE product SET stock = stock - ? WHERE id = ?');
+            $update_stm->execute([$item->quantity, $item->id]);
+        }
+        
+        // 4. 创建支付记录
+        $simulated_ref = 'SIM_' . time() . '_' . rand(1000, 9999);
+        $stm = $_db->prepare('
+            INSERT INTO payment (order_id, method, status, amount, paid_at, payment_reference) 
+            VALUES (?, ?, "completed", ?, NOW(), ?)
+        ');
+        $stm->execute([$order_id, $payment_method, $total_amount, $simulated_ref]);
+        echo "Payment record created\n";
+        
+        // 5. 更新订单状态为已支付
+        $stm = $_db->prepare('UPDATE orders SET status = "paid" WHERE order_id = ?');
+        $stm->execute([$order_id]);
+        echo "Order status updated to 'paid'\n";
+        
+        // 6. 清空购物车
+        clear_cart($customer_id);
+        echo "Cart cleared\n";
+        
+        // 提交事务
+        $_db->commit();
+        
+        echo "✅ Order creation COMPLETED successfully!\n";
+        echo "</pre>";
+        
+        return $order_id;
+        
+    } catch (Exception $e) {
+        $_db->rollBack();
+        echo "❌ ERROR: " . $e->getMessage() . "\n";
+        echo "</pre>";
+        return false;
+    }
+}
 }
 ?>
 
