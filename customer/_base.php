@@ -48,30 +48,15 @@
 
     // Set or get temporary session variable
     function temp($key, $value = null) {
-    if ($value !== null) {
-        // 设置临时消息
-        $_SESSION["temp_$key"] = [
-            'message' => $value,
-            'page' => $_SERVER['REQUEST_URI'] // 记录设置消息的页面
-        ];
-    } else {
-        // 获取并清除消息
-        $data = $_SESSION["temp_$key"] ?? null;
-        
-        if ($data) {
-            // 只有当在当前页面设置的消息才显示
-            if ($data['page'] === $_SERVER['REQUEST_URI']) {
-                unset($_SESSION["temp_$key"]);
-                return $data['message'];
-            } else {
-                // 如果是其他页面的消息，清除它
-                unset($_SESSION["temp_$key"]);
-                return null;
-            }
+        if ($value !== null) {
+            $_SESSION["temp_$key"] = $value;
         }
-        return null;
+        else {
+            $value = $_SESSION["temp_$key"] ?? null;
+            unset($_SESSION["temp_$key"]);
+            return $value;
+        }
     }
-}
 
     // ============================================================================
     // HTML Helpers
