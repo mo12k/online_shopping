@@ -254,10 +254,9 @@ function table_headers($fields, $sort, $dir, $href = '') {
  
     
 
-    function update_cart($product_id, $quantity, $customer_id = null) {
+        function update_cart($product_id, $quantity, $customer_id = null) {
         global $_db;
         
-        // for guest
         if (!$customer_id && isset($_SESSION['customer_id'])) {
             $customer_id = $_SESSION['customer_id'];
         }
@@ -265,22 +264,40 @@ function table_headers($fields, $sort, $dir, $href = '') {
         $quantity = (int)$quantity;
         
         if ($customer_id) {
-            // for member
+            // 1. 确保用户有购物车
+            $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
+            $stm->execute([$customer_id]);
+            $cart = $stm->fetch();
+            
+            if (!$cart) {
+                // 创建新的购物车
+                $stm = $_db->prepare('INSERT INTO cart (customer_id) VALUES (?)');
+                $stm->execute([$customer_id]);
+                $cart_id = $_db->lastInsertId();
+            } else {
+                $cart_id = $cart->cart_id;
+            }
+            
+            // 2. 更新购物车商品
             if ($quantity > 0) {
-                
                 $stm = $_db->prepare('
-                    INSERT INTO cart (customer_id, product_id, quantity) 
+                    INSERT INTO cart_item (cart_id, product_id, quantity) 
                     VALUES (?, ?, ?)
                     ON DUPLICATE KEY UPDATE quantity = ?
                 ');
-                $stm->execute([$customer_id, $product_id, $quantity, $quantity]);
+                $stm->execute([$cart_id, $product_id, $quantity, $quantity]);
             } else {
-                // delete cart when quantity 0 <= 
-                $stm = $_db->prepare('DELETE FROM cart WHERE customer_id = ? AND product_id = ?');
-                $stm->execute([$customer_id, $product_id]);
+                // 数量为0，删除商品
+                $stm = $_db->prepare('DELETE FROM cart_item WHERE cart_id = ? AND product_id = ?');
+                $stm->execute([$cart_id, $product_id]);
             }
+            
+            // 3. 更新购物车更新时间
+            $stm = $_db->prepare('UPDATE cart SET updated_at = NOW() WHERE cart_id = ?');
+            $stm->execute([$cart_id]);
+            
         } else {
-            // for guest use session
+            // 游客使用Session
             if (!isset($_SESSION['cart'])) {
                 $_SESSION['cart'] = [];
             }
@@ -305,10 +322,17 @@ function table_headers($fields, $sort, $dir, $href = '') {
         }
         
         if ($customer_id) {
-            $stm = $_db->prepare('DELETE FROM cart WHERE customer_id = ? AND product_id = ?');
-            $stm->execute([$customer_id, $product_id]);
+            // 获取用户的购物车
+            $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
+            $stm->execute([$customer_id]);
+            $cart = $stm->fetch();
+            
+            if ($cart) {
+                $stm = $_db->prepare('DELETE FROM cart_item WHERE cart_id = ? AND product_id = ?');
+                $stm->execute([$cart->cart_id, $product_id]);
+            }
         } else {
-            // for guest
+            // 游客
             if (isset($_SESSION['cart'][$product_id])) {
                 unset($_SESSION['cart'][$product_id]);
             }
@@ -327,20 +351,28 @@ function table_headers($fields, $sort, $dir, $href = '') {
         $cart_data = [];
         
         if ($customer_id) {
-            // get from database when is member
+            // 获取用户的购物车及商品
             $stm = $db->prepare("
-                SELECT c.cart_id, c.product_id, c.quantity, 
-                    p.*, cat.category_name 
+                SELECT ci.cart_item_id, ci.quantity, 
+                    p.*, cat.category_name,
+                    c.cart_id
                 FROM cart c
-                JOIN product p ON c.product_id = p.id
+                JOIN cart_item ci ON c.cart_id = ci.cart_id
+                JOIN product p ON ci.product_id = p.id
                 LEFT JOIN category cat ON p.category_id = cat.category_id
                 WHERE c.customer_id = ?
+                ORDER BY ci.added_at DESC
             ");
             $stm->execute([$customer_id]);
-            $cart_data = $stm->fetchAll();
+            $items = $stm->fetchAll();
+            
+            foreach ($items as $item) {
+                $item->subtotal = $item->price * $item->quantity;
+                $cart_data[] = $item;
+            }
             
         } elseif (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
-            // get from session when is guest
+            // 游客从Session获取
             $product_ids = array_keys($_SESSION['cart']);
             if (!empty($product_ids)) {
                 $placeholders = implode(',', array_fill(0, count($product_ids), '?'));
@@ -354,7 +386,8 @@ function table_headers($fields, $sort, $dir, $href = '') {
                 $products = $stm->fetchAll();
                 
                 foreach ($products as $product) {
-                    $product->cart_id = null; // session won't save in database, do not have cart_id
+                    $product->cart_item_id = null;
+                    $product->cart_id = null;
                     $product->quantity = $_SESSION['cart'][$product->id];
                     $product->subtotal = $product->price * $product->quantity;
                     $cart_data[] = $product;
@@ -365,25 +398,6 @@ function table_headers($fields, $sort, $dir, $href = '') {
         return $cart_data;
     }
 
-    function get_cart_total($items) {
-        $total = 0;
-        foreach ($items as $item) {
-            // 如果已经有 subtotal 属性，直接使用
-            if (isset($item->subtotal)) {
-                $total += $item->subtotal;
-            } 
-            // 否则计算 price * quantity
-            elseif (isset($item->price) && isset($item->quantity)) {
-                $total += $item->price * $item->quantity;
-            }
-            // 如果是数组格式
-            elseif (is_array($item) && isset($item['price']) && isset($item['quantity'])) {
-                $total += $item['price'] * $item['quantity'];
-            }
-        }
-        return $total;
-    }
-
     function clear_cart($customer_id = null) {
         global $_db;
         
@@ -392,17 +406,159 @@ function table_headers($fields, $sort, $dir, $href = '') {
         }
         
         if ($customer_id) {
-            $stm = $_db->prepare('DELETE FROM cart WHERE customer_id = ?');
+            // 获取用户的购物车并清空所有商品
+            $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
             $stm->execute([$customer_id]);
+            $cart = $stm->fetch();
+            
+            if ($cart) {
+                $stm = $_db->prepare('DELETE FROM cart_item WHERE cart_id = ?');
+                $stm->execute([$cart->cart_id]);
+            }
         } else {
             unset($_SESSION['cart']);
         }
+    }
+
+    // 新增：获取用户的购物车ID
+    function get_cart_id($customer_id) {
+        global $_db;
+        
+        if (!$customer_id && isset($_SESSION['customer_id'])) {
+            $customer_id = $_SESSION['customer_id'];
+        }
+        
+        if ($customer_id) {
+            $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
+            $stm->execute([$customer_id]);
+            $cart = $stm->fetch();
+            
+            return $cart ? $cart->cart_id : null;
+        }
+        
+        return null;
+    }
+
+    function get_cart_total($cart_items) {
+        $total = 0;
+        foreach ($cart_items as $item) {
+            // + subtotal
+            if (isset($item->subtotal)) {
+                $total += $item->subtotal;
+            } 
+            // calculate price * quantity
+            elseif (isset($item->price) && isset($item->quantity)) {
+                $total += $item->price * $item->quantity;
+            }
+        }
+        return $total;
     }
 
     // Generate <input type='hidden'>
     function html_hidden($key, $attr = '') {
         $value ??= encode($GLOBALS[$key] ?? '');
         echo "<input type='hidden' id='$key' name='$key' value='$value' $attr>";
+    }
+
+    // 在 _base.php 中添加或修改 create_order 函数
+function create_order($customer_id, $cart_items, $address_id, $payment_method) {
+    global $_db;
+    
+    try {
+        $_db->beginTransaction();
+        
+        // 1. 验证地址是否属于该客户
+        $stm = $_db->prepare('SELECT address_id FROM customer_address WHERE address_id = ? AND customer_id = ?');
+        $stm->execute([$address_id, $customer_id]);
+        $address = $stm->fetch();
+        
+        if (!$address) {
+            throw new Exception('Invalid address selected');
+        }
+        
+        // 2. 计算总金额
+        $total_amount = get_cart_total($cart_items);
+        
+        // 3. 插入订单主表
+        $stm = $_db->prepare('
+            INSERT INTO orders (customer_id, address_id, total_amount, status, order_date) 
+            VALUES (?, ?, ?, "pending", NOW())
+        ');
+        $stm->execute([$customer_id, $address_id, $total_amount]);
+        $order_id = $_db->lastInsertId();
+        
+        // 4. 插入订单详情（order_items表）
+        $stm = $_db->prepare('
+            INSERT INTO order_items (order_id, product_id, quantity, price) 
+            VALUES (?, ?, ?, ?)
+        ');
+        
+        foreach ($cart_items as $item) {
+            // 验证库存
+            $stm_check = $_db->prepare('SELECT stock FROM product WHERE id = ?');
+            $stm_check->execute([$item->id]);
+            $product = $stm_check->fetch();
+            
+            if (!$product || $item->quantity > $product->stock) {
+                throw new Exception("Insufficient stock for product: {$item->title}");
+            }
+            
+            $stm->execute([$order_id, $item->id, $item->quantity, $item->price]);
+            
+            // 更新产品库存
+            $stm_update = $_db->prepare('UPDATE product SET stock = stock - ? WHERE id = ?');
+            $stm_update->execute([$item->quantity, $item->id]);
+        }
+        
+        // 5. 创建支付记录
+        $stm = $_db->prepare('
+            INSERT INTO payment (order_id, method, status, amount, paid_at) 
+            VALUES (?, ?, "pending", ?, NULL)
+        ');
+        $stm->execute([$order_id, $payment_method, $total_amount]);
+        
+        // 6. 清空购物车
+        clear_cart($customer_id);
+        
+        $_db->commit();
+        return $order_id;
+        
+    } catch (Exception $e) {
+        $_db->rollBack();
+        error_log("Order creation failed: " . $e->getMessage());
+        return false;
+    }
+}
+
+    // 获取客户的地址列表
+    function get_customer_addresses($customer_id) {
+        global $_db;
+        
+        $stm = $_db->prepare('
+            SELECT address_id, address, city, state, postcode 
+            FROM customer_address 
+            WHERE customer_id = ? 
+            ORDER BY address_id
+        ');
+        $stm->execute([$customer_id]);
+        return $stm->fetchAll();
+    }
+
+    // 获取单个地址详情
+    function get_address_by_id($address_id, $customer_id = null) {
+        global $_db;
+        
+        $sql = 'SELECT * FROM customer_address WHERE address_id = ?';
+        $params = [$address_id];
+        
+        if ($customer_id) {
+            $sql .= ' AND customer_id = ?';
+            $params[] = $customer_id;
+        }
+        
+        $stm = $_db->prepare($sql);
+        $stm->execute($params);
+        return $stm->fetch();
     }
     
    

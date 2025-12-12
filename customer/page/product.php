@@ -1,7 +1,8 @@
 <?php
 
 require '../_base.php';
-include '../_head.php';
+include '../../_head.php'; 
+include '../../_header.php';
 
 $current = 'product';
 $_title = 'Product List';
@@ -67,8 +68,8 @@ $arr = $p->result;
 
 $info = temp('info');
 ?>
-<link rel="stylesheet" href="/customer/css/app.css">
-
+<link rel="stylesheet" href="../../css/app.css">
+<link rel="stylesheet" href="../../css/customer.css">
 
 <div class="content">
     
@@ -142,4 +143,4 @@ $info = temp('info');
            
 
 <?php
-include '../_foot.php';
+include '../../_footer.php';

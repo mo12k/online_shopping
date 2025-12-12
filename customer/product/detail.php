@@ -1,5 +1,7 @@
 <?php
 require '../_base.php';
+include '../../_head.php';
+include '../../_header.php';
 $current = 'product';
 $_title = 'Product Detail';
 
@@ -45,10 +47,9 @@ if (is_post()) {
 }
 
 $arr = $_db->query('SELECT * FROM product');
-
-include '../_head.php';
 ?>
-<link rel="stylesheet" href="/customer/css/app.css">
+<link rel="stylesheet" href="../../css/app.css">
+<link rel="stylesheet" href="../../css/customer.css">
 
 <style>
 
@@ -370,4 +371,4 @@ $(document).ready(function() {
 });
 </script>
 
-<?php include '../_foot.php'; ?>
+<?php include '../../_footer.php'; ?>

@@ -5,13 +5,14 @@ $arr = array_map('basename', $arr);
 
 $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
 ?>
+
 <header>
     <div class="header-left">
         <h1>Welcome to the Bookstore</h1>
         <nav class="navbar">
             <a href="/">Index</a>
             <a href="/customer/page/product.php">Product</a>
-            <a href="/page/demo2.php">Demo 2</a>
+            <a href="/customer/cart/cart.php">Cart</a>
         </nav>
     </div>
     <nav class="navbar">

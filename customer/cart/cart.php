@@ -1,5 +1,7 @@
 <?php
 require '../_base.php';
+include '../../_head.php';
+include '../../_header.php';
 $current = 'cart';
 $_title = 'Shopping Cart';
 
@@ -18,15 +20,18 @@ if (is_post()) {
     
     switch ($action) {
         case 'update':
-            update_cart($id, $quantity);
+            // ✅ 添加customer_id参数
+            update_cart($id, $quantity, $customer_id);
             break;
             
         case 'remove':
-            remove_from_cart($id);
+            // ✅ 添加customer_id参数
+            remove_from_cart($id, $customer_id);
             break;
             
         case 'clear':
-            unset($_SESSION['cart']);
+            // ✅ 使用新的clear_cart函数
+            clear_cart($customer_id);
             break;
     }
 
@@ -36,13 +41,9 @@ if (is_post()) {
 // get cart item
 $cart_items = get_cart_items($_db, $customer_id);
 $cart_total = get_cart_total($cart_items);
-$cart_total = get_cart_total($cart_items);
 
-
-include '../_head.php';
 ?>
-
-<link rel="stylesheet" href="../css/cart.css">
+<link rel="stylesheet" href="../../css/cart.css">
 
 <div class="cart-container">
     <div class="cart-header">
@@ -82,7 +83,7 @@ include '../_head.php';
                             <?php endif; ?>
                             
                             <div class="cart-item-price">
-                                RM <?= number_format($item->price, 0) ?>
+                                RM <?= number_format($item->price, 2) ?> per 1
                             </div>
                             
                             <div class="cart-item-actions">
@@ -113,7 +114,7 @@ include '../_head.php';
                         <div class="cart-item-subtotal">
                             <span class="subtotal-label">Subtotal</span>
                             <div class="subtotal-amount">
-                                RM <?= number_format($item->subtotal, 0) ?>
+                                RM <?= number_format($item->subtotal, 2) ?>
                             </div>
                         </div>
                     </div>
@@ -137,22 +138,12 @@ include '../_head.php';
                 
                 <div class="summary-row">
                     <span class="summary-label">Subtotal</span>
-                    <span class="summary-amount">RM <?= number_format($cart_total, 0) ?></span>
-                </div>
-                
-                <div class="summary-row">
-                    <span class="summary-label">Shipping</span>
-                    <span class="summary-amount">RM 0</span>
-                </div>
-                
-                <div class="summary-row">
-                    <span class="summary-label">Tax</span>
-                    <span class="summary-amount">RM 0</span>
+                    <span class="summary-amount">RM <?= number_format($cart_total, 2) ?></span>
                 </div>
                 
                 <div class="summary-total">
                     <span class="total-label">Total</span>
-                    <span class="total-amount">RM <?= number_format($cart_total, 0) ?></span>
+                    <span class="total-amount">RM <?= number_format($cart_total, 2) ?></span>
                 </div>
                 
                 <button type="button" class="checkout-btn" onclick="checkout()">
@@ -231,10 +222,8 @@ function checkout() {
         return;
     }
     
-    alert('Checkout functionality would be implemented here.\n\nTotal: RM <?= number_format($cart_total, 0) ?>');
-    // 在实际应用中，这里会跳转到结账页面
-    // window.location.href = 'checkout.php';
+    window.location.href = '../page/checkout.php';
 }
 </script>
 
-<?php include '../_foot.php'; ?>
+<?php include '../../_footer.php'; ?>
