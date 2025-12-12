@@ -4,6 +4,9 @@ $_body_class = 'verify-otp-page';
 $_page_title = "Verify OTP";
 
 require '../_base.php';
+
+$info = temp('info');
+
 include '../_head.php';
 
 // Must come from registration
@@ -15,7 +18,7 @@ if (!$pending) {
     exit;
 }
 
-if(time() > $pending['otp_expires_at']) {
+if (time() > ($pending['expires_at'] ?? 0)) {
     unset($_SESSION['pending_registration']);
     temp('error', 'OTP has expired. Please register again.');
     redirect('register.php');
@@ -74,6 +77,14 @@ if (is_post()) {
 }
 
 ?>
+<?php if ($info): ?>
+<div class="alert-success-fixed">
+    <div class="alert-content">
+        <strong>Success!</strong> <?= encode($info) ?>
+        <span class="alert-close">×</span>
+    </div>
+</div>
+<?php endif; ?>
 
 <div class="verify-otp-container">
     <h2>Email Verification</h2>

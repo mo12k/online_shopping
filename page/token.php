@@ -7,7 +7,6 @@ $_body_class = 'token-page';
 $raw_token = trim(req('token') ?? '');
 $email     = trim(req('email') ?? '');
 
-temp('info', null);  // clears old messages
 
 if ($raw_token === '' || $email === '') {
     temp('info', 'Invalid reset link');
@@ -58,7 +57,7 @@ if (is_post()) {
 
     // ---- If no errors → update password ----
     if (empty($_err)) {
-        $new_hash = password_hash($password, PASSWORD_DEFAULT);
+        $new_hash = sha1($password);
 
         // Update password
         $_db->prepare("UPDATE customer SET password = ? WHERE customer_id = ?")

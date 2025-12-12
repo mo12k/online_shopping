@@ -3,52 +3,52 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
 
-    body {
-        margin: 0;  
-        font-family: Arial, sans-serif;
-        background: #f1f2f6;
-    }
+body {
+    margin: 0;  
+    font-family: Arial, sans-serif;
+    background: #f1f2f6;
+}
 
-    
-    /* --- Sidebar --- */
-    .sidebar {
-        width: 170px;
-        height: 100vh;
-        background: #2f3542;
-        position: fixed;
-        top: 0;
-        left: 0;
-        padding-top: 20px;
-        color: white;
-    }
 
-    .sidebar ul {
-        margin-bottom: 15px;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
+/* --- Sidebar --- */
+.sidebar {
+    width: 170px;
+    height: 100vh;
+    background: #2f3542;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 20px;
+    color: white;
+}
 
-    .sidebar ul li a {
-        display: block;
-        padding: 12px 20px;
-        color: #f1f2f6;
-        text-decoration: none;
-        font-size: 16px;
-    }
+.sidebar ul {
+    margin-bottom: 15px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
 
-    .sidebar ul li.active a{
-        background: #ffa502;
-        color: black !important;
-        font-weight :bold;
+.sidebar ul li a {
+    display: block;
+    padding: 12px 20px;
+    color: #f1f2f6;
+    text-decoration: none;
+    font-size: 16px;
+}
 
-    }
+.sidebar ul li.active a{
+    background: #ffa502;
+    color: black !important;
+    font-weight :bold;
 
-    .sidebar ul li a:hover {
-        background: #57606f;
-    }
+}
 
-    /* --- Header --- */
+.sidebar ul li a:hover {
+    background: #57606f;
+}
+
+/* --- Header --- */
 .header {
     height: 70px;
     display: flex;
@@ -1002,3 +1002,4 @@ body.forgot-password-page {
 .customers-table th a.desc::after {
     content: " ▾";
 }
+
