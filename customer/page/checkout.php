@@ -38,12 +38,12 @@ if (is_post()) {
         redirect();
     }
     
-    // 创建订单
-    $order_id = create_order($customer_id, $cart_items, $address_id, $payment_method);
+    // 模拟支付处理
+    $order_id = process_simulated_checkout($customer_id, $cart_items, $address_id, $payment_method);
     
     if ($order_id) {
         temp('success', "Order #$order_id placed successfully!");
-        redirect("order-confirmation.php?id=$order_id");
+        redirect("order_confirm.php?id=$order_id");
     } else {
         temp('error', 'Failed to create order. Please try again.');
         redirect();
@@ -52,6 +52,7 @@ if (is_post()) {
 ?>
 
 <style>
+/* 保持你现有的CSS样式不变 */
 .checkout-container {
     min-width: 500px;
     max-width: 1000px;
@@ -192,6 +193,35 @@ if (is_post()) {
     color: #856404;
     border: 1px solid #ffeaa7;
 }
+
+/* 虚拟信用卡表单 */
+.virtual-card-form {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #555;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
 </style>
 
 <div class="checkout-container">
@@ -214,13 +244,13 @@ if (is_post()) {
         
         <!-- 结账表单 -->
         <div class="checkout-form">
-            <form method="post">
+            <form method="post" id="checkout-form">
                 <!-- 选择地址 -->
                 <div class="form-section">
                     <h3>Delivery Address</h3>
                     <?php if (empty($addresses)): ?>
                         <div class="alert alert-warning">
-                            No address found. <a href="add-address.php">Add a new address</a>
+                            No address found. <a href="add_address.php">Add a new address</a>
                         </div>
                     <?php else: ?>
                         <div class="address-list">
@@ -242,27 +272,97 @@ if (is_post()) {
                     <div class="payment-methods">
                         <label class="payment-option">
                             <input type="radio" name="payment_method" value="credit_card" required>
-                            <span>Credit Card</span>
+                            <span>Credit Card (Simulated)</span>
                         </label>
                         <label class="payment-option">
                             <input type="radio" name="payment_method" value="debit_card">
-                            <span>Debit Card</span>
+                            <span>Debit Card (Simulated)</span>
                         </label>
                         <label class="payment-option">
                             <input type="radio" name="payment_method" value="online_banking">
-                            <span>Online Banking</span>
+                            <span>Online Banking (Simulated)</span>
                         </label>
                         <label class="payment-option">
                             <input type="radio" name="payment_method" value="cash_on_delivery">
                             <span>Cash on Delivery</span>
                         </label>
                     </div>
+                    
+                    <!-- 虚拟信用卡表单（可选显示） -->
+                    <div id="virtual-card-form" class="virtual-card-form">
+                        <h4>Test Card Information</h4>
+                        <div class="form-group">
+                            <label>Card Number</label>
+                            <input type="text" value="4242 4242 4242 4242">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label>Expiry Date</label>
+                                <input type="text" value="12/30">
+                            </div>
+                            <div class="form-group">
+                                <label>CVC</label>
+                                <input type="text" value="123">
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <button type="submit" class="btn-checkout">Place Order</button>
+                <button type="submit" class="btn-checkout" id="submit-btn">
+                    Place Order
+                </button>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+// 显示/隐藏虚拟信用卡表单
+$(document).ready(function() {
+    $('input[name="payment_method"]').on('change', function() {
+        const method = $(this).val();
+        const $cardForm = $('#virtual-card-form');
+        
+        if (method === 'credit_card' || method === 'debit_card') {
+            $cardForm.slideDown(300);
+        } else {
+            $cardForm.slideUp(300);
+        }
+    });
+    
+    // 为模拟支付添加一些效果
+    $('#checkout-form').on('submit', function(e) {
+        // 可以添加一些模拟延迟或动画
+        $('#submit-btn').html('<span class="spinner"></span> Processing...');
+        $('#submit-btn').prop('disabled', true);
+        
+        // 模拟网络延迟
+        setTimeout(function() {
+            $('#submit-btn').html('Processing Payment...');
+        }, 1000);
+        
+        // 表单会正常提交
+        return true;
+    });
+});
+</script>
+
+<style>
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
 
 <?php include '../../_footer.php'; ?>

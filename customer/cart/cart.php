@@ -149,10 +149,6 @@ $cart_total = get_cart_total($cart_items);
                 <button type="button" class="checkout-btn" onclick="checkout()">
                     Proceed to Checkout
                 </button>
-                
-                <p style="text-align: center; margin-top: 15px; color: #666; font-size: 14px;">
-                    Free shipping on all orders
-                </p>
             </div>
         </div>
     <?php endif; ?>
