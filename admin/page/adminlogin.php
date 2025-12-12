@@ -64,7 +64,7 @@ if(is_post()){
 
 
             <div class="remember-forgot">
-                <a href="forgot-password.php" class="link">Forgot Password?</a>
+                <a href="/admin/page/forgot-password.php" class="link">Forgot Password?</a>
             </div>
 
             <button type="submit" name="submit" value='1'> Login </button>

@@ -3,8 +3,8 @@ require '../_base.php';
 
 admin_require_login();
 
-$current = 'product';
-$_title = 'Product List';
+$current = 'category';
+$_title = 'Category List';
 
              
 $category_id = get('category_id');

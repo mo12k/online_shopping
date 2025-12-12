@@ -35,6 +35,10 @@
             <li class="<?= $current == 'staff' ? 'active' : '' ?>">
                 <a href="/admin/page/staff.php">Staff List</a>
             </li>
+
+            <li class="<?= $current == 'category' ? 'active' : '' ?>">
+                <a href="/admin/page/category.php">Category List</a>
+            </li>
         </ul>
     </div>
 
