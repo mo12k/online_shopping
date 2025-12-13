@@ -110,7 +110,7 @@ $info = temp('info');
     
             <div class="product-card">
 
-                <a href="../product/detail.php?id=<?= encode($s->id) ?>">
+                <a href="detail.php?id=<?= encode($s->id) ?>">
                     <?php if ($s->photo_name): ?>
                 <img src="../upload/<?= $s->photo_name ?>">
                     <?php else: ?>

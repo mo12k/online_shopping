@@ -1,19 +1,12 @@
 <?php
 require '../_base.php';
 
-// 启动session（如果还没启动）
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
-
-// 获取订单ID
 $order_id = $_GET['id'] ?? 0;
 if (!$order_id) {
     header('Location: cart.php');
     exit;
 }
 
-// 检查登录
 if (!isset($_SESSION['customer_id'])) {
     $_SESSION['temp_info'] = 'Please login to view order';
     header('Location: ../../page/login.php');
@@ -22,7 +15,7 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
-// 查询订单详情
+//check order
 $sql = 'SELECT o.*, ca.address, ca.city, ca.state, ca.postcode 
         FROM orders o 
         JOIN customer_address ca ON o.address_id = ca.address_id 
@@ -31,7 +24,7 @@ $stm = $_db->prepare($sql);
 $stm->execute([$order_id, $customer_id]);
 $order = $stm->fetch();
 
-// 查询订单商品
+// check product
 $sql = 'SELECT oi.*, p.title, p.photo_name, oi.price_each 
         FROM order_item oi 
         JOIN product p ON oi.product_id = p.id 
