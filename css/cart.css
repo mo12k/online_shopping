@@ -127,17 +127,14 @@
     margin-bottom: 15px;
 }
 
-/* =======================
-   ✅ Unified Quantity Picker
-======================= */
-
+/*quantity control */
 .quantity-control-cart {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-/* + / - 按钮 */
+/* + / - button */
 .quantity-control-cart .qty-dec,
 .quantity-control-cart .qty-inc {
     width: 38px;
@@ -166,7 +163,7 @@
     cursor: not-allowed;
 }
 
-/* 数量输入框（重点） */
+/* quantity input */
 .quantity-control-cart .qty-input {
     width: 70px;
     height: 38px;
@@ -182,9 +179,7 @@
     -webkit-appearance: none;
 }
 
-/* =======================
-   Actions
-======================= */
+/* actions */
 
 .remove-btn {
     margin-left: 10px;
@@ -209,9 +204,7 @@
     margin-top: 6px;
 }
 
-/* =======================
-   Subtotal
-======================= */
+/* Subtotal */
 
 .cart-item-subtotal {
     text-align: right;
@@ -228,9 +221,7 @@
     color: #333;
 }
 
-/* =======================
-   Summary
-======================= */
+/* Summary */
 
 .summary-title {
     font-size: 22px;
@@ -277,9 +268,7 @@
     background: #5A3E34;
 }
 
-/* =======================
-   Footer Actions
-======================= */
+/* Footer Actions */
 
 .cart-actions {
     display: flex;
@@ -320,61 +309,32 @@
     color: #FFF;
 }
 
-/* =======================
-   Mobile
-======================= */
-
-@media (max-width: 768px) {
-    .cart-content {
-        flex-direction: column;
-    }
-
-    .cart-summary {
-        width: 100%;
-    }
-
-    .cart-item {
-        flex-direction: column;
-    }
-
-    .cart-item-subtotal {
-        text-align: left;
-        margin-top: 10px;
-    }
-}
-
-/* =======================
-   FIX: quantity + remove same line
-======================= */
+/* quantity + remove same line */
 
 .cart-item-actions {
     display: flex;
-    align-items: center;   /* 垂直居中 */
+    align-items: center;
     gap: 16px;
 }
 
-/* 关键：form 不能是 block */
 .cart-item-actions form {
     display: flex;
     align-items: center;
     margin: 0;
 }
 
-/* quantity 这一整组 */
 .quantity-control-cart {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-/* 防止 input 或 button 撑高 */
 .quantity-control-cart input,
 .quantity-control-cart button {
     height: 38px;
     line-height: 1;
 }
 
-/* Remove 按钮不要被拉高 */
 .remove-btn {
     height: 38px;
     display: flex;

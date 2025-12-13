@@ -40,16 +40,14 @@ if (is_post()) {
 
         update_cart($product_id, $quantity, $customer_id);
 
-        // ✅ 页面级成功信息（不会进 head）
         temp('success', "Added <strong>{$product->title}</strong> (x{$quantity}) to cart!");
 
     } else {
 
-        // ✅ 页面级错误信息（不会进 head）
         temp('error', 'Invalid quantity or insufficient stock!');
     }
 
-    // PRG 模式，防止重复提交
+    
     redirect();
     exit;
 }
@@ -66,11 +64,10 @@ $arr = $_db->query('SELECT * FROM product');
 }
 
 .message button {
-    all: unset;                 /* 清掉浏览器默认样式 */
     cursor: pointer;
     font-size: 20px;
     font-weight: bold;
-    line-height: 1;              /* 关键：防止文字下沉 */
+    line-height: 1;              
     display: flex;
     align-items: center;
     justify-content: center;
@@ -79,19 +76,19 @@ $arr = $_db->query('SELECT * FROM product');
     margin-left: 12px;
 }
 
-/* Quantity Selector — Warm Bookstore Style */
+/* Quantity Selector */
 .quantity-selector {
     margin: 20px 0;
     padding: 20px;
-    background: #FAF7F2; /* 柔和米白底 */
+    background: #FAF7F2; 
     border-radius: 12px;
-    border: 1px solid #E4DCD3; /* 暖灰边框 */
+    border: 1px solid #E4DCD3; 
     text-align: center;
 }
 
 .quantity-label {
     display: block;
-    color: #4E342E; /* 深咖啡色，书店风 */
+    color: #4E342E; 
     font-weight: 600;
     margin-bottom: 10px;
     font-size: 16px;
@@ -99,20 +96,20 @@ $arr = $_db->query('SELECT * FROM product');
 
 .quantity-control {
     display: flex;
-    align-items: center;         /* 强制同一中线 */
+    align-items: center;        
     justify-content: center;
     gap: 12px;
 }
 
-/* + / - 按钮 */
+/* + / - button */
 .qty-btn {
     width: 42px;
     height: 42px;
-    border: 2px solid #D7CCC8; /* 柔和暖灰边框 */
+    border: 2px solid #D7CCC8; 
     background: #FFF;
     font-size: 22px;
     cursor: pointer;
-    border-radius: 8px; /* 比较圆，有手工感 */
+    border-radius: 8px; 
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
@@ -120,8 +117,8 @@ $arr = $_db->query('SELECT * FROM product');
 }
 
 .qty-btn:hover {
-    background: #F2EBE5; /* 暖色 hover */
-    border-color: #6D4C41; /* 木质深棕 hover 边框 */
+    background: #F2EBE5; 
+    border-color: #6D4C41; 
 }
 
 .qty-btn:disabled {
@@ -147,9 +144,9 @@ $arr = $_db->query('SELECT * FROM product');
 
     text-align: center;
 
-    display: flex;              /* 🔥 关键 */
-    align-items: center;        /* 🔥 关键 */
-    justify-content: center;    /* 🔥 关键 */
+    display: flex;              
+    align-items: center;        
+    justify-content: center;    
 
     box-sizing: border-box;
 }
@@ -207,7 +204,6 @@ $arr = $_db->query('SELECT * FROM product');
 
     <div class="content">
         
-        <!-- 消息提示区域 -->
         <?php if ($msg = temp('success')): ?>
                     <div class="message success" style="
                         max-width: 800px;
@@ -258,7 +254,7 @@ $arr = $_db->query('SELECT * FROM product');
         <div class="product-detail-container">
         <div class="product-detail-wrapper">
 
-            <!-- 左邊：圖片 + 標題 + 描述 -->
+            <!-- left picture + summary + .. -->
             <div class="product-image-section">
                 <?php if ($s->photo_name && file_exists("../upload/{$s->photo_name}")): ?>
                     <div class="product-image-frame">
@@ -278,7 +274,7 @@ $arr = $_db->query('SELECT * FROM product');
                 </div>
             </div>
 
-            <!-- 右邊：所有資訊 -->
+            <!-- right -->
             <div class="product-info-section">
 
                 <div class="info-row">
@@ -302,7 +298,6 @@ $arr = $_db->query('SELECT * FROM product');
                     </span>
                 </div>
 
-            <!-- 数量选择器 -->
             <div class="product-action">     
                 <div class="quantity-selector">
                     <?php if ($s->stock > 0): ?>
@@ -355,23 +350,23 @@ $arr = $_db->query('SELECT * FROM product');
 
 <script>
 $(document).ready(function() {
-    // 获取元素
+    
     const $quantityInput = $('#quantity');
     const $minusBtn = $('.qty-btn.minus');
     const $plusBtn = $('.qty-btn.plus');
     const maxStock = <?= $s->stock ?>;
     
-    // 更新按钮状态
+    
     function updateButtonState() {
         const currentValue = parseInt($quantityInput.val());
         $minusBtn.prop('disabled', currentValue <= 1);
         $plusBtn.prop('disabled', currentValue >= maxStock);
     }
     
-    // 初始化按钮状态
+    
     updateButtonState();
     
-    // 减少数量
+    
     $minusBtn.on('click', function() {
         let value = parseInt($quantityInput.val());
         if (value > 1) {
@@ -380,7 +375,7 @@ $(document).ready(function() {
         }
     });
     
-    // 增加数量
+    
     $plusBtn.on('click', function() {
         let value = parseInt($quantityInput.val());
         if (value < maxStock) {
@@ -389,7 +384,7 @@ $(document).ready(function() {
         }
     });
     
-    // 输入框变化时验证
+    // validate input change
     $quantityInput.on('change', function() {
         let value = parseInt($(this).val());
         if (isNaN(value) || value < 1) {
@@ -400,7 +395,7 @@ $(document).ready(function() {
         updateButtonState();
     });
     
-    // 表单提交前的验证
+    // validate before upload form
     $('#add-to-cart-form').on('submit', function(e) {
         let quantity = parseInt($quantityInput.val());
         

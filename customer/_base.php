@@ -252,8 +252,6 @@ function table_headers($fields, $sort, $dir, $href = '') {
     // Shopping Cart
     // ============================================================================
  
-    
-
         function update_cart($product_id, $quantity, $customer_id = null) {
         global $_db;
         
@@ -264,13 +262,13 @@ function table_headers($fields, $sort, $dir, $href = '') {
         $quantity = (int)$quantity;
         
         if ($customer_id) {
-            // 1. 确保用户有购物车
+            // user have cart
             $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
             $stm->execute([$customer_id]);
             $cart = $stm->fetch();
             
             if (!$cart) {
-                // 创建新的购物车
+                // create cart
                 $stm = $_db->prepare('INSERT INTO cart (customer_id) VALUES (?)');
                 $stm->execute([$customer_id]);
                 $cart_id = $_db->lastInsertId();
@@ -278,7 +276,7 @@ function table_headers($fields, $sort, $dir, $href = '') {
                 $cart_id = $cart->cart_id;
             }
             
-            // 2. 更新购物车商品
+            // update cart
             if ($quantity > 0) {
                 $stm = $_db->prepare('
                     INSERT INTO cart_item (cart_id, product_id, quantity) 
@@ -287,30 +285,15 @@ function table_headers($fields, $sort, $dir, $href = '') {
                 ');
                 $stm->execute([$cart_id, $product_id, $quantity, $quantity]);
             } else {
-                // 数量为0，删除商品
+                // delete product if quantity = 0
                 $stm = $_db->prepare('DELETE FROM cart_item WHERE cart_id = ? AND product_id = ?');
                 $stm->execute([$cart_id, $product_id]);
             }
             
-            // 3. 更新购物车更新时间
+            // 3. update date
             $stm = $_db->prepare('UPDATE cart SET updated_at = NOW() WHERE cart_id = ?');
             $stm->execute([$cart_id]);
             
-        } else {
-            // 游客使用Session
-            if (!isset($_SESSION['cart'])) {
-                $_SESSION['cart'] = [];
-            }
-            
-            if ($quantity > 0) {
-                $_SESSION['cart'][$product_id] = $quantity;
-            } else {
-                unset($_SESSION['cart'][$product_id]);
-            }
-            
-            if (empty($_SESSION['cart'])) {
-                unset($_SESSION['cart']);
-            }
         }
     }
 
@@ -322,7 +305,7 @@ function table_headers($fields, $sort, $dir, $href = '') {
         }
         
         if ($customer_id) {
-            // 获取用户的购物车
+            // call user cart
             $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
             $stm->execute([$customer_id]);
             $cart = $stm->fetch();
@@ -330,15 +313,6 @@ function table_headers($fields, $sort, $dir, $href = '') {
             if ($cart) {
                 $stm = $_db->prepare('DELETE FROM cart_item WHERE cart_id = ? AND product_id = ?');
                 $stm->execute([$cart->cart_id, $product_id]);
-            }
-        } else {
-            // 游客
-            if (isset($_SESSION['cart'][$product_id])) {
-                unset($_SESSION['cart'][$product_id]);
-            }
-            
-            if (empty($_SESSION['cart'])) {
-                unset($_SESSION['cart']);
             }
         }
     }
@@ -351,7 +325,7 @@ function table_headers($fields, $sort, $dir, $href = '') {
         $cart_data = [];
         
         if ($customer_id) {
-            // 获取用户的购物车及商品
+            // call user cart and product
             $stm = $db->prepare("
                 SELECT ci.cart_item_id, ci.quantity, 
                     p.*, cat.category_name,
@@ -371,28 +345,6 @@ function table_headers($fields, $sort, $dir, $href = '') {
                 $cart_data[] = $item;
             }
             
-        } elseif (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
-            // 游客从Session获取
-            $product_ids = array_keys($_SESSION['cart']);
-            if (!empty($product_ids)) {
-                $placeholders = implode(',', array_fill(0, count($product_ids), '?'));
-                $stm = $db->prepare("
-                    SELECT p.*, c.category_name 
-                    FROM product p 
-                    LEFT JOIN category c ON p.category_id = c.category_id 
-                    WHERE p.id IN ($placeholders)
-                ");
-                $stm->execute($product_ids);
-                $products = $stm->fetchAll();
-                
-                foreach ($products as $product) {
-                    $product->cart_item_id = null;
-                    $product->cart_id = null;
-                    $product->quantity = $_SESSION['cart'][$product->id];
-                    $product->subtotal = $product->price * $product->quantity;
-                    $cart_data[] = $product;
-                }
-            }
         }
         
         return $cart_data;
@@ -406,7 +358,7 @@ function table_headers($fields, $sort, $dir, $href = '') {
         }
         
         if ($customer_id) {
-            // 获取用户的购物车并清空所有商品
+            // call user cart and clear cart
             $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
             $stm->execute([$customer_id]);
             $cart = $stm->fetch();
@@ -420,7 +372,6 @@ function table_headers($fields, $sort, $dir, $href = '') {
         }
     }
 
-    // 新增：获取用户的购物车ID
     function get_cart_id($customer_id) {
         global $_db;
         
@@ -542,7 +493,6 @@ function table_headers($fields, $sort, $dir, $href = '') {
     }
 }
 
-    // 获取客户的地址列表
     function get_customer_addresses($customer_id) {
     global $_db;
     
@@ -556,7 +506,6 @@ function table_headers($fields, $sort, $dir, $href = '') {
     return $stm->fetchAll();
 }
 
-    // 获取单个地址详情
     function get_address_by_id($address_id, $customer_id = null) {
         global $_db;
         
@@ -593,9 +542,6 @@ function get_order_by_id($order_id, $customer_id = null) {
     return $stm->fetch();
 }
 
-/**
- * 获取订单商品
- */
 function get_order_items($order_id) {
     global $_db;
     

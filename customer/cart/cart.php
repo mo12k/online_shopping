@@ -35,19 +35,19 @@ $cart_total = get_cart_total($cart_items);
 <link rel="stylesheet" href="../../css/cart.css">
 
 <style>
-/* Quantity Selector — Warm Bookstore Style */
+/* quantity selector */
 .quantity-selector {
     margin: 20px 0;
     padding: 20px;
-    background: #FAF7F2; /* 柔和米白底 */
+    background: #FAF7F2;
     border-radius: 12px;
-    border: 1px solid #E4DCD3; /* 暖灰边框 */
+    border: 1px solid #E4DCD3;
     text-align: center;
 }
 
 .quantity-label {
     display: block;
-    color: #4E342E; /* 深咖啡色，书店风 */
+    color: #4E342E; 
     font-weight: 600;
     margin-bottom: 10px;
     font-size: 16px;
@@ -55,20 +55,20 @@ $cart_total = get_cart_total($cart_items);
 
 .quantity-control {
     display: flex;
-    align-items: center;         /* 强制同一中线 */
+    align-items: center; 
     justify-content: center;
     gap: 12px;
 }
 
-/* + / - 按钮 */
+/* + / - button */
 .qty-btn {
     width: 42px;
     height: 42px;
-    border: 2px solid #D7CCC8; /* 柔和暖灰边框 */
+    border: 2px solid #D7CCC8;
     background: #FFF;
     font-size: 22px;
     cursor: pointer;
-    border-radius: 8px; /* 比较圆，有手工感 */
+    border-radius: 8px;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
@@ -76,8 +76,8 @@ $cart_total = get_cart_total($cart_items);
 }
 
 .qty-btn:hover {
-    background: #F2EBE5; /* 暖色 hover */
-    border-color: #6D4C41; /* 木质深棕 hover 边框 */
+    background: #F2EBE5;
+    border-color: #6D4C41;
 }
 
 .qty-btn:disabled {
@@ -103,9 +103,9 @@ $cart_total = get_cart_total($cart_items);
 
     text-align: center;
 
-    display: flex;              /* 🔥 关键 */
-    align-items: center;        /* 🔥 关键 */
-    justify-content: center;    /* 🔥 关键 */
+    display: flex;              
+    align-items: center;        
+    justify-content: center;    
 
     box-sizing: border-box;
 }
@@ -114,9 +114,9 @@ $cart_total = get_cart_total($cart_items);
     height: 36px;
     padding: 0 14px;
     display: flex;
-    align-items: center;   /* ✅ 往上拉回中线 */
+    align-items: center; 
     justify-content: center;
-    margin-top: -2px;      /* ✅ 视觉微调 */
+    margin-top: -2px;    
     white-space: nowrap;
 }
 </style>
@@ -143,7 +143,7 @@ $cart_total = get_cart_total($cart_items);
 
 <div class="cart-content">
 
-<!-- ================= LEFT ================= -->
+<!-- left -->
 <div class="cart-items">
 
 <?php foreach ($cart_items as $item): ?>
@@ -200,7 +200,7 @@ $cart_total = get_cart_total($cart_items);
 </div>
 <?php endforeach; ?>
 
-<!-- ✅ Clear Cart 保留 -->
+
 <div class="cart-actions">
     <a href="../page/product.php" class="continue-shopping">← Continue Shopping</a>
 
@@ -215,7 +215,7 @@ $cart_total = get_cart_total($cart_items);
 
 </div>
 
-<!-- ================= RIGHT ================= -->
+<!-- right -->
 <div class="cart-summary">
     <h2 class="summary-title">Order Summary</h2>
 
@@ -274,7 +274,7 @@ $(document).ready(function () {
             let qty = normalizeQty();
             if (qty > 1) {
                 $qtyInput.val(qty - 1);
-                $form.submit(); // 🔥 自动 submit → PHP → redirect
+                $form.submit();
             }
         });
 
@@ -282,13 +282,13 @@ $(document).ready(function () {
             let qty = normalizeQty();
             if (qty < maxStock) {
                 $qtyInput.val(qty + 1);
-                $form.submit(); // 🔥 自动 submit → PHP → redirect
+                $form.submit();
             }
         });
 
         $qtyInput.on('change', function () {
             normalizeQty();
-            $form.submit(); // 手动输入后也更新
+            $form.submit();
         });
     });
 

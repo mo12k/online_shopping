@@ -5,8 +5,8 @@
 body {
     margin: 0;
     font-family: "Roboto", Arial, sans-serif;
-    background: #FAF7F2; /* 整体暖米色背景 */
-    color: #5D4037; /* 主文字暖咖 */
+    background: #FAF7F2;
+    color: #5D4037;
 }
 
 /* --- Header --- */
@@ -20,7 +20,7 @@ body {
     border-bottom: 1px solid #E0D7D2;
     position: fixed;
     top: 0;
-    left: 170px; /* 与 sidebar 宽度一致 */
+    left: 170px;
     right: 0;
     z-index: 10;
 }
@@ -44,7 +44,7 @@ body {
 
 /* --- Content  --- */
 .content {
-    margin-left: center; /* 修正为与 sidebar 宽度一致 */
+    margin-left: center;
     padding: 40px 40px 40px 40px;
     color: #5D4037;
 }
@@ -65,7 +65,7 @@ table th, table td {
 }
 
 table th {
-    background: #EFEBE9; /* 表头柔和米灰 */
+    background: #EFEBE9;
     font-weight: bold;
     color: #4E342E;
 }
@@ -111,7 +111,7 @@ table th {
 }
 
 .btn-go {
-    background: #6D4C41; /* 主色按钮 */
+    background: #6D4C41;
     color: #fff;
     padding: 11px 24px;
     border-radius: 8px;
@@ -128,7 +128,7 @@ table th {
 }
 
 .btn-add {
-    background: #FFB74D; /* 次色 add */
+    background: #FFB74D;
     color: #000;
     padding: 11px 24px;
     border-radius: 8px;
@@ -695,7 +695,7 @@ small { color: #98877b; font-size: 14px; }
 .product-id-value {
     font-size: 28px;
     font-weight: bold;
-    color: #B4533B; /* 暖色强调 */
+    color: #B4533B;
     margin-bottom: 30px;
 }
 
