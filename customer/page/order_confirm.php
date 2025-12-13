@@ -1,21 +1,13 @@
 <?php
-// order_confirm.php - 完全重写版本
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require '../_base.php';
 
 // 启动session（如果还没启动）
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-// 数据库连接
-$db = new PDO('mysql:dbname=bookstore', 'root', '', [
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
-]);
-
 // 获取订单ID
 $order_id = $_GET['id'] ?? 0;
-
 if (!$order_id) {
     header('Location: cart.php');
     exit;
@@ -35,42 +27,21 @@ $sql = 'SELECT o.*, ca.address, ca.city, ca.state, ca.postcode
         FROM orders o 
         JOIN customer_address ca ON o.address_id = ca.address_id 
         WHERE o.order_id = ? AND o.customer_id = ?';
-        
-$stm = $db->prepare($sql);
+$stm = $_db->prepare($sql);
 $stm->execute([$order_id, $customer_id]);
 $order = $stm->fetch();
 
-if (!$order) {
-    $_SESSION['temp_error'] = 'Order not found';
-    header('Location: cart.php');
-    exit;
-}
-
 // 查询订单商品
-$sql = 'SELECT oi.*, p.title, p.photo_name,
-               oi.price_each as price
+$sql = 'SELECT oi.*, p.title, p.photo_name, oi.price_each 
         FROM order_item oi 
         JOIN product p ON oi.product_id = p.id 
         WHERE oi.order_id = ? 
         ORDER BY oi.order_item_id';
-        
-$stm = $db->prepare($sql);
+$stm = $_db->prepare($sql);
 $stm->execute([$order_id]);
 $order_items = $stm->fetchAll();
 
-// 如果有临时消息，显示并清除
-$temp_success = $_SESSION['temp_success'] ?? null;
-$temp_error = $_SESSION['temp_error'] ?? null;
-$temp_info = $_SESSION['temp_info'] ?? null;
-
-unset($_SESSION['temp_success'], $_SESSION['temp_error'], $_SESSION['temp_info']);
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Confirmation - Online Bookstore</title>
     <style>
         * {
             margin: 0;
@@ -95,17 +66,6 @@ unset($_SESSION['temp_success'], $_SESSION['temp_error'], $_SESSION['temp_info']
             animation: slideIn 0.6s ease-out;
         }
         
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
         .confirmation-header {
             background: linear-gradient(135deg, #2ecc71, #27ae60);
             color: white;
@@ -125,23 +85,6 @@ unset($_SESSION['temp_success'], $_SESSION['temp_error'], $_SESSION['temp_info']
             background: radial-gradient(circle, rgba(255,255,255,0.1) 1%, transparent 1%);
             background-size: 50px 50px;
             animation: float 20s linear infinite;
-        }
-        
-        @keyframes float {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            100% { transform: translate(-50px, -50px) rotate(360deg); }
-        }
-        
-        .success-icon {
-            font-size: 100px;
-            margin-bottom: 20px;
-            animation: bounce 1s ease infinite alternate;
-            display: inline-block;
-        }
-        
-        @keyframes bounce {
-            from { transform: scale(1); }
-            to { transform: scale(1.1); }
         }
         
         .confirmation-header h1 {
@@ -174,11 +117,6 @@ unset($_SESSION['temp_success'], $_SESSION['temp_error'], $_SESSION['temp_info']
             align-items: center;
             gap: 10px;
             animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         
         .alert-success {
@@ -419,81 +357,17 @@ unset($_SESSION['temp_success'], $_SESSION['temp_error'], $_SESSION['temp_info']
             font-size: 14px;
             border-left: 5px solid #ffc107;
         }
-        
-        @media (max-width: 768px) {
-            .confirmation-content {
-                padding: 30px 20px;
-            }
-            
-            .confirmation-header {
-                padding: 40px 20px;
-            }
-            
-            .confirmation-header h1 {
-                font-size: 32px;
-            }
-            
-            .detail-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .order-item {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-            }
-            
-            .item-image, .no-image {
-                margin-right: 0;
-            }
-            
-            .item-price {
-                text-align: center;
-                min-width: auto;
-            }
-            
-            .actions {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-        }
     </style>
-</head>
-<body>
+
     <div class="order-confirmation-container">
         <div class="confirmation-header">
-            <div class="success-icon">✓</div>
             <h1>Order Confirmed!</h1>
-            <p class="order-number">Order #: <?= htmlspecialchars($order_id) ?></p>
+            <p class="order-number">Order : <?= htmlspecialchars($order_id) ?></p>
         </div>
         
         <div class="confirmation-content">
-            <?php if ($temp_success): ?>
-                <div class="alert alert-success">
-                    <span>✅</span> <?= htmlspecialchars($temp_success) ?>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($temp_error): ?>
-                <div class="alert alert-error">
-                    <span>❌</span> <?= htmlspecialchars($temp_error) ?>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($temp_info): ?>
-                <div class="alert alert-info">
-                    <span>ℹ️</span> <?= htmlspecialchars($temp_info) ?>
-                </div>
-            <?php endif; ?>
-            
             <div class="order-details">
                 <h2>Order Details</h2>
-                
                 <div class="detail-grid">
                     <div class="detail-item">
                         <span class="detail-label">Order Status</span>
@@ -503,17 +377,16 @@ unset($_SESSION['temp_success'], $_SESSION['temp_error'], $_SESSION['temp_info']
                             </span>
                         </span>
                     </div>
-                    
                     <div class="detail-item">
                         <span class="detail-label">Order Date</span>
                         <span class="detail-value"><?= date('F j, Y, g:i a', strtotime($order->order_date)) ?></span>
                     </div>
-                    
                     <div class="detail-item">
                         <span class="detail-label">Delivery Address</span>
                         <span class="detail-value">
                             <?= htmlspecialchars($order->address) ?><br>
-                            <?= htmlspecialchars($order->city) ?>, <?= htmlspecialchars($order->state) ?> <?= htmlspecialchars($order->postcode) ?>
+                            <?= htmlspecialchars($order->city) ?>, <?= htmlspecialchars($order->state) ?>
+                            <?= htmlspecialchars($order->postcode) ?>
                         </span>
                     </div>
                 </div>
@@ -530,7 +403,9 @@ unset($_SESSION['temp_success'], $_SESSION['temp_error'], $_SESSION['temp_info']
                     <?php foreach ($order_items as $item): ?>
                         <div class="order-item">
                             <?php if ($item->photo_name): ?>
-                                <img src="../upload/<?= htmlspecialchars($item->photo_name) ?>" alt="<?= htmlspecialchars($item->title) ?>" class="item-image">
+                                <img src="../upload/<?= htmlspecialchars($item->photo_name) ?>"
+                                     alt="<?= htmlspecialchars($item->title) ?>"
+                                     class="item-image">
                             <?php else: ?>
                                 <div class="no-image">No Image</div>
                             <?php endif; ?>
@@ -538,63 +413,27 @@ unset($_SESSION['temp_success'], $_SESSION['temp_error'], $_SESSION['temp_info']
                             <div class="item-info">
                                 <div class="item-title"><?= htmlspecialchars($item->title) ?></div>
                                 <div class="item-meta">
-                                    Quantity: <?= $item->quantity ?> × RM <?= number_format($item->price, 2) ?>
+                                    Quantity: <?= $item->quantity ?>
+                                    × RM <?= number_format($item->price_each, 2) ?>
                                 </div>
                             </div>
                             
                             <div class="item-price">
-                                RM <?= number_format($item->quantity * $item->price, 2) ?>
+                                RM <?= number_format($item->quantity * $item->price_each, 2) ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
             </div>
             
-            <div class="note">
-                <strong>Note:</strong> This was a simulated payment for demonstration purposes. No actual payment was processed.
-            </div>
-            
             <div class="actions">
                 <a href="product.php" class="btn btn-continue">
-                    <span>🛒</span> Continue Shopping
+                    Continue Shopping
                 </a>
                 <a href="order_history.php" class="btn btn-history">
-                    <span>📋</span> View Order History
+                    View Order History
                 </a>
             </div>
         </div>
     </div>
     
-    <script>
-        // 添加一些交互效果
-        document.addEventListener('DOMContentLoaded', function() {
-            // 为订单项目添加点击效果
-            const orderItems = document.querySelectorAll('.order-item');
-            orderItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    this.style.transform = 'scale(0.98)';
-                    setTimeout(() => {
-                        this.style.transform = '';
-                    }, 200);
-                });
-            });
-            
-            // 成功图标动画
-            const successIcon = document.querySelector('.success-icon');
-            setInterval(() => {
-                successIcon.style.animation = 'none';
-                setTimeout(() => {
-                    successIcon.style.animation = 'bounce 1s ease infinite alternate';
-                }, 10);
-            }, 3000);
-            
-            // 显示页面加载动画
-            document.body.style.opacity = '0';
-            setTimeout(() => {
-                document.body.style.transition = 'opacity 0.5s ease';
-                document.body.style.opacity = '1';
-            }, 100);
-        });
-    </script>
-</body>
-</html>

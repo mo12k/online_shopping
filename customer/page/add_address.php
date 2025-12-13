@@ -5,9 +5,7 @@ include '../../_header.php';
 $current = 'profile';
 $_title = 'Add Address';
 
-// 检查登录
 if (!isset($_SESSION['customer_id'])) {
-    temp('info', 'Please login to add address');
     redirect('../../page/login.php');
 }
 
@@ -20,7 +18,6 @@ if (is_post()) {
     $postcode = trim(req('postcode'));
     
     if (empty($address) || empty($city) || empty($state) || empty($postcode)) {
-        temp('error', 'All fields are required');
         redirect();
     }
     
@@ -29,8 +26,6 @@ if (is_post()) {
         VALUES (?, ?, ?, ?, ?)
     ');
     $stm->execute([$customer_id, $address, $city, $state, $postcode]);
-    
-    temp('success', 'Address added successfully');
     redirect('checkout.php');
 }
 

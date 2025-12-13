@@ -79,4 +79,5 @@ $(() => {
             $('#rule-special').removeClass('valid');
         }
     });
+
 });

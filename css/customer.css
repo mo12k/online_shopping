@@ -532,11 +532,18 @@ input:focus-visible + .slider {
 label { display: block; margin: 25px 0 10px; font-weight: 600; color: #4E342E; font-size: 16px; }
 .req { color: #D32F2F; font-weight: bold; }
 
-input, select, textarea {
-    width: 100%; padding: 16px 20px; border: 2px solid #E0D7D2;
-    border-radius: 14px; font-size: 16px; background: #fff; box-sizing: border-box;
-    transition: all 0.3s;
+.form-container input,
+.form-container select,
+.form-container textarea {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid #E0D7D2;
+    border-radius: 14px;
+    font-size: 16px;
+    background: #fff;
+    box-sizing: border-box;
 }
+
 input:focus, select:focus, textarea:focus {
     outline: none; border-color: #6D4C41; background: #fffef9;
     box-shadow: 0 0 0 6px rgba(109,76,65,0.08);
@@ -871,11 +878,94 @@ small { color: #98877b; font-size: 14px; }
     font-weight: bold;
 }
 
-/* Footer */
-.footer {
-    text-align: center;
-    background: #F3EDE7;
-    color: #5D4037;
-    border-top: 1px solid #E0D7D2;
-    margin-top: 40px;
+.order-summary-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    display: grid;
+    gap: 20px;
 }
+
+.order-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.order-summary-item {
+    font-size: 15px;
+    color: #5D4037;
+}
+
+.order-summary-label {
+    font-size: 13px;
+    color: #8E7D73;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.order-summary-value {
+    font-weight: 600;
+    color: #4E342E;
+}
+
+.order-items-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.order-item-row {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 20px;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #E0D7D2;
+}
+
+.order-item-row:last-child {
+    border-bottom: none;
+}
+
+.order-item-title {
+    font-weight: 600;
+    color: #4E342E;
+}
+
+.order-item-meta {
+    font-size: 14px;
+    color: #8E7D73;
+}
+
+.order-item-price {
+    font-weight: 700;
+    color: #B4533B;
+}
+
+
+.order-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.order-actions .btn {
+    padding: 12px 32px;
+    border-radius: 30px;
+    font-weight: 600;
+    margin: 0 10px;
+}
+
+.btn-primary {
+    background: #6D4C41;
+    color: #fff;
+}
+
+.btn-secondary {
+    background: #f026077a;
+    color: #e2e0df;
+}
+
+

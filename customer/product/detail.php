@@ -6,8 +6,9 @@ $current = 'product';
 $_title = 'Product Detail';
 
 $id = get('id');
-if (!$id) redirect('../page/product.php');
-
+if (!$id){ redirect('../page/product.php');
+exit;
+}
 $stm = $_db->prepare('SELECT p.*, c.category_name 
                       FROM product p 
                       LEFT JOIN category c 
@@ -19,39 +20,64 @@ $s = $stm->fetch();
 if (!$s) {
     temp('info', 'Product not found');
     redirect('../page/product.php');
+    exit;
 }
 
 if (is_post()) {
-    $id   = req('id');
-    $quantity = req('quantity');
-    
+
+    $product_id = req('id');
+    $quantity   = (int) req('quantity');
+
     // get customer_id
     $customer_id = $_SESSION['customer_id'] ?? null;
-    
+
     // validate stock
     $stm = $_db->prepare('SELECT stock, title FROM product WHERE id = ?');
-    $stm->execute([$id]);
+    $stm->execute([$product_id]);
     $product = $stm->fetch();
-    
+
     if ($product && $quantity > 0 && $quantity <= $product->stock) {
-        // customer_id
-        update_cart($id, $quantity, $customer_id);
-        
-        // success / error information
-        temp('success', "Added <strong>{$product->title}</strong> (x$quantity) to cart!");
+
+        update_cart($product_id, $quantity, $customer_id);
+
+        // ✅ 页面级成功信息（不会进 head）
+        temp('success', "Added <strong>{$product->title}</strong> (x{$quantity}) to cart!");
+
     } else {
+
+        // ✅ 页面级错误信息（不会进 head）
         temp('error', 'Invalid quantity or insufficient stock!');
     }
-    
+
+    // PRG 模式，防止重复提交
     redirect();
+    exit;
 }
+
 
 $arr = $_db->query('SELECT * FROM product');
 ?>
-<link rel="stylesheet" href="../../css/app.css">
-<link rel="stylesheet" href="../../css/customer.css">
 
 <style>
+
+.message {
+    display: flex;
+    align-items: center;
+}
+
+.message button {
+    all: unset;                 /* 清掉浏览器默认样式 */
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;              /* 关键：防止文字下沉 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    width: 20px;
+    margin-left: 12px;
+}
 
 /* Quantity Selector — Warm Bookstore Style */
 .quantity-selector {
@@ -73,10 +99,9 @@ $arr = $_db->query('SELECT * FROM product');
 
 .quantity-control {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 15px 0;
+    align-items: center;         /* 强制同一中线 */
     justify-content: center;
+    gap: 12px;
 }
 
 /* + / - 按钮 */
@@ -85,7 +110,7 @@ $arr = $_db->query('SELECT * FROM product');
     height: 42px;
     border: 2px solid #D7CCC8; /* 柔和暖灰边框 */
     background: #FFF;
-    font-size: 20px;
+    font-size: 22px;
     cursor: pointer;
     border-radius: 8px; /* 比较圆，有手工感 */
     transition: all 0.3s ease;
@@ -106,16 +131,29 @@ $arr = $_db->query('SELECT * FROM product');
 
 /* Quantity input */
 #quantity {
-    width: 75px;
+    width: 72px;
     height: 42px;
-    text-align: center;
+
     border: 2px solid #D7CCC8;
     border-radius: 8px;
+    background: #FFF;
+
     font-size: 16px;
     font-weight: 600;
     color: #4E342E;
-    background: #FFF;
+
+    padding: 0;
+    margin: 0;
+
+    text-align: center;
+
+    display: flex;              /* 🔥 关键 */
+    align-items: center;        /* 🔥 关键 */
+    justify-content: center;    /* 🔥 关键 */
+
+    box-sizing: border-box;
 }
+
 
 /* Stock text */
 .stock-info {
@@ -163,10 +201,12 @@ $arr = $_db->query('SELECT * FROM product');
     margin-top: 25px;
 }
 
-
 </style>
+<link rel="stylesheet" href="../../css/app.css">
+<link rel="stylesheet" href="../../css/customer.css">
 
     <div class="content">
+        
         <!-- 消息提示区域 -->
         <?php if ($msg = temp('success')): ?>
                     <div class="message success" style="
@@ -211,14 +251,7 @@ $arr = $_db->query('SELECT * FROM product');
                         <span><?= $msg ?></span>
                     </div>
 
-                    <button onclick="this.parentElement.remove()" style="
-                        background: none;
-                        border: none;
-                        font-size: 20px;
-                        color: #721c24;
-                        cursor: pointer;
-                        padding: 0 5px;
-                    ">×</button>
+                    <button onclick="this.parentElement.remove()">x</button>
             </div>
         <?php endif; ?>
         
@@ -279,10 +312,20 @@ $arr = $_db->query('SELECT * FROM product');
                             <span class="quantity-label">Quantity</span>
                             
                             <div class="quantity-control">
-                                <button type="button" class="qty-btn minus">-</button>
-                                <input type="number" id="quantity" name="quantity" value="1" min="1" max="<?= $s->stock ?>">
-                                <button type="button" class="qty-btn plus">+</button>
+                                <div class="qty-btn minus" role="button" aria-label="Decrease quantity">−</div>
+
+                                <input
+                                    type="text"
+                                    id="quantity"
+                                    name="quantity"
+                                    value="1"
+                                    autocomplete="off"
+                                >
+
+
+                                <div class="qty-btn plus" role="button" aria-label="Increase quantity">+</div>
                             </div>
+
                             
                             <div class="stock-info">
                                 <span class="in-stock">Max: <?= $s->stock ?> available</span>
@@ -299,12 +342,13 @@ $arr = $_db->query('SELECT * FROM product');
                         </div>
                     <?php endif; ?>
                 </div>
-            </div>
+                </div>
                 <div class="product-actions">
                     <a href="/customer/page/product.php" class="btn-back">Back to List</a>
                 </div>
                 
             
+            </div>
         </div>
     </div>
 </div>

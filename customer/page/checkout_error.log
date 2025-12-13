@@ -1,1 +1,0 @@
-[12-Dec-2025 22:05:53 Asia/Kuala_Lumpur] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\Users\user\OneDrive\Documents\GitHub\online_shopping\customer\page\debug_variables.php on line 227

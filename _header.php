@@ -5,7 +5,7 @@ $arr = array_map('basename', $arr);
 
 $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
 ?>
-
+<link rel="stylesheet" href="/css/app.css">
 <header>
     <div class="header-left">
         <h1>Welcome to the Bookstore</h1>
