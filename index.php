@@ -4,7 +4,6 @@
 $_page_title = "Home - Bookstore";
 $_body_class = "home-page"; // optional, for styling if needed
 require '_base.php';    // include core functions, DB connection
-
 include '_head.php';     // include CSS/JS, open body
 include '_header.php';   // include top navigation
 ?>

@@ -93,6 +93,8 @@ if(is_post()) {
             //User not found
             $_err['general'] = "Invalid username or password";
         }
+
+        
     }
 }
 ?>
