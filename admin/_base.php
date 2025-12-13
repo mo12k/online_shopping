@@ -285,7 +285,7 @@ $_genders = [
     'M' => 'Male',
 ];
 
-    $_category = $_db->query('SELECT category_id, category_name FROM category ORDER BY sort_order')
+    $_category = $_db->query('SELECT category_id, category_name FROM category')
                  ->fetchAll(PDO::FETCH_KEY_PAIR);
 
 $_status = [1 => 'Published', 0 => 'Draft'];

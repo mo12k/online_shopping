@@ -1,14 +1,26 @@
 <?php
 require '../_base.php';
 
+admin_require_login();
+
 $current = 'product';
 $_title = 'Edit Product';
 
 $id = req('id');
 
 
+$stm = $_db->prepare('SELECT * FROM product WHERE id = ?');
+$stm->execute([$id]);
+$p = $stm->fetch();
+
+if (!$p) {
+    temp('info', 'Product not found');
+    redirect('../page/product.php');
+}
+
 
 if (is_post()) {
+
     $title       = trim(req('title'));
     $author      = trim(req('author') ?? '');
     $category_id = req('category_id');
@@ -16,96 +28,103 @@ if (is_post()) {
     $stock       = (int)req('stock');
     $status      = req('status') ? 1 : 0;
     $description = trim(req('description') ?? '');
-    $photo       = $_FILES['photo'] ?? null;
+    $photo_name  = req('old_photo');
 
-    // 驗證
-      if ($title === '') {
+   
+    if ($title === '') {
         $_err['title'] = 'Title is required';
     } elseif (mb_strlen($title) > 50) {
         $_err['title'] = 'Title must not exceed 50 characters';
     }
 
-    if (mb_strlen($author)> 50) {
+    if (mb_strlen($author) > 50) {
         $_err['author'] = 'Author name too long (max 50)';
-    }elseif ($title === '') {
-         $_err['author'] = 'Author is required';
     }
 
     if ($category_id === '' || !array_key_exists($category_id, $_category)) {
         $_err['category_id'] = 'Please select a category';
     }
 
-     if ($price == '') {
+    if ($price === '') {
         $_err['price'] = 'Required';
-    }
-    else if (!is_money($price)) {
+    } elseif (!is_money($price)) {
         $_err['price'] = 'Must be money';
-    }
-    else if ($price < 0.01 || $price > 99.99) {
+    } elseif ($price < 0.01 || $price > 99.99) {
         $_err['price'] = 'Must between 0.01 - 99.99';
     }
 
-    if ($stock == '') {
+    if ($stock === '') {
         $_err['stock'] = 'Required';
-    }
-    else if ($stock < 0) {
+    } elseif ($stock < 0) {
         $_err['stock'] = 'Stock cannot be negative';
     }
 
-    $required = ['title', 'category_id', 'price', 'stock'];
-    foreach ($required as $field) {
-        if (req($field) === '' || req($field) === null) {
-            $_err[$field] ??= 'This field is required';
+    
+    $f = get_file('photo');
+
+    if ($f && isset($f->tmp_name) && $f->error === 0) {
+
+        if ($f->size > 5 * 1024 * 1024) {
+            $_err['photo'] = 'Maximum 5MB';
+        }
+        elseif (!str_starts_with($f->type, 'image/')) {
+            $_err['photo'] = 'Must be an image';
+        }
+        else {
+            $new_photo = save_photo($f, '../upload');
+
+            if ($new_photo) {
+                if ($photo_name && file_exists("../upload/$photo_name")) {
+                    @unlink("../upload/$photo_name");
+                }
+                $photo_name = $new_photo;
+            } else {
+                $_err['photo'] = 'Upload failed';
+            }
         }
     }
 
-    
-        $photo_name = req('old_photo'); 
+   
+    $isIdentityChanged =
+        $title !== $p->title ||
+        $author !== $p->author ||
+        $category_id != $p->category_id;
 
-        $f = get_file('photo'); 
+    if (!$_err && $isIdentityChanged) {
+        $stm = $_db->prepare(
+            "SELECT COUNT(*) 
+             FROM product 
+             WHERE title = ? 
+               AND author = ? 
+               AND category_id = ?
+               AND id <> ?"
+        );
+        $stm->execute([$title, $author, $category_id, $id]);
 
-        if ($f && isset($f->tmp_name) && $f->error === 0) {
- 
-                if ($f->size > 5 * 1024 * 1024) {
-                    $_err['photo'] = 'Maximum 5MB';
-                }
-                
-                elseif (!str_starts_with($f->type, 'image/')) {
-                    $_err['photo'] = 'Must be an image';
-                }
-                else {
-                
-                    $new_photo = save_photo($f, '../upload');
-                    if ($new_photo) {
-                    
-                        if ($photo_name && file_exists("../upload/$photo_name")) {
-                            @unlink("../upload/$photo_name");
-                        }
-                        $photo_name = $new_photo;
-                    } else {
-                        $_err['photo'] = 'Upload failed';
-                    }
-                }
-            }
+        if ($stm->fetchColumn()) {
+            $_err['title'] = 'Another product with the same title already exists';
+        }
+    }
 
+    // ---------- Update ----------
     if (!$_err) {
-        $_db->prepare("UPDATE product SET title=?, author=?, category_id=?, price=?, stock=?, status=?, description=?, photo_name=? WHERE id=?")
-            ->execute([$title, $author, $category_id, $price, $stock, $status, $description, $photo_name, $id]);
+        $_db->prepare(
+            "UPDATE product 
+             SET title=?, author=?, category_id=?, price=?, stock=?, status=?, description=?, photo_name=? 
+             WHERE id=?"
+        )->execute([
+            $title, $author, $category_id,
+            $price, $stock, $status,
+            $description, $photo_name, $id
+        ]);
 
         temp('info', "Product ID $id updated successfully!");
         redirect('../page/product.php');
     }
 
-} elseif (is_get() && $id) {
-    $stm = $_db->prepare('SELECT * FROM product WHERE id = ?');
-    $stm->execute([$id]);
-    $p = $stm->fetch();
+}
 
-    if (!$p) {
-        temp('info', "Product not found");
-        redirect('../page/product.php');
-    }
-
+else {
     $title       = $p->title;
     $author      = $p->author;
     $category_id = $p->category_id;
@@ -114,10 +133,6 @@ if (is_post()) {
     $status      = $p->status;
     $description = $p->description;
     $photo_name  = $p->photo_name;
-
-} else {
-    temp('info', 'Invalid access');
-    redirect('../page/product.php');
 }
 
 include '../_head.php';
@@ -194,7 +209,7 @@ include '../_head.php';
                     </small>
                 </div>
 
-                <!-- 表單欄位 -->
+               
                 <div class="fields-section">
                     <div class="auto-id">Product ID: <strong><?= encode($id) ?></strong></div>
 
@@ -212,7 +227,7 @@ include '../_head.php';
                     <div class="row">
                         <div>
                             <label><span class="req">*</span> Price</label>
-                            <?= html_number('price', 1.00, 999, '0.01', "value='$price' step='0.01' min='1.00' required") ?>
+                            <?= html_number('price', 1.00, 99, '0.01', "value='$price' step='0.01' min='1.00' required") ?>
                             <?= err('price') ?>
                         </div>
                         <div>

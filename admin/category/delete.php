@@ -1,20 +1,13 @@
 <?php
 include '../_base.php';
-$current = 'product';
+$current = 'category';
 
 // ----------------------------------------------------------------------------
 
 if (is_post()) {
-    $id = req('id');
+    $category_id  = req('id');
 
-    // Delete photo
-    $stm = $_db->prepare('SELECT photo_name FROM product WHERE id = ?');
-    $stm->execute([$id]);
-    $photo = $stm->fetchColumn();
-    
-    unlink("../upload/$photo");
-
-    $query = http_build_query([
+     $query = http_build_query([
         'sort' => get('sort', 'id'),     
         'dir'  => get('dir', 'desc'),    
         'page' => get('page') ,           
@@ -22,12 +15,24 @@ if (is_post()) {
         'name'=> get('name')  
     ]);
 
-
-    $stm = $_db->prepare('DELETE FROM product WHERE id = ?');
-    $stm->execute([$id]);
-    temp('info', 'Record deleted');
-    redirect('../page/product.php?'. $query);
-
+    // Delete photo
+    $stm = $_db->prepare('SELECT COUNT(*) FROM product WHERE category_id = ?');
+    $stm->execute([$category_id ]);
+    
+    if($stm->fetchColumn()>0){
+        temp('info', 'Has been related product ,Please change product category first');
+        redirect('../page/category.php?'. $query);
+       exit;
+    }
+    else {
+    temp('info', "Record ID:$category_id deleted");
+       $stm = $_db->prepare('DELETE FROM category WHERE category_id = ?');
+    $stm->execute([$category_id]);
+   
+    
+    redirect('../page/category.php?'. $query);
+    }
+  
 }
 
 

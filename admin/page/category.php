@@ -125,7 +125,6 @@ include '../_head.php';
                     <?= encode($s->category_name)?>
                 </td>
                 <td style="text-align:center;">
-                    <button data-get="../category/detail.php?id=<?= encode($s->category_id)?>" class="btn">View</button>
                     <button data-get="../category/update.php?id=<?= encode($s->category_id) ?>" class="btn edit">Edit</button>
                     <button data-post="../category/delete.php?id=<?= encode($s->category_id) ?>" 
                        data-confirm="Confirm delete「<?= encode($s->category_name) ?>」？"

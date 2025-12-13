@@ -301,6 +301,13 @@ body {
     content: ' ▾';
 }
 
+.product-table td:first-child {
+    width: 90px;         
+    padding: 6px;
+    text-align: center;
+}
+
+
 /* Form -------------------------------------------------------------------- */
 
 label > * {

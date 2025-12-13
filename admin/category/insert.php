@@ -49,7 +49,7 @@ if (is_post()) {
     if ($exists) {
         $_err['category_name'] = 'Category name already exists';
     }
-}
+    }
 
 
     // Insert

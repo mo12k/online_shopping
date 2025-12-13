@@ -68,6 +68,23 @@ if (is_post()) {
     }
 
     if (!$_err) {
+        $stm = $_db->prepare(
+            "SELECT COUNT(*) 
+            FROM product 
+            WHERE title = ? 
+            AND author = ? 
+            AND category_id = ?"
+        );
+        $stm->execute([$title, $author, $category_id]);
+        $exists = $stm->fetchColumn();
+
+        if ($exists) {
+            $_err['title'] = 'This product already exists in the same category';
+        }
+    }
+
+
+    if (!$_err) {
         $photo_name = save_photo($f,"../upload");
 
         //檢查 database 有沒有 autoincrement 在合并的時候

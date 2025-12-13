@@ -137,9 +137,9 @@ include '../_head.php';
                 <?php endif; ?>
                 <td><?= encode($s->id) ?></td>
                 <td >
-                    <?= encode(mb_strimwidth($s->title , 0 ,15 ,'...' , 'UTF-8'))?>
+                    <?= encode(mb_strimwidth($s->title , 0 ,20 ,'...' , 'UTF-8'))?>
                 </td>
-                <td><?= encode(mb_strimwidth($s->author , 0 ,10 ,'...' , 'UTF-8'))?></td>
+                <td><?= encode(mb_strimwidth($s->author , 0 ,20 ,'...' , 'UTF-8'))?></td>
                 <td><?= encode($s->category_code) ?></td>
                 <td><?= encode($s->price ) ?></td>
                 <td style="<?= $s->stock <= 10 ? 'color:red;font-weight:bold;' : '' ?>">

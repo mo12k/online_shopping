@@ -9,16 +9,16 @@ $_title = 'Update Category';
 $id = req('id');
 
 
+
 $stm = $_db->prepare("SELECT * FROM category WHERE category_id = ?");
 $stm->execute([$id]);
 $c = $stm->fetch();
 
-if (!$c) {
-    redirect('/admin/page/category.php');
-}
+
 
 if (is_post()) {
 
+    
     $category_code = strtoupper(trim(req('category_code')));
     $category_name = trim(req('category_name'));
 
@@ -35,7 +35,29 @@ if (is_post()) {
         $_err['category_name'] = 'Max 50 characters';
     }
 
-    
+    if (!$_err) {
+        $stm = $_db->prepare(
+            "SELECT COUNT(*) FROM category WHERE category_code = ?"
+        );
+        $stm->execute([$category_code]);
+        $exists = $stm->fetchColumn();
+
+        if ($exists) {
+            $_err['category_code'] = 'Category code already exists';
+        }
+    }
+
+    if (!$_err) {
+    $stm = $_db->prepare(
+        "SELECT COUNT(*) FROM category WHERE category_name = ?"
+    );
+    $stm->execute([$category_name]);
+    $exists = $stm->fetchColumn();
+
+    if ($exists) {
+        $_err['category_name'] = 'Category name already exists';
+    }
+    }
     
     // database check code  type 是不是10
     
@@ -59,6 +81,11 @@ if (is_post()) {
             }
         }
     }
+}
+else{
+
+    $category_code       =  $c->category_code;
+    $category_name       =  $c->category_name;
 }
 
 include '../_head.php';
