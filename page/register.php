@@ -13,22 +13,33 @@ if (is_post()) {
     $email = req('email');
     $password = req('password');
     $confirm_password = req('confirm_password');
+    $phone = req('phone');
+    $birthdate = req('birthdate');  
+    $gender = req('gender');  
+    $address = req('address');
+    $city = req('city');
+    $state = req('state');
+    $postcode = req('postcode');
 
-    // Validate username
-    if (!$username) {
+    //Validate username
+    if(!$username){
         $_err['username'] = "Required";
-    } else if (strlen($username) > 100) {
+    }
+    else if(strlen($username) > 100){
         $_err['username'] = "Maximum length 100";
-    } else if (!is_unique($username, 'customer', 'username')) {
+    }
+    else if (!is_unique($username, 'customer', 'username')) {
         $_err['username'] = "Duplicate Username";
     }
 
-    // Validate email
-    if (!$email) {
+    //Validate email
+    if(!$email){
         $_err['email'] = "Required";
-    } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    }
+    else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_err['email'] = "Invalid Email Format";
-    } else if (!is_unique($email, 'customer', 'email')) {
+    }
+    else if (!is_unique($email, 'customer', 'email')) {
         $_err['email'] = "Duplicate Email";
     }
 
@@ -46,10 +57,11 @@ if (is_post()) {
         $_err['password'] = "Must contain uppercase, lowercase, number and special character";
     }
 
-    // Validate confirm password
+    //Validate confirm password
     if (!$confirm_password) {
         $_err['confirm_password'] = "Required";
-    } else if ($confirm_password !== $password) {
+    } 
+    else if ($confirm_password !== $password) {
         $_err['confirm_password'] = "Passwords do not match";
     }
 
@@ -91,6 +103,7 @@ if (is_post()) {
         }
     }
 }
+}
 ?>
 <?php if ($info): ?>
 <div class="alert-success-fixed">
@@ -108,9 +121,9 @@ if (is_post()) {
         <?= html_text('username', 'maxlength="100"') ?>
         <?= err('username') ?>
 
-        <label for="email">Email Address *</label>
-        <?= html_text('email', 'placeholder="example@example.com"') ?>
-        <?= err('email') ?>
+            <label for="username">Username *</label>
+            <?= html_text('username', 'maxlength="100" ') ?>
+            <?= err('username') ?>
 
         <label for="password">Password *</label>
         <?=  html_password('password', 'maxlength="11"') ?>
@@ -130,9 +143,48 @@ if (is_post()) {
         <button type="submit" id="create_account" name="create_account">Create Account</button>
         
 
-        <div class="already-account">
-            Already have an account?
-            <a href="login.php" class="login-link">Log in here</a>
+            <label for="city">City </label>
+            <?= html_text('city', 'placeholder="Kuala Lumpur"') ?>
+
+            <label for="state">State </label>
+            <select name="state" id="state">
+                <option value="">- Select State -</option>
+                <?php 
+                $states = [
+                    'Johor' => 'Johor',
+                    'Kedah' => 'Kedah',
+                    'Kelantan' => 'Kelantan',
+                    'Malacca' => 'Malacca',
+                    'Negeri Sembilan' => 'Negeri Sembilan',
+                    'Pahang' => 'Pahang',
+                    'Penang' => 'Penang',
+                    'Perak' => 'Perak',
+                    'Perlis' => 'Perlis',
+                    'Sabah' => 'Sabah',
+                    'Sarawak' => 'Sarawak',
+                    'Selangor' => 'Selangor',
+                    'Terengganu' => 'Terengganu',
+                    'Kuala Lumpur' => 'Federal Territory of Kuala Lumpur',
+                    'Labuan' => 'Federal Territory of Labuan',
+                    'Putrajaya' => 'Federal Territory of Putrajaya'
+                ];
+                $selected = $_POST['state'] ?? '';
+                foreach ($states as $value => $label): ?>
+                    <option value="<?= $value ?>" <?= $selected === $value ? 'selected' : '' ?>>
+                        <?= $label ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <label for="postcode">Postcode </label>
+            <?= html_text('postcode', 'placeholder="50050" maxlength="5"') ?>            
+            <?= err('postcode') ?>
+
+            <div class="btn">
+                <button type="button" class="btn-prev">Previous</button>
+                <button type="submit">Create Account</button>
+            </div>
         </div>
     </form>
 </div>
+<!-- <?php include '../_footer.php'; ?> -->

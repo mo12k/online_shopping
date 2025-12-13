@@ -1,0 +1,386 @@
+/* =======================
+   Cart Layout
+======================= */
+
+.cart-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.cart-header {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.cart-header h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.cart-count {
+    color: #666;
+    font-size: 16px;
+}
+
+/* =======================
+   Empty Cart
+======================= */
+
+.cart-empty {
+    text-align: center;
+    padding: 80px 20px;
+    background: #FAF7F2;
+    border-radius: 14px;
+    border: 1px solid #E4DCD3;
+}
+
+.cart-empty h2 {
+    color: #666;
+    margin-bottom: 20px;
+    font-weight: normal;
+}
+
+/* =======================
+   Content Layout
+======================= */
+
+.cart-content {
+    display: flex;
+    gap: 30px;
+}
+
+.cart-items {
+    flex: 1;
+}
+
+.cart-summary {
+    width: 350px;
+    background: #FAF7F2;
+    border-radius: 14px;
+    border: 1px solid #E4DCD3;
+    padding: 25px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+/* =======================
+   Cart Item
+======================= */
+
+.cart-item {
+    display: flex;
+    gap: 20px;
+    padding: 25px;
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #E4DCD3;
+    margin-bottom: 20px;
+}
+
+.cart-item-image {
+    width: 120px;
+    height: 160px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cart-item-details {
+    flex: 1;
+}
+
+.cart-item-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.cart-item-title:hover {
+    color: #6D4C41;
+}
+
+.cart-item-author {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.cart-item-price {
+    font-size: 17px;
+    font-weight: 600;
+    color: #6D4C41;
+    margin-bottom: 15px;
+}
+
+/* =======================
+   ✅ Unified Quantity Picker
+======================= */
+
+.quantity-control-cart {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* + / - 按钮 */
+.quantity-control-cart .qty-dec,
+.quantity-control-cart .qty-inc {
+    width: 38px;
+    height: 38px;
+    border: 1.5px solid #D7CCC8;
+    background: #FFF;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #4E342E;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.quantity-control-cart .qty-dec:hover,
+.quantity-control-cart .qty-inc:hover {
+    background: #F2EBE5;
+    border-color: #6D4C41;
+}
+
+.quantity-control-cart button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* 数量输入框（重点） */
+.quantity-control-cart .qty-input {
+    width: 70px;
+    height: 38px;
+    border: 1.5px solid #D7CCC8;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #4E342E;
+    text-align: center;
+    padding: 0;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+/* =======================
+   Actions
+======================= */
+
+.remove-btn {
+    margin-left: 10px;
+    padding: 8px 14px;
+    font-size: 14px;
+    color: #D32F2F;
+    background: #FFF;
+    border: 1.5px solid #D32F2F;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+    background: #D32F2F;
+    color: #FFF;
+}
+
+.stock-warning {
+    color: #D32F2F;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+/* =======================
+   Subtotal
+======================= */
+
+.cart-item-subtotal {
+    text-align: right;
+}
+
+.subtotal-label {
+    font-size: 13px;
+    color: #666;
+}
+
+.subtotal-amount {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* =======================
+   Summary
+======================= */
+
+.summary-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #E4DCD3;
+    padding-bottom: 15px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #E4DCD3;
+}
+
+.total-amount {
+    font-size: 22px;
+    font-weight: 700;
+    color: #6D4C41;
+}
+
+.checkout-btn {
+    width: 100%;
+    margin-top: 25px;
+    padding: 16px;
+    border-radius: 10px;
+    border: none;
+    background: #6D4C41;
+    color: #FFF;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.checkout-btn:hover {
+    background: #5A3E34;
+}
+
+/* =======================
+   Footer Actions
+======================= */
+
+.cart-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.continue-shopping,
+.clear-cart-btn {
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    margin-top: 2px;
+}
+
+.continue-shopping {
+    border: 2px solid #6D4C41;
+    color: #6D4C41;
+    background: #FFF;
+}
+
+.continue-shopping:hover {
+    background: #6D4C41;
+    color: #FFF;
+}
+
+.clear-cart-btn {
+    border: 2px solid #D32F2F;
+    color: #D32F2F;
+    background: #FFF;
+}
+
+.clear-cart-btn:hover {
+    background: #D32F2F;
+    color: #FFF;
+}
+
+/* =======================
+   Mobile
+======================= */
+
+@media (max-width: 768px) {
+    .cart-content {
+        flex-direction: column;
+    }
+
+    .cart-summary {
+        width: 100%;
+    }
+
+    .cart-item {
+        flex-direction: column;
+    }
+
+    .cart-item-subtotal {
+        text-align: left;
+        margin-top: 10px;
+    }
+}
+
+/* =======================
+   FIX: quantity + remove same line
+======================= */
+
+.cart-item-actions {
+    display: flex;
+    align-items: center;   /* 垂直居中 */
+    gap: 16px;
+}
+
+/* 关键：form 不能是 block */
+.cart-item-actions form {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+/* quantity 这一整组 */
+.quantity-control-cart {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 防止 input 或 button 撑高 */
+.quantity-control-cart input,
+.quantity-control-cart button {
+    height: 38px;
+    line-height: 1;
+}
+
+/* Remove 按钮不要被拉高 */
+.remove-btn {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+

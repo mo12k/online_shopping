@@ -11,19 +11,19 @@ body {
     height: 100vh;
     display: grid;
     grid: auto auto 1fr auto / auto;
-    background: rgba(255, 255, 255, 0.475);
+    background: rgba(17, 24, 39, 0.475);
 }
 body {
     margin: 0;
     min-height: 100vh; /* ensures body is at least full viewport */
     display: grid;
     grid-template-rows: auto 1fr auto; /* header auto, main fills remaining space, footer auto */
-    background: rgba(255, 255, 255, 0.475);
+    background: rgba(249, 250, 251, 0.475);
 }
 header, footer {
     padding: 10px 50px;
-    background: grey;
-    color: black;
+    background: #6D4C41;
+    color: #FFFFFF;
 }
 
 header h1 {
@@ -76,22 +76,46 @@ header {
 }
 
 
-nav {
-    padding: 0 50px;
-    background: #b53232b3; /* keeps your demo nav color */
-    display: flex;
-    gap: 5px;
-}
-
-nav a {
-    padding: 5px 10px;
-    color: #fff;
+.navbar a {
+    position: relative;
+    display: inline-block;
+    padding: 10px 15px;
+    color: #FFF;
     text-decoration: none;
-    white-space: nowrap;
+    font-size: 16px;
+    transition: color 0.3s ease;
 }
 
-nav a:hover {
-    background: #4facfe;
+/* Hover 时文字变橘色 */
+.navbar a:hover {
+    color: #FFB74D; /* 辅助色 */
+}
+
+/* 下划线动画（从中间展开） */
+.navbar a::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background-color: #FFB74D;
+    transition: 0.3s ease;
+}
+
+/* Hover 时下划线伸展开 */
+.navbar a:hover::after {
+    left: 0;
+    width: 100%;
+}
+
+ul{
+    display: flex;
+}
+
+li{
+    list-style: none;
+    margin: 1rem;
 }
 
 main {
@@ -488,18 +512,11 @@ body.token-page {
     position: fixed;
     top: 20px;
     left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    background: #d4edda;
-    color: #155724;
-    padding: 16px 30px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    font-size: 17px;
-    font-weight: 500;
-    border: 1px solid #c3e6cb;
-    animation: slideDown 0.5s ease, fadeOut 0.6s ease 4s forwards;
-    max-width: 90%;
+    translate: -50% 0;
+    z-index: 999;
+    top: -100px;
+    opacity: 0;
+    
 }
 
 .alert-content {
