@@ -252,50 +252,52 @@ function table_headers($fields, $sort, $dir, $href = '') {
     // Shopping Cart
     // ============================================================================
  
-        function update_cart($product_id, $quantity, $customer_id = null) {
-        global $_db;
-        
-        if (!$customer_id && isset($_SESSION['customer_id'])) {
-            $customer_id = $_SESSION['customer_id'];
-        }
-        
-        $quantity = (int)$quantity;
-        
-        if ($customer_id) {
-            // user have cart
-            $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
-            $stm->execute([$customer_id]);
-            $cart = $stm->fetch();
-            
-            if (!$cart) {
-                // create cart
-                $stm = $_db->prepare('INSERT INTO cart (customer_id) VALUES (?)');
-                $stm->execute([$customer_id]);
-                $cart_id = $_db->lastInsertId();
-            } else {
-                $cart_id = $cart->cart_id;
-            }
-            
-            // update cart
-            if ($quantity > 0) {
-                $stm = $_db->prepare('
-                    INSERT INTO cart_item (cart_id, product_id, quantity) 
-                    VALUES (?, ?, ?)
-                    ON DUPLICATE KEY UPDATE quantity = ?
-                ');
-                $stm->execute([$cart_id, $product_id, $quantity, $quantity]);
-            } else {
-                // delete product if quantity = 0
-                $stm = $_db->prepare('DELETE FROM cart_item WHERE cart_id = ? AND product_id = ?');
-                $stm->execute([$cart_id, $product_id]);
-            }
-            
-            // 3. update date
-            $stm = $_db->prepare('UPDATE cart SET updated_at = NOW() WHERE cart_id = ?');
-            $stm->execute([$cart_id]);
-            
-        }
+    function update_cart($product_id, $quantity, $customer_id = null, $mode = 'add') {
+    global $_db;
+
+    if (!$customer_id && isset($_SESSION['customer_id'])) {
+        $customer_id = $_SESSION['customer_id'];
     }
+
+    $quantity = (int)$quantity;
+    if ($quantity < 1 || !$customer_id) return;
+
+    // 找 cart
+    $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
+    $stm->execute([$customer_id]);
+    $cart = $stm->fetch();
+
+    if (!$cart) {
+        $stm = $_db->prepare('INSERT INTO cart (customer_id) VALUES (?)');
+        $stm->execute([$customer_id]);
+        $cart_id = $_db->lastInsertId();
+    } else {
+        $cart_id = $cart->cart_id;
+    }
+
+    if ($mode === 'update') {
+        // 🔥 覆盖数量（cart 页面）
+        $stm = $_db->prepare('
+            INSERT INTO cart_item (cart_id, product_id, quantity)
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE quantity = VALUES(quantity)
+        ');
+        $stm->execute([$cart_id, $product_id, $quantity]);
+    } else {
+        // 🔥 累加数量（商品页）
+        $stm = $_db->prepare('
+            INSERT INTO cart_item (cart_id, product_id, quantity)
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)
+        ');
+        $stm->execute([$cart_id, $product_id, $quantity]);
+    }
+
+    $stm = $_db->prepare('UPDATE cart SET updated_at = NOW() WHERE cart_id = ?');
+    $stm->execute([$cart_id]);
+}
+
+
 
     function remove_from_cart($product_id, $customer_id = null) {
         global $_db;

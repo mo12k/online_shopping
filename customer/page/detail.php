@@ -25,6 +25,13 @@ if (!$s) {
 
 if (is_post()) {
 
+    if (!isset($_SESSION['customer_id'])) {
+    temp('error', 'Please login as customer to add items to cart.');
+    redirect();
+    exit;
+}
+
+
     $product_id = req('id');
     $quantity   = (int) req('quantity');
 
@@ -74,6 +81,7 @@ $arr = $_db->query('SELECT * FROM product');
     height: 20px;
     width: 20px;
     margin-left: 12px;
+    margin-top: 2px;
 }
 
 /* Quantity Selector */
@@ -251,7 +259,7 @@ $arr = $_db->query('SELECT * FROM product');
             </div>
         <?php endif; ?>
         
-        <div class="product-detail-container">
+    <div class="product-detail-container">
         <div class="product-detail-wrapper">
 
             <!-- left picture + summary + .. -->

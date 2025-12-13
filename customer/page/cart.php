@@ -18,7 +18,7 @@ if (is_post()) {
     $quantity = req('quantity', 0);
 
     if ($action === 'update') {
-        update_cart($id, $quantity, $customer_id);
+    update_cart($id, $quantity, $customer_id, 'update');
     } elseif ($action === 'remove') {
         remove_from_cart($id, $customer_id);
     } elseif ($action === 'clear') {

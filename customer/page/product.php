@@ -7,7 +7,6 @@ include '../../_header.php';
 $current = 'product';
 $_title = 'Product List';
 
-             
 $category_id = get('category_id');
 $name = trim(req('name')?? '');
 
@@ -68,8 +67,43 @@ $arr = $p->result;
 
 $info = temp('info');
 ?>
-<link rel="stylesheet" href="../../css/app.css">
-<link rel="stylesheet" href="../../css/customer.css">
+
+<style>
+.search-input-wrapper {
+    position: relative;
+    width: 600px;
+    max-width: 100%;
+}
+
+.search-input-wrapper input.key-in {
+    box-sizing: border-box ;
+    display: block ;
+
+    width: 100% !important;
+    height: 36px !important;
+
+    padding: 0 36px 0 12px !important;
+
+    border: 1px solid #D7CCC8 !important;
+    border-radius: 8px !important;
+
+    background-color: #ffffff !important;
+    color: #5D4037 !important;
+    font-size: 15px !important;
+
+    appearance: none !important;
+    -webkit-appearance: none !important;
+}
+
+.search-input-wrapper .search-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #8D6E63;
+}
+</style>
 
 <div class="content">
     
@@ -85,9 +119,10 @@ $info = temp('info');
                     <?= html_select('category_id', $_category, 'All category' , '', true) ?>
 
                 <div class="search-input-wrapper">
-                    <input type="search" id="name" name="name" value="" placeholder="Searching by id, title, author">
+                    <input class="key-in "type="search" id="name" name="name" value="" placeholder="Searching by id, title, author">
                         <i class='bx bx-search search-icon' onclick="this.closest('form').submit();"></i>
                 </div>
+                </form>
             </div>
         </div>
        
