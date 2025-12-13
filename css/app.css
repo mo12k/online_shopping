@@ -526,23 +526,41 @@ body.token-page {
     position: relative;
 }
 
-.alert-close {
-    margin-left: 20px;
-    cursor: pointer;
-    font-size: 24px;
-    font-weight: bold;
-    opacity: 0.7;
+@keyframes fade {
+      0% { top: -100px; opacity: 0; }
+     10% { top:  100px; opacity: 1; }
+     90% { top:  100px; opacity: 1; }
+    100% { top: -100px; opacity: 0; }
+} 
+
+/* Bottom icon-card ----------------------------------------------------------- */
+
+.icon-card{
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.144);
+    border-radius: 10px;
+    box-shadow: 0 20px 20px rgba(0, 0, 0, 0.205),
+    inset 0 20px 20px rgba(253, 253, 253, 0.205);
+    margin: 15px;
+    display: felx;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    font-size: 1.5em;
+    color: rgba(255, 255, 255, 0.336);
+    position: relative;
+    transition: box-shadow .4s, color .8s, transform .4s;
 }
 
-.alert-close:hover { opacity: 1; }
-
-@keyframes slideDown {
-    from { top: -100px; opacity: 0; }
-    to   { top: 20px; opacity: 1; }
-}
-
-@keyframes fadeOut {
-    to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+.icon-card:hover{
+    color: #ffffff;
+    box-shadow: 0 20px 20px rgba(0, 0, 0, 0.205),
+    inset  0px 20px 10px rgba(253, 253, 253, 0.287),
+    inset  10px 0px 20px rgb(255, 58, 58),
+    inset -20px 0px 20px rgb(104, 255, 58),
+    inset -30px 0px 20px rgb(71, 58, 255);
+    transform: translateY(-10px); 
 }
 
 

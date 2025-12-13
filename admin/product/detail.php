@@ -3,6 +3,8 @@ require '../_base.php';
 $current = 'product';
 $_title = 'Product Detail';
 
+
+
 $id = get('id');
 if (!$id) redirect('../page/product.php');
 
