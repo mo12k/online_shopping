@@ -91,7 +91,7 @@ if (is_post()) {
     <?php if ($info): ?>
     <div class="alert-success-fixed">
         <div class="alert-content">
-            <strong>Success!</strong> <?= encode($info) ?>
+            <?= encode($info) ?>
             <span class="alert-close"></span>
         </div>
     </div>

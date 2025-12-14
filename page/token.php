@@ -7,6 +7,7 @@ $_body_class = 'token-page';
 $raw_token = trim(req('token') ?? '');
 $email     = trim(req('email') ?? '');
 
+$info = temp('info');
 
 if ($raw_token === '' || $email === '') {
     temp('info', 'Invalid reset link');
@@ -77,7 +78,14 @@ $_body_class = 'token-page';
 $_page_title = 'Reset Password';
 require '../_head.php';   
 ?>
-
+<?php if ($info): ?>
+<div class="alert-success-fixed">
+    <div class="alert-content">
+        <?= encode($info) ?>
+        <span class="alert-close">×</span>
+    </div>
+</div>
+<?php endif; ?>
 <div class="container-token">
     <div class="wrapper-token">
         <h1>Reset Your Password</h1>
