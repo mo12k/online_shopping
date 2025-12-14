@@ -8,6 +8,86 @@ require '../_base.php';
 $info = temp('info');
 
 include '../_head.php';
+?>
+
+<style>
+body.verify-otp-page {
+    background-image: url("../images/register_background.jpg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
+}
+.verify-otp-container {
+    max-width: 450px;
+    margin: 80px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.verify-otp-container h2 {
+    color: #1976d2;
+    margin-bottom: 16px;
+    font-size: 28px;
+}
+
+.verify-otp-container p {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 15px;
+}
+
+.verify-otp-container input[type="text"] {
+    width: 100%;
+    padding: 16px;
+    font-size: 24px;
+    letter-spacing: 8px;
+    text-align: center;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: border-color 0.3s;
+}
+
+.verify-otp-container input[type="text"]:focus {
+    outline: none;
+    border-color: #1976d2;
+}
+
+.verify-otp-container button {
+    width: 100%;
+    padding: 14px 40px;
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 20px;
+}
+
+.verify-otp-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+}
+
+.verify-otp-container button:active {
+    transform: translateY(0);
+}
+
+.error {
+    color: #d32f2f;
+    font-size: 14px;
+    margin-top: 8px;
+}
+</style>
+
+<?php
 
 // Must come from registration
 $pending = $_SESSION['pending_registration'] ?? null;

@@ -510,13 +510,19 @@ body.token-page {
 /* Message top  */
 .alert-success-fixed {
     position: fixed;
-    top: 20px;
     left: 50%;
     translate: -50% 0;
     z-index: 999;
     top: -100px;
     opacity: 0;
-    
+    animation: fade 5s ease-in-out forwards;
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 300px;
+    max-width: 500px;
 }
 
 .alert-content {
@@ -524,6 +530,19 @@ body.token-page {
     align-items: center;
     gap: 12px;
     position: relative;
+}
+
+.alert-close {
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: auto;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.alert-close:hover {
+    opacity: 1;
 }
 
 @keyframes fade {
