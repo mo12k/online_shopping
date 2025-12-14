@@ -4,6 +4,7 @@ $_page_title = "Login";
 
 require '../_base.php';
 include '../_head.php';
+include '../_header.php';
 
 if(is_post()) {
     $username = trim(req('username'));
@@ -99,47 +100,49 @@ if(is_post()) {
 }
 ?>
 
-<div class="container-login">
-    <div class="wrapper-login">
-        <h1> Login </h1>
-        <form method="post" action="">
-            <div class="field input">
-                <label for="username">Username </label>
-                <?= html_text('username') ?>
-                <i class='bxr bx-user'></i> 
-                <?= err('username') ?>
-            </div>
-
-            <div class="field input">
-                <label for="password">Password </label>
-                <?= html_password('password' ,'maxlength="11"') ?>
-                <i class='bxr  bx-lock'></i> 
-                <?= err('password') ?>
-            </div>
-
-            <?php if(!empty($_err['general'])): ?>
-                <div class="error-message" style="color:red; margin-bottom:10px;">
-                    <?= $_err['general'] ?>
+<main>
+    <div class="container-login">
+        <div class="wrapper-login">
+            <h1> Login </h1>
+            <form method="post" action="">
+                <div class="field input">
+                    <label for="username">Username </label>
+                    <?= html_text('username') ?>
+                    <i class='bxr bx-user'></i> 
+                    <?= err('username') ?>
                 </div>
-            <?php endif; ?>            
 
-            <div class="remember-forgot">
-                <label class="remember-me">
-                    <input type="checkbox" name="remember_me" value="1">
-                    Remember me
-                </label>
+                <div class="field input">
+                    <label for="password">Password </label>
+                    <?= html_password('password' ,'maxlength="11"') ?>
+                    <i class='bxr  bx-lock'></i> 
+                    <?= err('password') ?>
+                </div>
 
-                <a href="forgot-password.php" class="link">Forgot Password?</a>
-            </div>
+                <?php if(!empty($_err['general'])): ?>
+                    <div class="error-message" style="color:red; margin-bottom:10px;">
+                        <?= $_err['general'] ?>
+                    </div>
+                <?php endif; ?>            
 
-            <button type="submit" name="submit" value="login"> Login </button>
+                <div class="remember-forgot">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember_me" value="1">
+                        Remember me
+                    </label>
 
-            <div class="register-link">
-                <p> Don't have an account? <a href="register.php" class="link"> Register Here </a> </p>
-            </div>
+                    <a href="forgot-password.php" class="link">Forgot Password?</a>
+                </div>
 
-        </form>
+                <button type="submit" name="submit" value="login"> Login </button>
+
+                <div class="register-link">
+                    <p> Don't have an account? <a href="register.php" class="link"> Register Here </a> </p>
+                </div>
+
+            </form>
+        </div>
     </div>
-</div>
+</main>
 <?php
-// require '../_foot.php';
+include '../_footer.php';

@@ -138,3 +138,5 @@ if (is_post()) {
         </div>
     </form>
 </div>
+<?php
+include '../_footer.php';
