@@ -10,7 +10,7 @@ $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
     <div class="header-left">
         <h1>Welcome to PaperNest Bookstore</h1>
         <nav class="navbar">
-            <a href="/">Index</a>
+            <a href="/">Home</a>
             <a href="/customer/page/product.php">Product</a>
             <a href="/customer/page/cart.php">Cart</a>
         </nav>

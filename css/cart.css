@@ -324,18 +324,6 @@
     margin: 0;
 }
 
-.quantity-control-cart {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.quantity-control-cart input,
-.quantity-control-cart button {
-    height: 38px;
-    line-height: 1;
-}
-
 .remove-btn {
     height: 38px;
     display: flex;

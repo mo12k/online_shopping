@@ -60,6 +60,7 @@ include '../../_header.php';
 ?>
 <link rel="stylesheet" href="../../css/app.css">
 <link rel="stylesheet" href="../../css/customer.css">
+
 <style>
     .container {
         width: 900px;
@@ -111,7 +112,6 @@ include '../../_header.php';
         grid-template-columns: 1fr auto;
         gap: 20px;
         align-items: center;
-        transition: none !important;
     }
 
     .order-info {
@@ -184,12 +184,12 @@ include '../../_header.php';
     }
 
     .btn-view {
-        background: #3498db;
+        background: linear-gradient(135deg, #8d6e63, #6d4c41);
         color: #fff;
     }
 
     .btn-view:hover {
-        background: #2980b9;
+        background: linear-gradient(135deg, #6d4c41, #5d4037);
     }
 
     .empty {
