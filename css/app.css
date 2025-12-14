@@ -597,7 +597,6 @@ body.token-page {
 }
 
 
-/* 強制所有產品圖片變成你截圖裡的完美正方形卡片風格 */
 .product-image-frame {
     width: 380px;
     height: 380px;
@@ -615,14 +614,14 @@ body.token-page {
 .product-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;        /* 關鍵！強制填滿，不變形 */
-    object-position: center;  /* 從中間裁 */
+    object-fit: cover;        
+    object-position: center;  
     border-radius: 20px;
     border: 8px solid white;
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
 
-/* 沒有圖片時的樣子 */
+
 .product-no-image {
     width: 380px;
     height: 380px;

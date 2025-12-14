@@ -560,6 +560,74 @@ function get_order_items($order_id) {
 }
 
 
+function success() {
+    global $_db;
+
+    if (!isset($_SESSION['pending_order'])) {
+        redirect('checkout.php');
+        exit;
+    }
+
+    $pending = $_SESSION['pending_order'];
+
+    $customer_id    = $pending['customer_id'];
+    $address_id     = $pending['address_id'];
+    $payment_method = $pending['payment_method'];
+
+    
+    $cart_items = get_cart_items($_db, $customer_id);
+
+    if (empty($cart_items)) {
+        temp('error', 'Cart is empty.');
+        redirect('cart.php');
+        exit;
+    }
+
+    $order_id = create_order(
+        $customer_id,
+        $cart_items,
+        $address_id,
+        $payment_method
+    );
+
+    if (!$order_id) {
+        temp('error', 'Failed to create order.');
+        redirect('checkout.php');
+        exit;
+    }
+
+    unset($_SESSION['pending_order']);
+    unset($_SESSION['payment_retry']);
+
+    
+    redirect("order_confirm.php?id=$order_id");
+    exit;
+}
+
+
+function fail($message = 'Payment failed.') {
+
+    $_SESSION['payment_retry'] = ($_SESSION['payment_retry'] ?? 0) + 1;
+
+    $MAX_RETRY = 3;
+
+    if ($_SESSION['payment_retry'] >= $MAX_RETRY) {
+        temp('error', 'Payment failed too many times. Please checkout again.');
+
+        unset($_SESSION['pending_order']);
+        unset($_SESSION['payment_retry']);
+
+        redirect('checkout.php');
+        exit;
+    }
+
+    
+    temp('error', $message);
+    redirect();
+    exit;
+}
+
+
 
 
    

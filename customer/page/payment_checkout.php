@@ -18,75 +18,72 @@ $MAX_RETRY = 3;
 /* =====================
    PROCESS PAYMENT
 ===================== */
-if ($payment_method === 'credit_card' || $payment_method === 'debit_card') {
+if (is_post()) {
 
-    $card_number = req('card_number');
-    $card_holder = req('card_holder');
-    $expiry      = req('expiry');
-    $cvv         = req('cvv');
+    if ($payment_method === 'credit_card' || $payment_method === 'debit_card') {
 
-    if (
-        preg_match('/^[0-9]{16}$/', $card_number) &&
-        preg_match('/^[A-Z ]+$/', strtoupper($card_holder)) &&
-        preg_match('/^[0-9]{2}\/[0-9]{2}$/', $expiry) &&
-        preg_match('/^[0-9]{3}$/', $cvv)
-    ) {
+        $card_number = req('card_number');
+        $card_holder = req('card_holder');
+        $expiry      = req('expiry');
+        $cvv         = req('cvv');
+
+        if (
+            preg_match('/^[0-9]{16}$/', $card_number) &&
+            preg_match('/^[A-Z ]+$/', strtoupper($card_holder)) &&
+            preg_match('/^[0-9]{2}\/[0-9]{2}$/', $expiry) &&
+            preg_match('/^[0-9]{3}$/', $cvv)
+        ) {
+            success();
+        } else {
+            fail('Invalid card details.');
+        }
+
+    }
+    elseif ($payment_method === 'online_banking') {
+
+        $bank     = req('bank');
+        $username = req('bank_username');
+        $password = req('bank_password');
+        $approve  = req('approve');
+
+        $valid_banks = ['Maybank', 'CIMB', 'Public Bank'];
+
+        if (!in_array($bank, $valid_banks)) {
+            fail('Invalid bank selected.');
+        }
+
+        if (!$username || !$password) {
+            fail('Invalid bank login.');
+        }
+
+        if ($approve === 'A') {
+            success();
+        } else {
+            fail('Payment rejected.');
+        }
+
+    }
+    elseif ($payment_method === 'e_wallet') {
+
+        $wallet  = req('wallet');
+        $confirm = req('confirm');
+
+        $valid_wallets = ['Touch n Go', 'Boost', 'GrabPay'];
+
+        if (!in_array($wallet, $valid_wallets)) {
+            fail('Invalid e-wallet.');
+        }
+
+        if ($confirm === 'Y') {
+            success();
+        } else {
+            fail('E-wallet payment not completed.');
+        }
+
+    }
+    elseif ($payment_method === 'cash_on_delivery') {
         success();
-    } else {
-        fail('Invalid card details.');
     }
-
-}
-elseif ($payment_method === 'online_banking') {
-
-    $bank     = req('bank');
-    $username = req('bank_username');
-    $password = req('bank_password');
-    $approve  = req('approve');
-
-    $valid_banks = ['Maybank', 'CIMB', 'Public Bank'];
-
-    if (!in_array($bank, $valid_banks)) {
-        fail('Invalid bank selected.');
-    }
-
-    if (!$username || !$password) {
-        fail('Invalid bank login.');
-    }
-
-    if ($approve === 'A') {
-        success();
-    } else {
-        fail('Payment rejected.');
-    }
-
-}
-elseif ($payment_method === 'e_wallet') {
-
-    $wallet  = req('wallet');
-    $confirm = req('confirm');
-
-    $valid_wallets = ['Touch n Go', 'Boost', 'GrabPay'];
-
-    if (!in_array($wallet, $valid_wallets)) {
-        fail('Invalid e-wallet.');
-    }
-
-    if ($confirm === 'Y') {
-        success();
-    } else {
-        fail('E-wallet payment not completed.');
-    }
-
-}
-elseif ($payment_method === 'cash_on_delivery') {
-    // Cash on delivery - process immediately on page load
-    if (!is_post()) {
-        success();
-    }
-}
-else {
-    fail('Invalid payment method.');
 }
 
 include '../../_head.php';
