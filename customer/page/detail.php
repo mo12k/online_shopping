@@ -111,8 +111,8 @@ $arr = $_db->query('SELECT * FROM product');
 
 /* + / - button */
 .qty-btn {
-    width: 42px;
-    height: 42px;
+    width: 38px;
+    height: 38px;
     border: 2px solid #D7CCC8; 
     background: #FFF;
     font-size: 22px;
@@ -324,8 +324,6 @@ $arr = $_db->query('SELECT * FROM product');
                                     value="1"
                                     autocomplete="off"
                                 >
-
-
                                 <div class="qty-btn plus" role="button" aria-label="Increase quantity">+</div>
                             </div>
 
@@ -349,8 +347,6 @@ $arr = $_db->query('SELECT * FROM product');
                 <div class="product-actions">
                     <a href="/customer/page/product.php" class="btn-back">Back to List</a>
                 </div>
-                
-            
             </div>
         </div>
     </div>

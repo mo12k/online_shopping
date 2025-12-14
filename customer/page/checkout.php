@@ -13,7 +13,8 @@ if (!isset($_SESSION['customer_id'])) {
 $customer_id = $_SESSION['customer_id'];
 
 $cart_items = get_cart_items($_db, $customer_id);
-if (empty($cart_items)) {
+
+if (empty($cart_items) && !isset($_SESSION['pending_order'])) {
     redirect('cart.php');
     exit;
 }
@@ -27,27 +28,20 @@ if (is_post()) {
     $payment_method = req('payment_method');
 
     if (!$address_id || !$payment_method) {
-        redirect();
+        redirect('checkout.php');
         exit;
     }
 
-    $order_id = create_order(
-        $customer_id,
-        $cart_items,
-        $address_id,
-        $payment_method
-    );
+    $_SESSION['pending_order'] = [
+        'customer_id'    => $customer_id,
+        'address_id'     => $address_id,
+        'payment_method' => $payment_method
+    ];
+    unset($_SESSION['payment_retry']);
 
-    if (!$order_id) {
-        temp('error', 'Checkout failed');
-        redirect();
-        exit;
-    }
-
-    redirect("order_confirm.php?id=$order_id");
+    redirect('payment_checkout.php');
     exit;
 }
-
 
 include '../../_head.php';
 include '../../_header.php';
@@ -55,7 +49,7 @@ include '../../_header.php';
 ?>
 
 <style>
-/* 保持你现有的CSS样式不变 */
+
 .checkout-container {
     min-width: 500px;
     max-width: 1000px;
@@ -72,7 +66,7 @@ include '../../_header.php';
 
 .order-summary, .checkout-form {
     background: white;
-    padding: 30px;
+    padding: 20px;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
@@ -99,6 +93,7 @@ include '../../_header.php';
     width: 16px;
     height: 16px;
     flex-shrink: 0;
+    margin-top: 2px;
 }
 
 .address-option {
@@ -115,13 +110,10 @@ include '../../_header.php';
     border-color: #6d4c41;
 }
 
-.address-option input[type="radio"]:checked + .address-details {
-    background: #f9f5f2;
-}
-
 .address-details {
      display: flex;
-     width: 500px;
+     flex: 1;              
+     flex-wrap: wrap; 
 }
 
 .payment-methods {
@@ -132,7 +124,7 @@ include '../../_header.php';
 
 .payment-option {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
     padding: 15px;
     border: 2px solid #e0e0e0;
@@ -149,6 +141,8 @@ include '../../_header.php';
     width: 16px;
     height: 16px;
     flex-shrink: 0;
+    margin-top: 2px;
+    
 }
 
 .order-item {

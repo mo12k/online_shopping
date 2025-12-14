@@ -1,7 +1,5 @@
 <?php
 require '../_base.php';
-include '../../_head.php';
-include '../../_header.php';
 
 if (!isset($_SESSION['customer_id'])) {
     temp('info', 'Please login to view order history');
@@ -35,7 +33,7 @@ if ($search !== '') {
     $params[] = "%$search%";
 }
 
-/* collect number of page */
+// collect number of page
 $stm = $_db->prepare("SELECT COUNT(*) FROM orders WHERE customer_id = ?" . ($search !== '' ? " AND (order_id LIKE ? OR status LIKE ? OR DATE(order_date) LIKE ?)" : ""));
 $count_params = [$customer_id];
 if ($search !== '') {
@@ -56,34 +54,37 @@ $sql .= " ORDER BY o.order_date DESC LIMIT " . intval($per_page) . " OFFSET " . 
 $stm = $_db->prepare($sql);
 $stm->execute($params);
 $orders = $stm->fetchAll();
+include '../../_head.php';
+include '../../_header.php';
 
 ?>
 <link rel="stylesheet" href="../../css/app.css">
 <link rel="stylesheet" href="../../css/customer.css">
 <style>
-
     .container {
-        max-width: 900px;
+        width: 900px;
         margin: 80px auto 40px;
         padding: 0 20px;
     }
 
     .search-bar {
-        margin-bottom: 30px;
+        margin-bottom: 30px ;
     }
 
     .search-form {
-        position: relative;
-        max-width: 400px;
+        position: relative ;
+        width: 100% ;
+        max-width: 400px ;
     }
 
-    .search-form input {
-        width: 100%;
+    .search-form input.key-in{
+        display: block ;
+        width: 100% ;
         padding: 12px 50px 12px 18px;
-        border-radius: 30px;
-        border: 1px solid #ddd;
-        font-size: 14px;
-        box-sizing: border-box;
+        border-radius: 30px ;
+        border: 1px solid #ddd ;
+        font-size: 14px ;
+        box-sizing: border-box ;
     }
 
     .search-icon {
@@ -91,10 +92,8 @@ $orders = $stm->fetchAll();
         right: 15px;
         top: 0;
         height: 100%;
-
         display: flex;
         align-items: center;
-
         cursor: pointer;
         color: #666;
         font-size: 18px;
@@ -112,6 +111,7 @@ $orders = $stm->fetchAll();
         grid-template-columns: 1fr auto;
         gap: 20px;
         align-items: center;
+        transition: none !important;
     }
 
     .order-info {
@@ -229,6 +229,7 @@ $orders = $stm->fetchAll();
     <div class="search-bar" style="display:flex; gap:12px; align-items:center;">
     <form method="get" class="search-form">
         <input
+            class="key-in"
             type="search"
             name="search"
             value="<?= encode($search) ?>"

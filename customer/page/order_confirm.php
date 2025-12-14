@@ -3,13 +3,13 @@ require '../_base.php';
 
 $order_id = $_GET['id'] ?? 0;
 if (!$order_id) {
-    header('Location: cart.php');
+    redirect('cart.php');
     exit;
 }
 
 if (!isset($_SESSION['customer_id'])) {
     $_SESSION['temp_info'] = 'Please login to view order';
-    header('Location: ../../page/login.php');
+    redirect('../../page/login.php');
     exit;
 }
 
@@ -351,6 +351,9 @@ $order_items = $stm->fetchAll();
             border-left: 5px solid #ffc107;
         }
     </style>
+
+    <title><?= $_page_title ?? 'Bookstore' ?></title>
+    <link rel="shortcut icon" href="../../images/book.png" type="image/x-icon">
 
     <div class="order-confirmation-container">
         <div class="confirmation-header">

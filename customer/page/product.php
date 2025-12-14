@@ -92,7 +92,6 @@ $info = temp('info');
     font-size: 15px !important;
 
     appearance: none !important;
-    -webkit-appearance: none !important;
 }
 
 .search-input-wrapper .search-icon {
@@ -147,7 +146,7 @@ $info = temp('info');
 
                 <a href="detail.php?id=<?= encode($s->id) ?>">
                     <?php if ($s->photo_name): ?>
-                <img src="../upload/<?= $s->photo_name ?>">
+                <img src="../../admin/upload/<?= $s->photo_name ?>">
                     <?php else: ?>
                 <img src="/images/no-photo.jpg" style="opacity:0.5;">
                     <?php endif; ?>

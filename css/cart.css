@@ -150,6 +150,7 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    margin-top: 3px;
 }
 
 .quantity-control-cart .qty-dec:hover,
@@ -176,7 +177,7 @@
     padding: 0;
     box-sizing: border-box;
     appearance: none;
-    -webkit-appearance: none;
+    margin-top: 3px;
 }
 
 /* actions */

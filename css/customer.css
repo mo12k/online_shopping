@@ -181,14 +181,12 @@ table th {
     max-width: 400px;
 }
 
-/* 搜索框容器 */
 .search-input-wrapper {
     position: relative;
     width: 600px;
     max-width: 100%;
 }
 
-/* 搜索输入框（覆盖全局 input 规则） */
 .search-input-wrapper input.key-in {
     box-sizing: border-box;
 
@@ -207,7 +205,6 @@ table th {
     display: block;
 }
 
-/* 放大镜 icon */
 .search-input-wrapper .search-icon {
     position: absolute;
     right: 10px;
@@ -216,8 +213,6 @@ table th {
     cursor: pointer;
     color: #8D6E63;
 }
-
-
 
 .search-input-wrapper .search-icon:hover {
     color: #4E342E;
@@ -468,7 +463,9 @@ input:focus-visible + .slider {
     border-radius: 10px;
     font-size: 15px;
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease,
+                box-shadow 0.2s ease,
+                transform 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -559,7 +556,11 @@ input:focus, select:focus, textarea:focus {
 .btn-primary {
     padding: 18px 80px; background: #6D4C41; color: #fff; border: none;
     border-radius: 16px; font-size: 19px; font-weight: bold; cursor: pointer;
-    box-shadow: 0 8px 25px rgba(109,76,65,0.18); transition: all 0.3s;
+    box-shadow: 0 8px 25px rgba(109,76,65,0.18); 
+    transition: background-color 0.3s ease,
+                transform 0.3s ease,
+                box-shadow 0.3s ease;
+
 }
 .btn-primary:hover { background: #5A3E34; transform: translateY(-2px); }
 
@@ -641,7 +642,6 @@ small { color: #98877b; font-size: 14px; }
 .product-detail-wrapper {
     display: flex;
     min-height: 680px;
-    flex-wrap: wrap;
 }
 
 .product-image-section {
@@ -793,9 +793,10 @@ small { color: #98877b; font-size: 14px; }
 
 .product-actions {
     margin-top: 50px;
-    text-align: center;
     padding-top: 30px;
     border-top: 2px dashed #E0D7D2;
+    display: flex;
+    justify-content: center;
 }
 
 .btn-edit {
@@ -842,7 +843,8 @@ small { color: #98877b; font-size: 14px; }
     border-radius: 10px;
     padding: 15px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-    transition: 0.2s;
+    transition: transform 0.2s ease,
+                box-shadow 0.2s ease;
     cursor: pointer;
     border: 1px solid #E0D7D2;
 }
@@ -958,11 +960,6 @@ small { color: #98877b; font-size: 14px; }
     border-radius: 30px;
     font-weight: 600;
     margin: 0 10px;
-}
-
-.btn-primary {
-    background: #6D4C41;
-    color: #fff;
 }
 
 .btn-secondary {
