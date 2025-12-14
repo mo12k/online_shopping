@@ -55,7 +55,6 @@ include '../../_header.php';
 ?>
 
 <style>
-/* 保持你现有的CSS样式不变 */
 .checkout-container {
     min-width: 500px;
     max-width: 1000px;
@@ -207,7 +206,7 @@ include '../../_header.php';
         
         <div class="checkout-form">
             <form method="post" id="checkout-form">
-                <!-- choose adress -->
+                <!-- choose address -->
                 <div class="form-section">
                     <h3>Delivery Address</h3>
                     <?php if (empty($addresses)): ?>

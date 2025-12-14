@@ -262,7 +262,7 @@ function table_headers($fields, $sort, $dir, $href = '') {
     $quantity = (int)$quantity;
     if ($quantity < 1 || !$customer_id) return;
 
-    // 找 cart
+    // find cart
     $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
     $stm->execute([$customer_id]);
     $cart = $stm->fetch();
@@ -414,7 +414,7 @@ function table_headers($fields, $sort, $dir, $href = '') {
     }
 
     
-    function create_order($customer_id, $cart_items, $address_id, $payment_method) {  // 改为 $cart_items
+    function create_order($customer_id, $cart_items, $address_id, $payment_method) {
     global $_db;
     
     try {
