@@ -8,7 +8,7 @@ $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
 <link rel="stylesheet" href="/css/app.css">
 <header>
     <div class="header-left">
-        <h1>Welcome to the Bookstore</h1>
+        <h1>Welcome to PaperNest Bookstore</h1>
         <nav class="navbar">
             <a href="/">Index</a>
             <a href="/customer/page/product.php">Product</a>
