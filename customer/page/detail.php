@@ -2,12 +2,16 @@
 require '../_base.php';
 include '../../_head.php';
 include '../../_header.php';
+
 $current = 'product';
 $_title = 'Product Detail';
 
-$id = get('id');
-if (!$id){ redirect('../page/product.php');
-exit;
+$hash = get('id');
+$id = decode_id($hash);
+
+if ($id <= 0) {
+    redirect('../page/product.php');
+    exit;
 }
 $stm = $_db->prepare('SELECT p.*, c.category_name 
                       FROM product p 

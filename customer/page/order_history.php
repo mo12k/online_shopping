@@ -290,14 +290,14 @@ include '../../_header.php';
                         RM <?= number_format($o->total_amount, 2) ?>
                     </div>
                     <br>
-                    <a href="order_confirm.php?id=<?= $o->order_id ?>" class="btn btn-view">
+                    <a href="order_confirm.php?id=<?= encode_id($o->order_id) ?>" class="btn btn-view">
                         View Order
                     </a>
                 </div>
             </div>
         <?php endforeach; ?>
         
-        <!-- 分页导航 -->
+        
         <div class="pager-container">
             <div class="pager">
                 <?php if ($page > 1): ?>

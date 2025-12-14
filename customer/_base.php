@@ -67,6 +67,19 @@
         return htmlentities($value);
     }
 
+    function encode_id($id) {
+        return rtrim(strtr(base64_encode((string)$id), '+/', '-_'), '=');
+    }
+
+    function decode_id($hash) {
+        if (!$hash) return 0;
+
+        $hash = strtr($hash, '-_', '+/');
+        $id = base64_decode($hash, true);
+
+        return ctype_digit($id) ? (int)$id : 0;
+    }
+
     function html_textarea($key, $attr = '') {
     $value = encode($GLOBALS[$key] ?? '');
     echo "<textarea id='$key' name='$key' $attr>$value</textarea>";
@@ -600,7 +613,7 @@ function success() {
     unset($_SESSION['payment_retry']);
 
     
-    redirect("order_confirm.php?id=$order_id");
+    redirect('order_confirm.php?id=' . encode_id($order_id));
     exit;
 }
 

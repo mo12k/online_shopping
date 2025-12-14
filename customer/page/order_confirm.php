@@ -1,12 +1,6 @@
 <?php
 require '../_base.php';
 
-$order_id = $_GET['id'] ?? 0;
-if (!$order_id) {
-    redirect('cart.php');
-    exit;
-}
-
 if (!isset($_SESSION['customer_id'])) {
     $_SESSION['temp_info'] = 'Please login to view order';
     redirect('../../page/login.php');
@@ -15,7 +9,14 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
-//check order
+$hash = $_GET['id'] ?? '';
+$order_id = decode_id($hash);
+
+if ($order_id <= 0) {
+    redirect('order_history.php');
+    exit;
+}
+
 $sql = 'SELECT o.*, ca.address, ca.city, ca.state, ca.postcode 
         FROM orders o 
         JOIN customer_address ca ON o.address_id = ca.address_id 
@@ -24,7 +25,11 @@ $stm = $_db->prepare($sql);
 $stm->execute([$order_id, $customer_id]);
 $order = $stm->fetch();
 
-// check product
+if (!$order) {
+    redirect('order_history.php');
+    exit;
+}
+
 $sql = 'SELECT oi.*, p.title, p.photo_name, oi.price_each 
         FROM order_item oi 
         JOIN product p ON oi.product_id = p.id 
@@ -33,8 +38,8 @@ $sql = 'SELECT oi.*, p.title, p.photo_name, oi.price_each
 $stm = $_db->prepare($sql);
 $stm->execute([$order_id]);
 $order_items = $stm->fetchAll();
-
 ?>
+
     <style>
         
         .order-confirmation-container {
