@@ -275,7 +275,7 @@ function table_headers($fields, $sort, $dir, $href = '') {
     $quantity = (int)$quantity;
     if ($quantity < 1 || !$customer_id) return;
 
-    // 找 cart
+    // cart
     $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
     $stm->execute([$customer_id]);
     $cart = $stm->fetch();
@@ -289,7 +289,7 @@ function table_headers($fields, $sort, $dir, $href = '') {
     }
 
     if ($mode === 'update') {
-        // 🔥 覆盖数量（cart 页面）
+        
         $stm = $_db->prepare('
             INSERT INTO cart_item (cart_id, product_id, quantity)
             VALUES (?, ?, ?)
@@ -297,7 +297,7 @@ function table_headers($fields, $sort, $dir, $href = '') {
         ');
         $stm->execute([$cart_id, $product_id, $quantity]);
     } else {
-        // 🔥 累加数量（商品页）
+        
         $stm = $_db->prepare('
             INSERT INTO cart_item (cart_id, product_id, quantity)
             VALUES (?, ?, ?)
@@ -618,7 +618,7 @@ function success() {
 }
 
 
-function fail($message = 'Payment failed.') {
+    function fail($message = 'Payment failed.') {
 
     $_SESSION['payment_retry'] = ($_SESSION['payment_retry'] ?? 0) + 1;
 

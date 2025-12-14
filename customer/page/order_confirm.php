@@ -215,26 +215,32 @@ $order_items = $stm->fetchAll();
         }
         
         .item-image {
+            max-width:80px;
+            max-height:80px;
             width: 80px;
             height: 100px;
-            object-fit: cover;
+            object-fit: contain;
+            display: block;
             border-radius: 8px;
             margin-right: 20px;
+            background: #f0f0f0;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
-        
+
         .no-image {
             width: 80px;
             height: 100px;
-            background: #ecf0f1;
             border-radius: 8px;
+            background: #f0f0f0;
             margin-right: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #95a5a6;
+            color: #999;
             font-size: 12px;
+            text-align: center;
         }
+
         
         .item-info {
             flex: 1;
