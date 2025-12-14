@@ -39,8 +39,8 @@ if (is_post()) {
     else if (!is_money($price)) {
         $_err['price'] = 'Must be money';
     }
-    else if ($price < 0.01 || $price > 99.99) {
-        $_err['price'] = 'Must between 0.01 - 99.99';
+    else if ($price < 0.01 || $price > 9999.99) {
+        $_err['price'] = 'Must between 0.01 - 9999.99';
     }
 
     if ($stock == '') {

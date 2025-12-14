@@ -49,7 +49,7 @@ if (is_post()) {
         $_err['price'] = 'Required';
     } elseif (!is_money($price)) {
         $_err['price'] = 'Must be money';
-    } elseif ($price < 0.01 || $price > 99.99) {
+    } elseif ($price < 0.01 || $price > 9999.99) {
         $_err['price'] = 'Must between 0.01 - 99.99';
     }
 
