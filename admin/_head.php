@@ -44,7 +44,7 @@
 
     <main>
         <div class="header">
-            <h2><?= htmlspecialchars($_title) ?></h2>
+            <h2><?= $_title ?></h2>
             <div class="user-info">
                 <img src="/admin/images/profile/<?= htmlspecialchars($_SESSION['profile_picture']) ?>" alt="Profile">
                 <span><?= htmlspecialchars($_SESSION['admin_username']) ?></span>
