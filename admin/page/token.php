@@ -106,7 +106,6 @@ $(() => {
 </script>
 
 <style>
-/* ===== Reset Password Page (Embedded Only) ===== */
 body.token-page {
     margin: 0;
     padding: 0;
