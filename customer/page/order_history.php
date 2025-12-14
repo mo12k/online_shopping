@@ -3,7 +3,6 @@ require '../_base.php';
 include '../../_head.php';
 include '../../_header.php';
 
-// 必须登录（最早）
 if (!isset($_SESSION['customer_id'])) {
     temp('info', 'Please login to view order history');
     redirect('../../page/login.php');
@@ -12,7 +11,6 @@ if (!isset($_SESSION['customer_id'])) {
 $customer_id = $_SESSION['customer_id'];
 $search = trim(req('search') ?? '');
 
-/* SQL - 使用子查询获取item_count */
 $sql = "
     SELECT 
         o.order_id,
@@ -37,7 +35,7 @@ if ($search !== '') {
     $params[] = "%$search%";
 }
 
-/* 分页 - 先获取总数 */
+/* collect number of page */
 $stm = $_db->prepare("SELECT COUNT(*) FROM orders WHERE customer_id = ?" . ($search !== '' ? " AND (order_id LIKE ? OR status LIKE ? OR DATE(order_date) LIKE ?)" : ""));
 $count_params = [$customer_id];
 if ($search !== '') {
@@ -46,16 +44,15 @@ if ($search !== '') {
 $stm->execute($count_params);
 $total_items = $stm->fetchColumn();
 
-/* 计算分页 */
+// calculate page
 $per_page = 5;
 $page = req('page', 1);
 $offset = ($page - 1) * $per_page;
 $total_pages = ceil($total_items / $per_page);
 
-// 添加ORDER BY并应用分页限制 - 直接拼接数字，不用参数绑定
+// order by date, only show intval(per_page), skip the intval($offset) page
 $sql .= " ORDER BY o.order_date DESC LIMIT " . intval($per_page) . " OFFSET " . intval($offset);
 
-/* 执行查询 */
 $stm = $_db->prepare($sql);
 $stm->execute($params);
 $orders = $stm->fetchAll();
@@ -67,7 +64,7 @@ $orders = $stm->fetchAll();
 
     .container {
         max-width: 900px;
-        margin: 80px auto 40px; /* 添加顶部边距避免被header遮挡 */
+        margin: 80px auto 40px;
         padding: 0 20px;
     }
 
