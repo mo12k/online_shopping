@@ -12,6 +12,7 @@ $_title  = 'Order List';
 $name      = trim(req('name') ?? '');
 $date_from = req('date_from');
 $date_to   = req('date_to');
+$status = req('status');
 
 /* =========================
    Table headers (for sort)
@@ -24,6 +25,7 @@ $fields = [
     'o.status'       => 'Status',
     'o.order_date'   => 'Order Date',
 ];
+
 
 /* =========================
    SQL
@@ -38,7 +40,7 @@ SELECT
     c.username,
 
     SUM(oi.quantity)        AS total_qty,
-    COUNT(oi.order_item_id) AS line_count
+    COUNT(oi.order_item_id) 
 
 FROM orders o
 LEFT JOIN customer c
@@ -53,6 +55,12 @@ $params = [];
 
 $q = [];
 
+$status_list = [
+    'pending'   => 'Pending',
+    'shipping'  => 'Shipping',
+    'completed' => 'Completed',
+];
+
 /* Search */
 if ($name !== '') {
     $q[] = 'name=' .$name;
@@ -65,6 +73,12 @@ if ($date_from !== '') {
 
 if ($date_to !== '') {
     $q[] = 'date_to=' .$date_to;
+}
+
+if ($status !== '' && in_array($status, ['pending','shipping','completed'])) {
+    $sql .= " AND o.status = ?";
+    $params[] = $status;
+    $q[] = 'status=' . $status;
 }
 
 /* Final query string */
@@ -111,7 +125,7 @@ include '../_head.php';
     <!-- 🔍 Search bar -->
     <form method="get" class="search-form" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
         <?= html_search('name', 'Order ID / Username') ?>
-
+         <?= html_select('status', $status_list, 'All status' , '', true) ?>
         <input type="date" name="date_from" value="<?= encode($date_from) ?>">
         <input type="date" name="date_to" value="<?= encode($date_to) ?>">
 
@@ -119,7 +133,12 @@ include '../_head.php';
              Search</button>
         <a href="order.php" style="padding:14px 32px; background:yellow; color:black; border:none; border-radius:16px; text-decoration: none; ">
             Reset</a>
+
+        
     </form>
+
+   
+
 
     <p>
         <?= $p->count ?> of <?= $p->item_count ?> record(s) |
@@ -151,7 +170,21 @@ include '../_head.php';
                     <td>RM <?= number_format($s->total_amount, 2) ?></td>
 
                     <td>
-                        <span style="color:<?= $s->status === 'completed' ? 'green' : 'orange' ?>">
+                        <?php
+                            $status_class = match ($s->status) {
+                                'pending'   => 'background:#fff3cd;color:#856404;',
+                                'shipping'  => 'background:#cce5ff;color:#004085;',
+                                'completed' => 'background:#d4edda;color:#155724;',
+                                default     => 'background:#eee;color:#333;',
+                            };
+                        ?>
+                        <span style="
+                            padding:6px 14px;
+                            border-radius:20px;
+                            font-size:13px;
+                            font-weight:600;
+                            <?= $status_class ?>
+                        ">
                             <?= ucfirst($s->status) ?>
                         </span>
                     </td>
@@ -164,6 +197,22 @@ include '../_head.php';
                         <button data-get="../order/detail.php?id=<?= encode($s->order_id) ?>" class="btn">
                             View
                         </button>
+                        <button data-get="../order/export.php?id=<?= encode($s->order_id) ?>" class="btn">
+                            Export File
+                        </button>
+
+                        <?php if ($s->status === 'shipping'): ?>
+                            
+                            <form method="post" action="../order/arrived.php" style="display:inline;">
+                                <input type="hidden" name="id" value="<?= encode($s->order_id) ?>">
+                                <button
+                                    class="btn"
+                                    style="background:#28a745;color:#fff;"
+                                    onclick="return confirm('Mark this order as completed?')">
+                                    Arrived
+                                </button>
+                            </form>
+                        <?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

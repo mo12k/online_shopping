@@ -43,7 +43,8 @@ $stm = $_db->prepare("
     SELECT 
         oi.*,
         p.title,
-        p.photo_name
+        p.photo_name,
+        p.price
     FROM order_item oi
     LEFT JOIN product p ON oi.product_id = p.id
     WHERE oi.order_id = ?
@@ -55,7 +56,9 @@ include '../_head.php';
 ?>
 
 <div class="content">
-
+    <div style="margin-top:30px;">
+        <a href="../page/order.php" class="btn">← Back to Order List</a>
+    </div>
     <h2>Order #<?= encode($order->order_id) ?></h2>
 
     <!-- ================= Order Info ================= -->
@@ -117,18 +120,16 @@ include '../_head.php';
                     <?php endif; ?>
                 </td>
                 <td><?= encode($i->title) ?></td>
-                <td>RM <?= number_format($i->price, 2) ?></td>
+                <td>RM <?= number_format($i->price_each, 2) ?></td>
                 <td><?= $i->quantity ?></td>
                 <td>
-                    RM <?= number_format($i->price * $i->quantity, 2) ?>
+                    RM <?= number_format($i->subtotal , 2) ?>
                 </td>
             </tr>
         <?php endforeach; ?>
     </table>
 
-    <div style="margin-top:30px;">
-        <a href="../page/order.php" class="btn">← Back to Order List</a>
-    </div>
+    
 
 </div>
 
