@@ -36,18 +36,6 @@ $order_items = $stm->fetchAll();
 
 ?>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
         
         .order-confirmation-container {
             max-width: 900px;
@@ -99,35 +87,6 @@ $order_items = $stm->fetchAll();
         
         .confirmation-content {
             padding: 50px;
-        }
-        
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 2px solid #c3e6cb;
-        }
-        
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 2px solid #f5c6cb;
-        }
-        
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 2px solid #bee5eb;
         }
         
         .order-details {
@@ -212,7 +171,7 @@ $order_items = $stm->fetchAll();
         
         .total-value {
             font-size: 36px;
-            color: #e74c3c;
+            color: #5d4037;
             font-weight: 700;
         }
         
@@ -224,7 +183,7 @@ $order_items = $stm->fetchAll();
             margin-bottom: 25px;
             color: #2c3e50;
             font-size: 24px;
-            border-bottom: 2px solid #3498db;
+            border-bottom: 2px solid #8d6e63;
             padding-bottom: 10px;
         }
         
@@ -242,7 +201,7 @@ $order_items = $stm->fetchAll();
             border-radius: 12px;
             box-shadow: 0 3px 15px rgba(0,0,0,0.08);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-left: 5px solid #3498db;
+            border-left: 5px solid #8d6e63;
         }
         
         .order-item:hover {
@@ -320,15 +279,15 @@ $order_items = $stm->fetchAll();
         }
         
         .btn-continue {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            background: linear-gradient(135deg, #8d6e63, #5d4037);
             color: white;
             box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
         }
         
         .btn-history {
             background: white;
-            color: #2c3e50;
-            border: 2px solid #3498db;
+            color: #5d4037;
+            border: 2px solid #8d6e63;
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
         }
         

@@ -78,20 +78,14 @@ $info = temp('info');
 .search-input-wrapper input.key-in {
     box-sizing: border-box ;
     display: block ;
-
-    width: 100% !important;
-    height: 36px !important;
-
-    padding: 0 36px 0 12px !important;
-
-    border: 1px solid #D7CCC8 !important;
-    border-radius: 8px !important;
-
-    background-color: #ffffff !important;
-    color: #5D4037 !important;
-    font-size: 15px !important;
-
-    appearance: none !important;
+    width: 100% ;
+    height: 36px ;
+    padding: 0 36px 0 12px ;
+    border: 1px solid #D7CCC8 ;
+    border-radius: 8px ;
+    background-color: #ffffff;
+    color: #5D4037 ;
+    font-size: 15px;
 }
 
 .search-input-wrapper .search-icon {

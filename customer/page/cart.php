@@ -6,9 +6,6 @@ $current = 'cart';
 $_title = 'Shopping Cart';
 
 if (!isset($_SESSION['customer_id'])) {
-    temp('error');
-    temp('success');
-    temp('info', 'Please login to view your cart');
     redirect('../../page/login.php');
     exit;
 }
