@@ -94,16 +94,14 @@ if (is_post()) {
     }
 }
 ?>
-<?php if ($info): ?>
-<div class="alert-success-fixed">
-    <div class="alert-content">
-        <?= encode($info) ?>
-        <span class="alert-close">×</span>
-    </div>
-</div>
-<?php endif; ?>
 
 <div class="container-register">
+    <?php if ($info): ?>
+    <div class="alert-message">
+        <?= $info ?>
+    </div>
+    <?php endif; ?>
+    
     <form id="register-form" method="POST" action="register.php">        
         <h2>Account Details</h2>
         <label for="username">Username *</label>

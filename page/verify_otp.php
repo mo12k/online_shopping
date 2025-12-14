@@ -85,6 +85,17 @@ include '../_head.php';
         font-size: 14px;
         margin-top: 8px;
     }
+
+    .verify-otp-container .alert-message {
+        background: #d4edda;
+        color: #155724;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid #c3e6cb;
+        margin-bottom: 20px;
+        font-size: 14px;
+        text-align: center;
+    }
 </style>
 
 <?php
@@ -156,16 +167,14 @@ if (is_post()) {
 }
 
 ?>
-<?php if ($info): ?>
-<div class="alert-success-fixed">
-    <div class="alert-content">
-        <?= encode($info) ?>
-        <span class="alert-close">×</span>
-    </div>
-</div>
-<?php endif; ?>
 
 <div class="verify-otp-container">
+    <?php if ($info): ?>
+    <div class="alert-message">
+        <?= $info ?>
+    </div>
+    <?php endif; ?>
+    
     <h2>Email Verification</h2>
     <p>Please enter the 6-digit code sent to your email</p>
 
