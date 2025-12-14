@@ -6,7 +6,21 @@ require '../_base.php';
 include '../_head.php';
 include '../_header.php';
 
+
 if(is_post()) {
+    // Verify reCAPTCHA first
+    if(isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
+        $secret_key = "6LfLYissAAAAABLmeoM3fqosSJl4UPfAP7eGujAf";
+        $verify_response = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secret_key.'&response='.$_POST['g-recaptcha-response']);
+        $response = json_decode($verify_response);
+
+        if(!$response->success) {
+            $_err['general'] = "reCAPTCHA verification failed. Please try again.";
+        }
+    } else {
+        $_err['general'] = "Please complete the reCAPTCHA verification.";
+    }
+    
     $username = trim(req('username'));
     $password = req('password');
     
@@ -100,6 +114,12 @@ if(is_post()) {
 }
 ?>
 
+<script>
+    function enableSubmitButton() {
+        document.getElementById("submitBtn").disabled = false;
+    }
+</script>
+
 <main>
     <div class="container-login">
         <div class="wrapper-login">
@@ -133,8 +153,13 @@ if(is_post()) {
 
                     <a href="forgot-password.php" class="link">Forgot Password?</a>
                 </div>
+                
+                <div class="field recaptcha">
+                      <div class="g-recaptcha" data-sitekey="6LfLYissAAAAALGrZhgnfryvtu2-y9xfyoeapoKl" data-callback="enableSubmitButton"></div>
+                </div>
 
-                <button type="submit" name="submit" value="login"> Login </button>
+
+                <button type="submit" name="submit" value="login" id="submitBtn" disabled>Login</button>
 
                 <div class="register-link">
                     <p> Don't have an account? <a href="register.php" class="link"> Register Here </a> </p>
