@@ -78,16 +78,125 @@ $_body_class = 'token-page';
 $_page_title = 'Reset Password';
 require '../_head.php';   
 ?>
-<?php if ($info): ?>
-<div class="alert-success-fixed">
-    <div class="alert-content">
-        <?= encode($info) ?>
-        <span class="alert-close">×</span>
-    </div>
-</div>
-<?php endif; ?>
+<style>
+body.token-page {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #ede7e3, #d7ccc8);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container-token {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+}
+
+.wrapper-token {
+    background: #fff;
+    padding: 32px 36px;
+    border-radius: 22px;
+    box-shadow: 0 14px 45px rgba(0,0,0,.15);
+}
+
+.wrapper-token h1 {
+    text-align: center;
+    margin-bottom: 26px;
+    font-size: 28px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Form layout */
+.wrapper-token form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.wrapper-token label {
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* Inputs */
+.wrapper-token input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.wrapper-token .field.input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Password rules */
+.password-rules {
+    margin-top: 10px;
+    width: 100%;
+    padding-right: 8px;
+    box-sizing: border-box;
+}
+
+.password-rules .rule {
+    font-size: 13px;
+    color: red;
+    margin: 4px 0;
+    word-wrap: break-word;
+}
+
+.password-rules .rule.valid {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+/* Button */
+.wrapper-token button {
+    margin-top: 10px;
+    width: 100%;
+    padding: 13px;
+    border-radius: 14px;
+    border: none;
+    background: #5b7cfa;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.wrapper-token button:hover {
+    background: #4868e8;
+}
+
+.wrapper-token .alert-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #c3e6cb;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+</style>
+
 <div class="container-token">
     <div class="wrapper-token">
+        <?php if ($info): ?>
+        <div class="alert-message">
+            <?= $info ?>
+        </div>
+        <?php endif; ?>
+        
         <h1>Reset Your Password</h1>
     
         <form method="post" class="form">

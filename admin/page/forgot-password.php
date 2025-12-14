@@ -87,17 +87,13 @@ if (is_post()) {
 ?>
 
 <div class="container-forgot-password">
-
-    <?php if ($info): ?>
-    <div class="alert-success-fixed">
-        <div class="alert-content">
-            <strong>Success!</strong> <?= encode($info) ?>
-            <span class="alert-close">×</span>
-        </div>
-    </div>
-    <?php endif; ?>
-
     <div class="wrapper-forgot-password">
+        <?php if ($info): ?>
+        <div class="alert-message">
+            <?= $info ?>
+        </div>
+        <?php endif; ?>
+        
         <h1>Forgot Password</h1>
         <form method="post">
             <div class="field input">
