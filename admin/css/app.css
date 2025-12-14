@@ -229,7 +229,7 @@ body {
     gap: 12px;
     flex-wrap: wrap;
     flex: 1;
-    max-width: 900px;
+    max-width: 500px;
 }
 
 /* html search /html select */

@@ -12,7 +12,8 @@ $name = trim(req('name')?? '');
 
 // searhing all possible 
 // use
-
+$date_from = req('date_from');
+$date_to   = req('date_to');
 
 //header set sort
 $fields = [
@@ -22,12 +23,16 @@ $fields = [
     'p.title'         => 'Title',
     'p.author'       => 'Author',
     'c.category_code'     => 'Category',
-    'p.price' => 'Price',
+    'p.price' => 'Price(RM)',
     'p.stock'     => 'Stock',
     'p.status' => 'Status',
 ];
 
+$q = [];
 
+if ($name !== '')        $q[] = 'name=' .$name;
+if ($category_id !== '') $q[] = 'category_id=' . $category_id;
+$qs = implode('&', $q);
 
 $sql = "SELECT p.*, c.*
         FROM product p 
@@ -35,6 +40,8 @@ $sql = "SELECT p.*, c.*
         WHERE 1=1";
 
 $params = [];
+
+
 
 if ($name !== '') {
     $sql .= " AND (p.title LIKE ? OR p.author LIKE ? OR p.id LIKE ?)";
@@ -114,7 +121,7 @@ include '../_head.php';
     <table class="product-table" >
         <tr>
             <!-- table title can click ,have link to baase php -->
-            <?= table_headers($fields, $sort, $dir ,"page=$page") ?>
+            <?= table_headers($fields, $sort, $dir ,"page=$page&$qs") ?>
             <th>Action</th>
         </tr>
 
@@ -162,7 +169,7 @@ include '../_head.php';
             <?php endforeach ?>
         <?php endif;  ?>
     </table>    
-                <?= $p->html("sort=$sort&dir=$dir") ?>
+                <?= $p->html("sort=$sort&dir=$dir&$qs") ?>
                 
 </div>
 

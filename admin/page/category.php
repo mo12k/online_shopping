@@ -22,8 +22,9 @@ $fields = [
     'category_name'         => 'Name',
     
 ];
-
-
+$q = [];
+if ($name !== '')        $q[] = 'name=' .$name;
+$qs = implode('&', $q);
 
 $sql = "SELECT *
         FROM category
@@ -106,7 +107,7 @@ include '../_head.php';
     <table class="product-table" >
         <tr>
             <!-- table title can click ,have link to baase php -->
-            <?= table_headers($fields, $sort, $dir ) ?>
+            <?= table_headers($fields, $sort, $dir ,"page=$page&$qs") ?>
             <th>Action</th>
         </tr>
 
@@ -136,7 +137,7 @@ include '../_head.php';
             <?php endforeach ?>
         <?php endif;  ?>
     </table>    
-                <?= $p->html("sort=$sort&dir=$dir") ?>
+                <?= $p->html("sort=$sort&dir=$dir&$qs") ?>
                 
 </div>
 
