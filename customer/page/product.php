@@ -50,35 +50,35 @@ if ($name !== '') {
 $info = temp('info');
 ?>
 
-<style>
-.search-input-wrapper {
-    position: relative;
-    width: 600px;
-    max-width: 100%;
-}
+    <style>
+    .search-input-wrapper {
+        position: relative;
+        width: 600px;
+        max-width: 100%;
+    }
 
-.search-input-wrapper input.key-in {
-    box-sizing: border-box;
-    display: block;
-    width: 100%;
-    height: 36px;
-    padding: 0 36px 0 12px;
-    border: 1px solid #D7CCC8;
-    border-radius: 8px;
-    background-color: #ffffff;
-    color: #5D4037;
-    font-size: 15px;
-}
+    .search-input-wrapper input.key-in {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        height: 36px;
+        padding: 0 36px 0 12px;
+        border: 1px solid #D7CCC8;
+        border-radius: 8px;
+        background-color: #ffffff;
+        color: #5D4037;
+        font-size: 15px;
+    }
 
-.search-input-wrapper .search-icon {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: #8D6E63;
-}
-</style>
+    .search-input-wrapper .search-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #8D6E63;
+    }
+    </style>
 
 <div class="content">
 
