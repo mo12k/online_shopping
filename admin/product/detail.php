@@ -67,7 +67,7 @@ include '../_head.php';
 
                 <div class="info-row">
                     <span class="info-label">Price</span>
-                    <span class="info-price">RM <?= number_format($s->price, 0) ?></span>
+                    <span class="info-price">RM <?= number_format($s->price, 2) ?></span>
                 </div>
 
                 <div class="info-row">
