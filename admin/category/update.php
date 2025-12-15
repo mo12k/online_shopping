@@ -69,7 +69,7 @@ if (is_post()) {
                  WHERE category_id = ?"
             )->execute([$category_code, $category_name, $id]);
 
-            temp('info', 'Category updated successfully');
+            temp('success', 'Category updated successfully');
             redirect('/admin/page/category.php');
 
         } catch (PDOException $e) {

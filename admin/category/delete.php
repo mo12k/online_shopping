@@ -9,7 +9,7 @@ if (is_post()) {
 
      $query = http_build_query([
         'sort' => get('sort', 'id'),     
-        'dir'  => get('dir', 'desc'),    
+        'dir'  => get('dir', 'asc'),    
         'page' => get('page') ,           
         'category_id'=> get('category_id')  ,
         'name'=> get('name')  
@@ -20,13 +20,13 @@ if (is_post()) {
     $stm->execute([$category_id ]);
     
     if($stm->fetchColumn()>0){
-        temp('info', 'Has been related product ,Please change product category first');
+        temp('error', 'Has been related product ,Please change product category first');
         redirect('../page/category.php?'. $query);
        exit;
     }
     else {
-    temp('info', "Record ID:$category_id deleted");
-       $stm = $_db->prepare('DELETE FROM category WHERE category_id = ?');
+    temp('success', "Record ID:$category_id deleted");
+    $stm = $_db->prepare('DELETE FROM category WHERE category_id = ?');
     $stm->execute([$category_id]);
    
     

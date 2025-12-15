@@ -13,6 +13,7 @@ $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
             <a href="/">Home</a>
             <a href="/customer/page/product.php">Product</a>
             <a href="/customer/page/cart.php">Cart</a>
+            <a href="/customer/page/order_history.php">History</a>
         </nav>
     </div>
     <nav class="navbar">

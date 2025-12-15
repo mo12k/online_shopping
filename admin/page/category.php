@@ -31,8 +31,6 @@ $sql = "SELECT *
         WHERE 1=1
        ";
 
-
-
 $params = [];
 
 if ($name !== '') {
@@ -62,8 +60,9 @@ $p = new SimplePager($sql, $params, 10, $page);
 $arr = $p->result;
 
 
+$success = temp('success');
+$error   = temp('error');
 
-$info = temp('info');
 
 include '../_head.php';
 
@@ -91,14 +90,24 @@ include '../_head.php';
          
 
        
-        <?php if ($info): ?>
-        <div class="alert-success-fixed">
+        <?php if ($error): ?>
+        <div class="alert-error-fixed">
             <div class="alert-content">
-                <strong>Success!</strong> <?= encode($info) ?>
+                <strong>Error!</strong> <?= encode($error) ?>
                 <span class="alert-close">×</span>
             </div>
         </div>
         <?php endif; ?>
+
+        <?php if ($success): ?>
+        <div class="alert-success-fixed">
+            <div class="alert-content">
+                <strong>Success!</strong> <?= encode($success) ?>
+                <span class="alert-close">×</span>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <p style="margin:20px 0; color:#666; font-size:15px;">
           <?= $p->item_count ?> record(s)
         </p>

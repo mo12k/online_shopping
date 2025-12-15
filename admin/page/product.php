@@ -159,9 +159,6 @@ include '../_head.php';
                 <td style="text-align:center;">
                     <button data-get="../product/detail.php?id=<?= encode($s->id)?>" class="btn">View</button>
                     <button data-get="../product/update.php?id=<?= encode($s->id) ?>" class="btn edit">Edit</button>
-                    <button data-post="../product/delete.php?id=<?= encode($s->id) ?>" 
-                       data-confirm="Confirm delete「<?= encode($s->title) ?>」？"
-                       class="btn delete">Delete</button>
                 </td>
                 
             

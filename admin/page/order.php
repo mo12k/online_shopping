@@ -18,12 +18,12 @@ $status = req('status');
    Table headers (for sort)
 ========================= */
 $fields = [
-    'o.order_id'     => 'Order ID',
-    'c.username'     => 'Customer',
+    'order_id'     => 'Order ID',
+    'username'     => 'Customer',
     'total_qty'      => 'Total Qty',
-    'o.total_amount' => 'Total (RM)',
-    'o.status'       => 'Status',
-    'o.order_date'   => 'Order Date',
+    'total_amount' => 'Total (RM)',
+    'status'       => 'Status',
+    'order_date'   => 'Order Date',
 ];
 
 
@@ -31,25 +31,32 @@ $fields = [
    SQL
 ========================= */
 $sql = "
-SELECT
-    o.order_id,
-    o.total_amount,
-    o.status,
-    o.order_date,
+    SELECT *
+    FROM (
+        SELECT
+            o.order_id,
+            o.total_amount,
+            o.status,
+            o.order_date,
+            c.username,
+            COALESCE(SUM(oi.quantity), 0) AS total_qty
+        FROM orders o
+        LEFT JOIN customer c
+            ON o.customer_id = c.customer_id
+        LEFT JOIN order_item oi
+            ON o.order_id = oi.order_id
+        WHERE 1 = 1
 
-    c.username,
-
-    SUM(oi.quantity)        AS total_qty,
-    COUNT(oi.order_item_id) 
-
-FROM orders o
-LEFT JOIN customer c
-    ON o.customer_id = c.customer_id
-LEFT JOIN order_item oi
-    ON o.order_id = oi.order_id
-
-WHERE 1 = 1
 ";
+
+$count_sql = "
+    SELECT COUNT(DISTINCT o.order_id)
+    FROM orders o
+    LEFT JOIN customer c ON o.customer_id = c.customer_id
+    LEFT JOIN order_item oi ON o.order_id = oi.order_id
+    WHERE 1 = 1
+";
+
 
 $params = [];
 
@@ -57,72 +64,89 @@ $q = [];
 
 $status_list = [
     'pending'   => 'Pending',
+    'delivery'  => 'Delivery',
     'shipping'  => 'Shipping',
     'completed' => 'Completed',
 ];
 
-/* Search */
+$params = [];
+$q = [];
+
+/* =========================
+   Search: Order ID / Username
+========================= */
 if ($name !== '') {
-    $q[] = 'name=' .$name;
+    $sql .= " AND (CAST(o.order_id AS CHAR) LIKE ? OR c.username LIKE ?)";
+    $count_sql .= " AND (CAST(o.order_id AS CHAR) LIKE ? OR c.username LIKE ?)";
+    $params[] = "%$name%";
+    $params[] = "%$name%";
+    $q[] = 'name=' . $name;
 }
 
-/* Date range */
+/* =========================
+   Date range
+========================= */
 if ($date_from !== '') {
+    $sql .= " AND o.order_date >= ?";
+    $count_sql .= " AND o.order_date >= ?";
+    $params[] = $date_from . ' 00:00:00';
     $q[] = 'date_from=' . $date_from;
 }
 
 if ($date_to !== '') {
-    $q[] = 'date_to=' .$date_to;
+    $sql .= " AND o.order_date <= ?";
+    $count_sql .= " AND o.order_date <= ?";
+    $params[] = $date_to . ' 23:59:59';
+    $q[] = 'date_to=' . $date_to;
 }
 
+/* =========================
+   Status filter
+========================= */
 if ($status !== '' && in_array($status, ['pending','shipping','completed'])) {
     $sql .= " AND o.status = ?";
+    $count_sql .= " AND o.status = ?";
     $params[] = $status;
     $q[] = 'status=' . $status;
 }
 
-/* Final query string */
+/* =========================
+   Final query string (for paging/sort)
+========================= */
 $qs = implode('&', $q);
 
 
-if ($name !== '') {
-    $sql .= " AND (CAST(o.order_id AS CHAR) LIKE ? OR c.username LIKE ?)";
-    $params[] = "%$name%";
-    $params[] = "%$name%";
-}
-
-
-if ($date_from) {
-    $sql .= " AND o.order_date >= ?";
-    $params[] = $date_from . ' 00:00:00';
-}
-
-if ($date_to) {
-    $sql .= " AND o.order_date <= ?";
-    $params[] = $date_to . ' 23:59:59';
-}
-
 
 $sort = req('sort');
-key_exists($sort, $fields) || $sort = 'o.order_id';
+key_exists($sort, $fields) || $sort = 't.order_id';
 
 $dir = req('dir');
 in_array($dir, ['asc', 'desc']) || $dir = 'desc';
 
-$sql .= " GROUP BY o.order_id ORDER BY $sort $dir";
+$sql .= " GROUP BY o.order_id
+) t
+ORDER BY $sort $dir";
 
 
 $page = req('page', 1);
 require_once '../lib/SimplePager.php';
-$p = new SimplePager($sql, $params, 10, $page);
+$p = new SimpleOPager(
+    $sql,
+    $count_sql,
+    $params,
+    10,
+    $page
+);
+
 $arr = $p->result;
+
 
 include '../_head.php';
 ?>
 
 <div class="content">
 
-    <!-- 🔍 Search bar -->
+    <!-- Search bar -->
     <form method="get" class="search-form" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
         <?= html_search('name', 'Order ID / Username') ?>
          <?= html_select('status', $status_list, 'All status' , '', true) ?>
@@ -197,9 +221,9 @@ include '../_head.php';
                         <button data-get="../order/detail.php?id=<?= encode($s->order_id) ?>" class="btn">
                             View
                         </button>
-                        <button data-get="../order/export.php?id=<?= encode($s->order_id) ?>" class="btn">
+                        <a href="../order/export.php?id=<?= encode($s->order_id) ?>" target="_blank" class="btn">
                             Export File
-                        </button>
+                        </a>
 
                         <?php if ($s->status === 'shipping'): ?>
                             
@@ -219,7 +243,7 @@ include '../_head.php';
         <?php endif; ?>
     </table>
 
-    <?= $p->html("sort=$sort&dir=$dir&$qs") ?>
+    <?= $p->html0("sort=$sort&dir=$dir&$qs") ?>
 
 </div>
 

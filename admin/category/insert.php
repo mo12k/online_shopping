@@ -59,7 +59,7 @@ if (is_post()) {
              VALUES (?, ?)"
         )->execute([$category_code, $category_name]);
 
-        temp('info', 'Category added successfully');
+        temp('success', 'Category added successfully');
         redirect('/admin/page/category.php');
     }
 }

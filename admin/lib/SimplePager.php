@@ -80,5 +80,89 @@ class SimplePager {
 
     echo '</div></div>';
 }
+}
 
+
+
+class SimpleOPager {
+
+    public int $limit;        
+    public int $page;        
+    public int $item_count;   
+    public int $page_count;   
+    public array $result;     
+    public int $count;        
+
+    public function __construct(
+        string $list_sql,      
+        string $count_sql,     
+        array  $params,
+        int    $limit,
+        int    $page
+    ) {
+        global $_db;
+
+      
+        $this->limit = max((int)$limit, 1);
+        $this->page  = max((int)$page, 1);
+
+       
+        $stm = $_db->prepare($count_sql);
+        $stm->execute($params);
+        $this->item_count = (int)$stm->fetchColumn();
+
+        $this->page_count = max((int)ceil($this->item_count / $this->limit), 1);
+
+        if ($this->page > $this->page_count) {
+            $this->page = $this->page_count;
+        }
+
+       
+        $offset = ($this->page - 1) * $this->limit;
+        $final_sql = $list_sql . " LIMIT $offset, {$this->limit}";
+
+        $stm = $_db->prepare($final_sql);
+        $stm->execute($params);
+        $this->result = $stm->fetchAll();
+
+        $this->count = count($this->result);
+    }
+
+  
+    public function html0(string $query = '') {
+        if ($this->page_count <= 1) return;
+
+        $query = $query ? '&' . ltrim($query, '&') : '';
+
+        echo '<div class="pager-container"><div class="pager">';
+
+        // First / Prev
+        if ($this->page > 1) {
+            echo "<a class='pager-btn' href='?page=1$query'>First</a>";
+            echo "<a class='pager-btn' href='?page=" . ($this->page - 1) . "$query'>Previous</a>";
+        } else {
+            echo "<span class='pager-btn disabled'>First</span>";
+            echo "<span class='pager-btn disabled'>Previous</span>";
+        }
+
+       
+        $start = max(1, $this->page - 3);
+        $end   = min($this->page_count, $this->page + 3);
+
+        for ($i = $start; $i <= $end; $i++) {
+            $active = $i === $this->page ? 'active' : '';
+            echo "<a class='pager-btn $active' href='?page=$i$query'>$i</a>";
+        }
+
+       
+        if ($this->page < $this->page_count) {
+            echo "<a class='pager-btn' href='?page=" . ($this->page + 1) . "$query'>Next</a>";
+            echo "<a class='pager-btn' href='?page={$this->page_count}$query'>Last</a>";
+        } else {
+            echo "<span class='pager-btn disabled'>Next</span>";
+            echo "<span class='pager-btn disabled'>Last</span>";
+        }
+
+        echo '</div></div>';
+    }
 }

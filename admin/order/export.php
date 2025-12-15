@@ -2,93 +2,197 @@
 require '../_base.php';
 admin_require_login();
 
-
-$id = get('id');
-if (!$id) {
-    die('Invalid order id');
+/* =========================
+   Get Order ID
+========================= */
+$order_id = req('id');
+if (!$order_id) {
+    die('Invalid order ID');
 }
 
-
+/* =========================
+   Order + Customer + Address
+========================= */
 $stm = $_db->prepare("
-    SELECT
+    SELECT 
         o.order_id,
         o.total_amount,
         o.status,
         o.order_date,
 
         c.username,
+        c.email,
 
         a.address,
         a.postcode,
         a.city,
         a.state
     FROM orders o
-    LEFT JOIN customer c
-        ON o.customer_id = c.customer_id
-    LEFT JOIN customer_address a
-        ON o.address_id = a.address_id
+    LEFT JOIN customer c ON o.customer_id = c.customer_id
+    LEFT JOIN customer_address a ON o.address_id = a.address_id
     WHERE o.order_id = ?
 ");
-$stm->execute([$id]);
-$o = $stm->fetch();
+$stm->execute([$order_id]);
+$order = $stm->fetch();
 
-if (!$o) {
+if (!$order) {
     die('Order not found');
 }
 
-
+/* =========================
+   Order Items
+========================= */
 $stm = $_db->prepare("
-    SELECT
-        p.id AS product_id ,
+    SELECT 
+        p.title,
         oi.quantity,
-        oi.price_each  AS price,
+        oi.price_each,
         oi.subtotal
     FROM order_item oi
-    LEFT JOIN product p
-        ON oi.product_id = p.id
+    LEFT JOIN product p ON oi.product_id = p.id
     WHERE oi.order_id = ?
 ");
-$stm->execute([$id]);
+$stm->execute([$order_id]);
 $items = $stm->fetchAll();
+?>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Order #<?= encode($order->order_id) ?></title>
 
-$filename = "order_{$o->order_id}.txt";
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #fff;
+        margin: 30px;
+        color: #333;
+    }
 
-header('Content-Type: text/plain; charset=utf-8');
-header("Content-Disposition: attachment; filename=\"$filename\"");
-header('Pragma: no-cache');
-header('Expires: 0');
+    h2 {
+        margin-bottom: 10px;
+    }
 
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+    }
 
-echo "ORDER DETAIL\n";
-echo "=============================\n";
-echo "Order ID   : {$o->order_id}\n";
-echo "Customer   : " . ($o->username ?: '(no user)') . "\n";
-echo "Status     : {$o->status}\n";
-echo "Order Date : {$o->order_date}\n\n";
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+        font-size: 14px;
+    }
 
-echo "Shipping Address\n";
-echo "-----------------------------\n";
+    th {
+        background: #f5f5f5;
+        width: 200px;
+    }
 
-if ($o->address) {
-    echo "{$o->address}\n";
-    echo "{$o->postcode}, {$o->city}, {$o->state}\n";
-} else {
-    echo "(no address)\n";
-}
+    .items th {
+        text-align: center;
+    }
 
-echo "\nItems\n";
-echo "-----------------------------\n";
-echo "Product\tQty\tPrice\t\tSubtotal\n";
+    .items td {
+        text-align: center;
+    }
 
-foreach ($items as $i) {
-    $price    = number_format((float)$i->price, 2);
-    $subtotal = number_format((float)$i->subtotal, 2);
+    .total {
+        font-size: 18px;
+        font-weight: bold;
+        text-align: right;
+    }
 
-    echo "{$i->product_id}\t{$i->quantity}\tRM {$price}\tRM {$subtotal}\n";
-}
+    /* Print button */
+    .no-print {
+        text-align: right;
+        margin-bottom: 20px;
+    }
 
-echo "\n-----------------------------\n";
-echo "TOTAL: RM " . number_format((float)$o->total_amount, 2) . "\n";
+    .no-print button {
+        padding: 10px 18px;
+        border-radius: 20px;
+        border: none;
+        background: #3498db;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+    }
 
-exit;
+    /* Hide on print */
+    @media print {
+        .no-print {
+            display: none;
+        }
+        body {
+            margin: 0;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- Print Button -->
+<div class="no-print">
+    <button onclick="window.print()">🖨 Print</button>
+</div>
+
+<h2>Order #<?= encode($order->order_id) ?></h2>
+
+<!-- Order Info -->
+<table>
+    <tr>
+        <th>Customer</th>
+        <td>
+            <?= $order->username ?: '(guest)' ?><br>
+            <small><?= encode($order->email) ?></small>
+        </td>
+    </tr>
+    <tr>
+        <th>Status</th>
+        <td><?= ucfirst($order->status) ?></td>
+    </tr>
+    <tr>
+        <th>Order Date</th>
+        <td><?= $order->order_date ?></td>
+    </tr>
+    <tr>
+        <th>Shipping Address</th>
+        <td>
+            <?= encode($order->address) ?><br>
+            <?= encode($order->postcode) ?>, <?= encode($order->city) ?><br>
+            <?= encode($order->state) ?>
+        </td>
+    </tr>
+</table>
+
+<!-- Items -->
+<table class="items">
+    <tr>
+        <th>Product</th>
+        <th width="100">Price</th>
+        <th width="80">Qty</th>
+        <th width="120">Subtotal</th>
+    </tr>
+
+    <?php foreach ($items as $i): ?>
+        <tr>
+            <td style="text-align:left"><?= encode($i->title) ?></td>
+            <td>RM <?= number_format($i->price_each, 2) ?></td>
+            <td><?= $i->quantity ?></td>
+            <td>RM <?= number_format($i->subtotal, 2) ?></td>
+        </tr>
+    <?php endforeach; ?>
+
+    <tr>
+        <td colspan="3" class="total">TOTAL</td>
+        <td class="total">RM <?= number_format($order->total_amount, 2) ?></td>
+    </tr>
+</table>
+
+</body>
+</html>
