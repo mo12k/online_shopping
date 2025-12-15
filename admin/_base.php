@@ -296,7 +296,7 @@ $_status = [1 => 'Published', 0 => 'Draft'];
 // ============================================================================
 function admin_require_login() {
     if (!isset($_SESSION['admin_id'])) {
-        header("Location: ../admin/page/adminlogin.php");
+        header("Location: ../page/adminlogin.php");
         exit;
     }
 }
