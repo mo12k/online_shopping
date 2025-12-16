@@ -28,24 +28,15 @@ $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
     </nav>
     <?php endif; ?>
 
-    <?php if ($_SESSION['customer_username'] ?? false): ?>
-        $default_photo_name = 'default_pic.jpg';
-    $img_src = '../../admin/images/profile/' . htmlspecialchars($default_photo_name);
-    
-
-    ?>
-    <div class="header-right">
-        <a href="/customer/page/profile.php">
-            <img src="<?= $img_src ?>" alt="<?= htmlspecialchars($_SESSION['customer_username']) ?>'s Profile" class="profile-header-img">
-        </a>
-            
-        <a href="/customer/page/profile.php">
+  <?php if ($_SESSION['customer_username'] ?? false): ?>
+        <div class="header-right">
+            <img src="/images/profile/<?= htmlspecialchars($profile_pic) ?>" alt="Profile"><a href="/customer/page/profile.php">
             <span class="username"><?= htmlspecialchars($_SESSION['customer_username']) ?></span>
-        </a>
-        |
-        <a href="/page/logout.php">Logout</a>
+            |
+            <a href="/page/logout.php">Logout</a>
         </div>
     <?php endif; ?>
+
 
 
 </header>
