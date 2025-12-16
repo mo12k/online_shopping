@@ -13,7 +13,7 @@ include '../../_head.php';
 include '../../_header.php';
 
 $info = temp('info'); 
-$default_photo = 'default_pic.jpg'; 
+$default_photo = '../../admin/images/profile/default_pic.jpg'; 
 
 $stm = $_db->prepare('SELECT * FROM customer WHERE customer_id = ? ');
 $stm->execute([$customer_id]);
@@ -39,17 +39,13 @@ $photo_name = $customer->photo;
     <h1>Account Profile</h1>   
 
         <div class="profile-photo">
-       <?php 
-            if ($customer->photo) {
-                $img_src = '../upload/' . $customer->photo;
-            } else {
-                $img_src = '../../admin/images/profile/' . $default_photo;
-            }
-            ?>
-            
-        <img src="<?= $img_src ?>" 
-             alt="Profile Picture" 
-             style="width: 150px; height: 150px; border-radius: 50%;">
+
+        <?php if ($customer->photo): ?>
+            <img src="../upload/<?= $customer->photo?>">
+        <?php else: ?>
+            <img src="../../admin/images/profile/default_pic.jpg" style="opacity:0.5;">
+        <?php endif; ?>
+        <div>
 
         <h2>Your Information</h2>
          
