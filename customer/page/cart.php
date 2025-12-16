@@ -33,18 +33,32 @@ $cart_total = get_cart_total($cart_items);
 ?>
 
 <link rel="stylesheet" href="../../css/cart.css">
-<link rel="stylesheet" href="../../css/qty.css">
 <link rel="stylesheet" href="../../css/customer.css">
 
-<style>
-.cart-info-text {
-    margin: 20px 0 30px;
-    color: #666;
-    font-size: 15px;
-    text-align: center;
-}
+    <style>
+    .cart-info-text {
+        margin: 20px 0 30px;
+        color: #666;
+        font-size: 15px;
+        text-align: center;
+    }
 
-</style>
+    .stock-info {
+        font-size: 15px;
+        margin-top: 10px;
+    }
+
+    .in-stock {
+        color: #2E7D32;
+        font-weight: 600;
+    }
+
+    .out-of-stock {
+        color: #D32F2F;
+        font-weight: 600;
+    }
+
+    </style>
 
 <div class="cart-container">
 
@@ -98,6 +112,7 @@ $cart_total = get_cart_total($cart_items);
                            value="<?= $item->quantity ?>" autocomplete="off">
                     <button type="button" class="qty-inc">+</button>
                 </div>
+
             </form>
 
             <form method="post" onsubmit="return confirm('Remove this item from cart?')">
@@ -106,6 +121,13 @@ $cart_total = get_cart_total($cart_items);
                 <button class="remove-btn">Remove</button>
             </form>
         </div>
+                <div class="stock-info">
+                    <?php if ($item->stock > 0): ?>
+                        <span class="in-stock">Max: <?= $item->stock ?> available</span>
+                    <?php else: ?>
+                        <span class="out-of-stock">Out of stock</span>
+                    <?php endif; ?>
+                </div>
     </div>
 
     <div class="cart-item-subtotal">

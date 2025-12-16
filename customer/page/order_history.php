@@ -181,6 +181,7 @@ include '../../_header.php';
         text-decoration: none;
         font-weight: 600;
         font-size: 14px;
+        margin-right: -5px;
     }
 
     .btn-view {

@@ -83,13 +83,12 @@
 .cart-item-image {
     width: 130px;
     height: 130px;
-
     border-radius: 8px;
     border: 1px solid #eee;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* 外框固定 */
+    overflow: hidden;
 }
 
 .cart-item-image img {

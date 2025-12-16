@@ -41,7 +41,6 @@ $order_items = $stm->fetchAll();
 ?>
 
     <style>
-        
         .order-confirmation-container {
             max-width: 900px;
             margin: 40px auto;
@@ -295,7 +294,7 @@ $order_items = $stm->fetchAll();
             box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
         }
         
-        .btn-history {
+        .btn-print {
             background: white;
             color: #5d4037;
             border: 2px solid #8d6e63;
@@ -320,6 +319,7 @@ $order_items = $stm->fetchAll();
             font-size: 14px;
             border-left: 5px solid #ffc107;
         }
+
     </style>
 
     <title><?= $_page_title ?? 'Bookstore' ?></title>
@@ -396,10 +396,126 @@ $order_items = $stm->fetchAll();
                 <a href="product.php" class="btn btn-continue">
                     Continue Shopping
                 </a>
-                <a href="order_history.php" class="btn btn-history">
-                    View Order History
+                <a href="javascript:window.print();" target="_self" class="btn btn-print">
+                    Print e-receipt
                 </a>
             </div>
         </div>
     </div>
+
+    <style>
+    @media print {
+
+    body {
+        background: white;
+        color: #000;
+    }
+
+    header,
+    .actions,
+    .btn {
+        display: none;
+    }
+
+    .order-confirmation-container {
+        margin: 0;
+        max-width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    .confirmation-header {
+        background: none;
+        padding: 30px 0 20px;
+        text-align: center;
+    }
+
+    .confirmation-header h1 {
+        display: none;
+    }
+
+    .order-number {
+        background: none;
+        color: #000;
+        font-size: 18px;
+        font-weight: 600;
+        padding: 0;
+        margin: 0;
+        position: relative;
+        top: 25px;
+    }
+
+    .confirmation-content {
+        padding: 30px;
+    }
+
+    .order-details {
+        background: none;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0;
+    }
+
+    .order-details h2 {
+        color: #000;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+    }
+
+    .detail-item {
+        box-shadow: none;
+        border: 1px solid #000;
+        border-radius: 6px;
+        background: #fff;
+    }
+
+    .detail-label {
+        color: #000;
+        text-align: left;
+    }
+
+    .detail-value {
+        color: #000;
+        text-align: left;
+    }
+
+    .status-badge {
+        background: none;
+        color: #000;
+        padding: 0;
+        border-radius: 0;
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .total-amount {
+        border-top: 2px dashed #000;
+    }
+
+    .total-label,
+    .total-value {
+        color: #000;
+    }
+
+    .order-items h3 {
+        color: #000;
+        border-bottom: 2px solid #000;
+    }
+
+    .order-item {
+        box-shadow: none;
+        border: 1px solid #000;
+        border-radius: 6px;
+        page-break-inside: avoid;
+    }
+
+    .item-title,
+    .item-meta,
+    .item-price {
+        color: #000;
+    }
+
+}
+
+    </style>
     
