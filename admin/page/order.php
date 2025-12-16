@@ -209,7 +209,7 @@ include '../_head.php';
                             font-weight:600;
                             <?= $status_class ?>
                         ">
-                            <?= ucfirst($s->status) ?>
+                            <?= $s->status ?>
                         </span>
                     </td>
 
@@ -222,7 +222,7 @@ include '../_head.php';
                             View
                         </button>
                         <a href="../order/export.php?id=<?= encode($s->order_id) ?>" target="_blank" class="btn">
-                            Export File
+                            Print
                         </a>
 
                         <?php if ($s->status === 'shipping'): ?>
