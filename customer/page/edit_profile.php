@@ -1,128 +1,214 @@
 <?php
+
 $_body_class = 'edit-profile-page';
 $_page_title = "Edit Profile";
 $_title = $_page_title;
 
-require '_base.php'; 
-include '_head.php'; 
-include '_header.php';
+require '../_base.php'; 
 
-auth(); 
+$customer_id = $_SESSION['customer_id'];
 
-global $_user, $_db; 
-$customer = $_user;
-$customer_id = $customer->customer_id; 
+include '../../_head.php';
+include '../../_header.php';
 
-$customer->photo = $customer->photo ?: 'default_pic.jpg';
+$info = temp('info'); 
+$error = temp('error');
+$default_photo = 'default_pic.jpg'; 
 
 
-$username = $customer->username;
-$email = $customer->email;
-$photo_filename = $customer->photo; 
+$stm = $_db->prepare('SELECT * FROM customer WHERE customer_id = ? ');
+$stm->execute([$customer_id]);
+$customer = $stm->fetch();
+
 
 if (is_post()) {
     
-    $username = req('username');
-    $email = req('email');
-    $photo_file = get_file('photo');
+    $_err = []; 
+    $username = trim(req('username') ?? '');
+    $email    = trim(req('email'));
+    $phone    = trim(req('phone') ?? '');
 
-    if (!$username) {
-        $_err['username'] = "Required";
-    } else if (strlen($username) > 100) {
-        $_err['username'] = "Maximum length 100";
-    } 
-    else if ($username !== $customer->username && !is_unique($username, 'customer', 'username')) {
-        $_err['username'] = "Duplicate Username";
-    }
+    
+    $photo_name = $customer->photo; 
 
-    if (!$email) {
-        $_err['email'] = "Required";
-    } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $_err['email'] = "Invalid Email Format";
-    } 
-    else if ($email !== $customer->email && !is_unique($email, 'customer', 'email')) {
-        $_err['email'] = "Duplicate Email";
+    
+    if ($username == '') {
+        $_err['username'] = 'Username is required';
+    } elseif (mb_strlen($username) > 50) {
+        $_err['username'] = 'Username must not exceed 50 characters';
     }
     
-    if ($photo_file) {
-        if (!str_starts_with($photo_file->type, 'image/')) { 
-            $_err['photo'] = 'Must be an image.';
+    if ($email == '') {
+        $_err['email'] = 'Email is required';
+    } elseif (!is_email($email)) { 
+        $_err['email'] = 'Invalid email format';
+    }
+
+    
+    $f = get_file('photo');
+
+   
+        if ($f->size > 5 * 1024 * 1024) {
+            $_err['photo'] = 'Maximum 5MB';
         }
-        else if ($photo_file->size > 5 * 1024 * 1024) { 
-            $_err['photo'] = 'Maximum 5MB.';
+        elseif (!str_starts_with($f->type, 'image/')) {
+            $_err['photo'] = 'Must be an image';
+        }
+        else {
+            $new_photo = save_photo($f, '../upload'); 
+
+            if ($new_photo) {
+                if ($photo_name && file_exists("../upload/$photo_name")) {
+                    @unlink("../upload/$photo_name");
+                }
+                $photo_name = $new_photo;
+            } else {
+                $_err['photo'] = 'Upload failed';
+            }
+        }
+    
+
+
+    $isIdentityChanged =
+        $username !== $customer->username ||
+        $email !== $customer->email;
+
+    if (!$_err && $isIdentityChanged) {
+        $stm = $_db->prepare(
+            "SELECT COUNT(*) 
+             FROM customer 
+             WHERE (username = ? OR email = ?)
+               AND customer_id <> ?" 
+        );
+        $stm->execute([$username, $email, $customer_id]);
+
+        if ($stm->fetchColumn()) {
+            $_err['username'] = 'This username or email is already in use by another account.';
         }
     }
+
+
+    
     
     if (!$_err) {
-        $upload_successful = true;
+        
+        $_db->prepare(
+            "UPDATE customer 
+             SET username=?, email=?, photo=?, phone=? 
+             WHERE customer_id=?"
+        )->execute([
+            $username, 
+            $email, 
+            $photo_name, 
+            $phone,      
+            $customer_id
+        ]);
 
-        if ($photo_file) {
-            $upload_dir = root('uploads/');
-            $new_filename = uniqid() . '_' . $photo_file->name;
-            
-            if (move_uploaded_file($photo_file->tmp_name, $upload_dir . $new_filename)) {
-                
-                if ($customer->photo && $customer->photo !== $default_photo) {
-                    $old_photo_path = root("uploads/{$customer->photo}");
-                    if (file_exists($old_photo_path)) {
-                        unlink($old_photo_path);
-                    }
-                }
-                $photo_filename = $new_filename; 
-            } else {
-                $_err['photo'] = 'Failed to move uploaded file. Check folder permissions.';
-                $upload_successful = false;
-            }
-        }
-
-        if ($upload_successful) {
-            $update_sql = "UPDATE customer SET username = ?, email = ?, photo = ? WHERE customer_id = ?";
-            $update_stm = $_db->prepare($update_sql);
-            $success = $update_stm->execute([$username, $email, $photo_filename, $customer_id]);
-
-            if ($success) {
-                $_user->username = $username;
-                $_user->email = $email;
-                $_user->photo = $photo_filename;
-                $_SESSION['customer_username'] = $username;
-                
-                temp('info', 'Your profile details and photo have been updated successfully.');
-                redirect('profile.php'); 
-            } else {
-                temp('info', 'No changes were detected or database error occurred.');
-                redirect('profile.php'); 
-            }
-        }
+        // Update session variables
+        $_SESSION['username'] = $username;
+        $_SESSION['email'] = $email;
+        
+        temp('info', "Profile updated successfully!");
+        redirect('profile.php'); 
     }
+
+}
+else {
+    
+    $username = $customer->username;
+    $email    = $customer->email;
+    $phone    = $customer->phone;
 }
 ?>
 
-<div class="container-profile">
-    <form id="edit-profile-form" method="POST" action="edit_profile.php" enctype="multipart/form-data">
-        <h2>Edit Account Details</h2>
-        
-        <label for="username">Username *</label>
-        <?= html_text('username', 'maxlength="100"', $username) ?>
-        <?= err('username') ?>
+<main>
 
-        <label for="email">Email Address *</label>
-        <?= html_text('email', 'placeholder="example@example.com"', $email) ?>
-        <?= err('email') ?>
-        
-        <label for="photo">Profile Picture</label>
-        
-        <label class="upload">
-            <?= html_file('photo', 'image/*', 'onchange="previewImage(event)"') ?>
+<?php if ($info): ?>
+<div class="alert-success-fixed">
+    <div class="alert-content">
+        <strong>Success!</strong> <?= encode($info) ?>
+        <span class="alert-close">×</span>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($error): ?>
+<div class="alert-error-fixed">
+    <div class="alert-content">
+        <strong>Error!</strong> <?= encode($error) ?>
+        <span class="alert-close">×</span>
+    </div>
+</div>
+<?php endif; ?>
+
+<div class="container-profile">
+    <h1>Edit Account Profile</h1>   
+    
+    <form action="edit_profile.php" method="POST" enctype="multipart/form-data">
+
+        <div class="profile-photo">
+            <?php 
+            if (!empty($customer->photo)) {
+                $img_src = '../upload/' . $customer->photo;
+            } else {
+                $img_src = '../../admin/images/profile/' . $default_photo;
+            }
+            ?>
             
-            <img id="profile-preview" src="<?= base("uploads/{$photo_filename}") ?>">
-        </label>
-        <?= err('photo') ?>
-        
-        <button type="submit" name="save_changes">Save Changes</button>
-        
-        <div class="back-link">
-            <a href="profile.php">← Back to Profile</a>
+            <img src="<?= $img_src ?>" 
+                 alt="Current Profile Picture" 
+                 style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 2px solid #eee;">
+            
+            <div class="file-upload-group" style="margin-top: 10px;">
+                <label for="photo">Change Photo:</label>
+                <input type="file" id="photo" name="photo" accept="image/*">
+                <small style="display:block; color:#666;">Leave blank to keep current photo.</small>
+                <?php if (isset($_err['photo'])): ?>
+                    <span style="color:red; font-size:0.9em;"><?= encode($_err['photo']) ?></span>
+                <?php endif; ?>
+            </div>
         </div>
+
+        <h2>Update Information</h2>
+         
+        <table>
+            <tr>
+                <th><label for="username">Username:</label></th>
+                <td>
+                    <input type="text" id="username" name="username" value="<?= encode($username) ?>" required>
+                    <?php if (isset($_err['username'])): ?>
+                        <span style="color:red; display:block; font-size:0.9em;"><?= encode($_err['username']) ?></span>
+                    <?php endif; ?>
+                </td> 
+            </tr>
+            
+            <tr>
+                <th><label for="email">Email Address:</label></th>
+                <td>
+                    <input type="email" id="email" name="email" value="<?= encode($email) ?>" required>
+                    <?php if (isset($_err['email'])): ?>
+                        <span style="color:red; display:block; font-size:0.9em;"><?= encode($_err['email']) ?></span>
+                    <?php endif; ?>
+                </td>
+            </tr>
+
+            <tr>
+                <th><label for="phone">Phone Number:</label></th>
+                <td>
+                    <input type="tel" id="phone" name="phone" value="<?= encode($phone) ?>">
+                </td>
+            </tr>
+
+        </table>
+        
+        <div class="actions" style="margin-top: 30px;">
+            <button type="submit" class="button-primary">Save Changes</button>
+            <a href="profile.php" class="button-secondary">Cancel</a>
+        </div>
+        
     </form>
 </div>
 
+</main>
+
+<?php include '../../_footer.php'; ?>
