@@ -46,6 +46,7 @@ if (is_post()) {
 
     
     $f = get_file('photo');
+    if ($f && $f->size > 0) {
 
    
         if ($f->size > 5 * 1024 * 1024) {
@@ -66,7 +67,7 @@ if (is_post()) {
                 $_err['photo'] = 'Upload failed';
             }
         }
-    
+    }
 
 
     $isIdentityChanged =
@@ -133,7 +134,7 @@ else {
 <?php endif; ?>
 
 <?php if ($error): ?>
-<div class="alert-error-fixed">
+<div class="alert-error-fixed"> 
     <div class="alert-content">
         <strong>Error!</strong> <?= encode($error) ?>
         <span class="alert-close">×</span>
