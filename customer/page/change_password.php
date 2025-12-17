@@ -1,108 +1,152 @@
-
 <?php
+
 $_body_class = 'change-password-page';
 $_page_title = "Change Password";
 $_title = $_page_title;
 
-require '_base.php'; 
-include '_head.php'; 
-include '_header.php';
+require '../_base.php'; 
 
+$customer_id = $_SESSION['customer_id'];
 
+include '../../_head.php';
+include '../../_header.php';
 
-global $_user, $_db; 
-$customer = $_user;
-$customer_id = $customer->customer_id;
+$info = temp('info'); 
+$error = temp('error');
 
-$_err = [];
-$current_password = '';
-$new_password = '';
-$confirm_password = '';
+$stm = $_db->prepare('SELECT customer_id FROM customer WHERE customer_id = ?');
+$stm->execute([$customer_id]);
+$customer = $stm->fetch();
+
+if (!$customer) {
+    redirect('/page/login.php', 'error', 'User account not found.');
+}
 
 if (is_post()) {
-    $current_password = req('current_password');
-    $new_password = req('new_password');
-    $confirm_password = req('confirm_password');
     
-    if (!$current_password) {
-        $_err['current_password'] = "Required";
-    } else {
-        $check_sql = "SELECT COUNT(*) FROM customer WHERE password = SHA1(?) AND customer_id = ?";
-        $check_stm = $_db->prepare($check_sql);
-        $check_stm->execute([$current_password, $customer->customer_id]);
-        
-        if ($check_stm->fetchColumn() == 0) {
-            $_err['current_password'] = "Incorrect current password.";
-        }
+    $_err = []; 
+    
+    $current_password = req('current_password');
+    $new_password     = req('new_password');
+    $confirm_password = req('confirm_password');
+
+    if ($current_password == '') {
+        $_err['current_password'] = 'Current password is required.';
     }
 
+    if ($new_password == '') {
+        $_err['new_password'] = 'New password is required.';
+    } elseif (mb_strlen($new_password) < 6) {
+        $_err['new_password'] = 'Password must be at least 6 characters.';
+    }
+
+    if ($confirm_password == '') {
+        $_err['confirm_password'] = 'Confirm password is required.';
+    } elseif ($new_password !== $confirm_password) {
+        $_err['confirm_password'] = 'New password and confirmation do not match.';
+    }
+
+    
     if (!isset($_err['current_password'])) {
-        
-        if (!$new_password) {
-            $_err['new_password'] = 'Required';
-        } elseif (strlen($new_password) < 8 || strlen($new_password) > 11) {
-            $_err['new_password'] = 'Between 8–11 characters';
-        } elseif (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])/', $new_password)) {
-            $_err['new_password'] = "Must contain uppercase, lowercase, number and special character";
-        }
+        $stm_verify = $_db->prepare('
+            SELECT COUNT(*) FROM customer
+            WHERE password = SHA(?) AND customer_id = ?
+        ');
+        $stm_verify->execute([$current_password, $customer_id]);
 
-        if ($new_password !== $confirm_password) {
-            $_err['confirm_password'] = "Passwords do not match.";
+        if ($stm_verify->fetchColumn() == 0) {
+            $_err['current_password'] = 'The current password you entered is incorrect.';
         }
     }
 
+   
     if (!$_err) {
-        $hashed_password = SHA1($new_password);
+        
+        $_db->prepare(
+            "UPDATE customer 
+             SET password = SHA1(?) 
+             WHERE customer_id=?"
+        )->execute([
+            $new_password, 
+            $customer_id
+        ]);
 
-        $update_sql = "UPDATE customer SET password = ? WHERE customer_id = ?";
-        $update_stm = $_db->prepare($update_sql);
-
-        if ($update_stm->execute([$hashed_password, $customer->customer_id])) {
-            temp('info', 'Your password has been updated successfully.');
-            redirect('profile.php'); 
-        } else {
-            $_err['general'] = "Failed to update password due to a database error.";
-        }
+        temp('info', "Your password has been changed successfully!");
+        redirect('profile.php');
     }
 }
+
+$error = temp('error');
 ?>
 
+<main>
+
+<?php if ($info): ?>
+<div class="alert-success-fixed">
+    <div class="alert-content">
+        <strong>Success!</strong> <?= encode($info) ?>
+        <span class="alert-close">×</span>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($error): ?>
+<div class="alert-error-fixed">
+    <div class="alert-content">
+        <strong>Error!</strong> <?= encode($error) ?>
+        <span class="alert-close">×</span>
+    </div>
+</div>
+<?php endif; ?>
+
 <div class="container-profile">
-    <form id="change-password-form" method="POST" action="change_password.php">
-        <h1>Change Password</h1>
+    <h1>Change Password</h1>   
+    
+    <form action="change_password.php" method="POST">
+
+        <h2>Security</h2>
+         
+        <table>
+            <tr>
+                <th><label for="current_password">Current Password:</label></th>
+                <td>
+                    <input type="password" id="current_password" name="current_password" required>
+                    <?php if (isset($_err['current_password'])): ?>
+                        <span style="color:red; display:block; font-size:0.9em;"><?= encode($_err['current_password']) ?></span>
+                    <?php endif; ?>
+                </td> 
+            </tr>
+            
+            <tr>
+                <th><label for="new_password">New Password:</label></th>
+                <td>
+                    <input type="password" id="new_password" name="new_password" required>
+                    <?php if (isset($_err['new_password'])): ?>
+                        <span style="color:red; display:block; font-size:0.9em;"><?= encode($_err['new_password']) ?></span>
+                    <?php endif; ?>
+                </td>
+            </tr>
+
+            <tr>
+                <th><label for="confirm_password">Confirm New Password:</label></th>
+                <td>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                    <?php if (isset($_err['confirm_password'])): ?>
+                        <span style="color:red; display:block; font-size:0.9em;"><?= encode($_err['confirm_password']) ?></span>
+                    <?php endif; ?>
+                </td>
+            </tr>
+
+        </table>
         
-        <?php if (isset($_err['general'])): ?>
-            <div class="alert-error"><?= htmlspecialchars($_err['general']) ?></div>
-        <?php endif; ?>
-
-        <div class="form-details">
-
-            <label for="current_password">Current Password *</label>
-            <?= html_password('current_password', '', $current_password) ?>
-            <?= err('current_password') ?>
-
-            <label for="new_password">New Password *</label>
-            <?= html_password('new_password', '', $new_password) ?>
-            <?= err('new_password') ?>
-            <p class="password-hint">
-                (8-11 characters, must include Uppercase, Lowercase, Number, and Special character)
-            </p>
-
-            <label for="confirm_password">Confirm New Password *</label>
-            <?= html_password('confirm_password', '', $confirm_password) ?>
-            <?= err('confirm_password') ?>
-        
-        </div>
-
-        <div class="actions">
-            <button type="submit" name="change_password" class="button-primary">Set New Password</button>
+        <div class="actions" style="margin-top: 30px;">
+            <button type="submit" class="button-primary">Change Password</button>
             <a href="profile.php" class="button-secondary">Cancel</a>
         </div>
         
     </form>
 </div>
 
-<?php 
-include '_foot.php'; 
-?>
+</main>
 
+<?php include '../../_footer.php'; ?>

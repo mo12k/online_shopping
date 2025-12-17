@@ -1,4 +1,5 @@
 <?php
+
 $_body_class = 'profile-page';
 $_page_title = "My Profile";
 $_title = $_page_title;
@@ -8,15 +9,23 @@ include '../../_head.php';
 include '../../_header.php';
 
 
-global $_user;
-$customer = $_user; 
+$customer_id = $_SESSION['customer_id'];
 
-$default_photo = 'default_pic.jpg'; 
-
-$customer->photo = $customer->photo ?: 'default_pic.jpg';
+include '../../_head.php';
+include '../../_header.php';
 
 $info = temp('info'); 
+$default_photo = '../../admin/images/profile/default_pic.jpg'; 
+
+$stm = $_db->prepare('SELECT * FROM customer WHERE customer_id = ? ');
+$stm->execute([$customer_id]);
+$customer = $stm->fetch();
+$photo_column = 'photo';
+$default_photo = 'default_pic.jpg';
+$photo_name = $customer->photo;
+
 ?>
+
 
 <?php if ($info): ?>
 <div class="alert-success-fixed">
@@ -27,21 +36,26 @@ $info = temp('info');
 </div>
 <?php endif; ?>
 
-<div class="container-profile">
-    <h1>Account Profile</h1>
-    
-    <div class="profile-details">
-        
-        <div class="profile-photo">
-            <img src="<?= base("uploads/{$customer->photo}") ?>" alt="Profile Picture" style="width: 150px; height: 150px; border-radius: 50%;">
-        </div>
 
-        <h2>Information</h2>
+<div class="container-profile">
+    <h1>Account Profile</h1>   
+
+        <div class="profile-photo">
+
+        <?php if ($customer->photo): ?>
+            <img src="../upload/<?= $customer->photo?>">
+        <?php else: ?>
+            <img src="../../admin/images/profile/default_pic.jpg" style="opacity:0.5;">
+        <?php endif; ?>
+        <div>
+
+        <h2>Your Information</h2>
+         
         <table>
             <tr>
                 <th>Customer ID:</th>
                 <td><?= encode($customer->customer_id) ?></td> 
-            </tr>
+            </tr>           
             <tr>
                 <th>Username:</th>
                 <td><?= encode($customer->username) ?></td> 
@@ -49,6 +63,10 @@ $info = temp('info');
             <tr>
                 <th>Email Address:</th>
                 <td><?= encode($customer->email) ?></td>
+            </tr>
+            <tr>
+                <th>Phone Number:</th>
+                <td><?= encode($customer->phone) ?></td>
             </tr>
         </table>
         
@@ -61,6 +79,4 @@ $info = temp('info');
     </div>
 </div>
 
-
-
-
+<?php include '../../_footer.php'; ?>
