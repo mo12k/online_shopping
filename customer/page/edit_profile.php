@@ -152,7 +152,7 @@ else {
             if (!empty($customer->photo)) {
                 $img_src = '../upload/' . $customer->photo;
             } else {
-                $img_src = '../../admin/images/profile/' . $default_photo;
+                $img_src = '../../images/profile/' . $default_photo;
             }
             ?>
             

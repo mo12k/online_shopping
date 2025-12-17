@@ -13,7 +13,7 @@ include '../../_head.php';
 include '../../_header.php';
 
 $info = temp('info'); 
-$default_photo = '../../admin/images/profile/default_pic.jpg'; 
+$default_photo = '../../images/profile/default_pic.jpg'; 
 
 $stm = $_db->prepare('SELECT * FROM customer WHERE customer_id = ? ');
 $stm->execute([$customer_id]);
@@ -40,10 +40,10 @@ $photo_name = $customer->photo;
 
         <div class="profile-photo">
 
-        <?php if ($customer->photo): ?>
-            <img src="../upload/<?= $customer->photo?>">
+        <?php if ($customer->photo && $customer->photo != 'default_pic.jpg'): ?>
+            <img src="../../images/profile/<?= encode($customer->photo) ?>" alt="Profile Photo">
         <?php else: ?>
-            <img src="../../admin/images/profile/default_pic.jpg" style="opacity:0.5;">
+            <img src="../../images/profile/default_pic.jpg" alt="Default Profile Photo">
         <?php endif; ?>
         <div>
 

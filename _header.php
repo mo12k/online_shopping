@@ -46,6 +46,6 @@ $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
     |
     <a href="/page/logout.php">Logout</a>
 </div>
-
+<?php endif; ?>
 
 </header>
