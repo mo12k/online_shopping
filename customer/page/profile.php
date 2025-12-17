@@ -45,7 +45,7 @@ $photo_name = $customer->photo;
         <?php else: ?>
             <img src="../../images/profile/default_pic.jpg" alt="Default Profile Photo">
         <?php endif; ?>
-        <div>
+        </div>
 
         <h2>Your Information</h2>
          
