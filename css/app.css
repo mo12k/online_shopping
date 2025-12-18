@@ -48,6 +48,7 @@ header {
     display: flex;
     align-items: center;
     gap: 10px;
+    text-decoration: none;
 }
 
 .header-right img {
@@ -70,11 +71,6 @@ header {
     color: #ffffff;
     text-decoration: none;
 }
-
-.header-right a:hover {
-    text-decoration: underline;
-}
-
 
 .navbar a {
     position: relative;

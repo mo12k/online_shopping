@@ -15,14 +15,11 @@ include '../../_head.php';
 include '../../_header.php';
 
 $info = temp('info'); 
-$default_photo = '../../admin/images/profile/default_pic.jpg'; 
+
 
 $stm = $_db->prepare('SELECT * FROM customer WHERE customer_id = ? ');
 $stm->execute([$customer_id]);
 $customer = $stm->fetch();
-$photo_column = 'photo';
-$default_photo = 'default_pic.jpg';
-$photo_name = $customer->photo;
 
 ?>
 
@@ -43,19 +40,15 @@ $photo_name = $customer->photo;
         <div class="profile-photo">
 
         <?php if ($customer->photo): ?>
-            <img src="../upload/<?= $customer->photo?>">
+            <img src="../../images/profile/<?= $customer->photo?>">
         <?php else: ?>
-            <img src="../../admin/images/profile/default_pic.jpg" style="opacity:0.5;">
+            <img src="../../images/profile/default_pic.jpg">
         <?php endif; ?>
         <div>
 
         <h2>Your Information</h2>
          
-        <table>
-            <tr>
-                <th>Customer ID:</th>
-                <td><?= encode($customer->customer_id) ?></td> 
-            </tr>           
+        <table>                     
             <tr>
                 <th>Username:</th>
                 <td><?= encode($customer->username) ?></td> 

@@ -13,7 +13,7 @@ include '../../_header.php';
 
 $info = temp('info'); 
 $error = temp('error');
-$default_photo = 'default_pic.jpg'; 
+
 
 
 $stm = $_db->prepare('SELECT * FROM customer WHERE customer_id = ? ');
@@ -55,18 +55,6 @@ if (is_post()) {
         elseif (!str_starts_with($f->type, 'image/')) {
             $_err['photo'] = 'Must be an image';
         }
-        else {
-            $new_photo = save_photo($f, '../upload'); 
-
-            if ($new_photo) {
-                if ($photo_name && file_exists("../upload/$photo_name")) {
-                    @unlink("../upload/$photo_name");
-                }
-                $photo_name = $new_photo;
-            } else {
-                $_err['photo'] = 'Upload failed';
-            }
-        }
     }
 
 
@@ -92,7 +80,12 @@ if (is_post()) {
     
     
     if (!$_err) {
-        
+         
+            if ($f) {
+                    unlink("../../images/profile/$photo_name");
+                $photo_name = save_photo($f, '../../images/profile');
+            } 
+            
         $_db->prepare(
             "UPDATE customer 
              SET username=?, email=?, photo=?, phone=? 
@@ -105,7 +98,7 @@ if (is_post()) {
             $customer_id
         ]);
 
-        // Update session variables
+        
         $_SESSION['username'] = $username;
         $_SESSION['email'] = $email;
         
@@ -148,17 +141,11 @@ else {
     <form action="edit_profile.php" method="POST" enctype="multipart/form-data">
 
         <div class="profile-photo">
-            <?php 
-            if (!empty($customer->photo)) {
-                $img_src = '../upload/' . $customer->photo;
-            } else {
-                $img_src = '../../admin/images/profile/' . $default_photo;
-            }
-            ?>
-            
-            <img src="<?= $img_src ?>" 
-                 alt="Current Profile Picture" 
-                 style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 2px solid #eee;">
+                <?php if ($customer->photo): ?>
+            <img src="../../images/profile/<?= $customer->photo?>">
+                <?php else: ?>
+            <img src="../../images/profile/default_pic.jpg">
+                <?php endif; ?>
             
             <div class="file-upload-group" style="margin-top: 10px;">
                 <label for="photo">Change Photo:</label>
