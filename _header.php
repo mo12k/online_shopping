@@ -28,11 +28,6 @@ $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
     </nav>
     <?php endif; ?>
 
-     <?php if ($_SESSION['customer_username'] ?? false): 
-
-    $default_photo_name = 'default_pic.jpg';
-    $img_src = '../../admin/images/profile/' . htmlspecialchars($default_photo_name);
-
 
     <?php if ($_SESSION['customer_username'] ?? false): ?>
         <div class="header-right">
