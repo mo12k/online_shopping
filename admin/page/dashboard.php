@@ -13,7 +13,7 @@ $order    = $_db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
 $low_stock = $_db->query("
     SELECT COUNT(*) 
     FROM product 
-    WHERE status != 'draft' 
+    WHERE status = 1  -- 假設 1 = Published, 0 = Draft
       AND stock <= 10
 ")->fetchColumn();
 
@@ -45,29 +45,54 @@ $today_data  = [$today_total];
 include '../_head.php';
 ?>
 <div class="content">
-    <!-- 四個統計卡片 -->
+    <!-- 四個統計卡片（改為可點擊） -->
     <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:20px; margin:30px 0 50px 0;">
-        <div style="background:#f0f8ff; padding:25px; border-radius:8px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h3 style="margin:0; font-size:42px; color:#17a2b8; font-weight:bold;"><?= $customer ?></h3>
-            <p style="margin:10px 0 0; color:#666; font-size:18px;">Customer</p>
-        </div>
-        <div style="background:#f0fff0; padding:25px; border-radius:8px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h3 style="margin:0; font-size:42px; color:#28a745; font-weight:bold;"><?= $product ?></h3>
-            <p style="margin:10px 0 0; color:#666; font-size:18px;">Product</p>
-        </div>
-        <div style="background:#fffbe6; padding:25px; border-radius:8px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h3 style="margin:0; font-size:42px; color:#ffc107; font-weight:bold;"><?= $order ?></h3>
-            <p style="margin:10px 0 0; color:#666; font-size:18px;">Orders</p>
-        </div>
-        <div style="background:#ffe6e6; padding:25px; border-radius:8px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h3 style="margin:0; font-size:42px; color:#dc3545; font-weight:bold;"><?= $low_stock ?></h3>
-            <p style="margin:10px 0 0; color:#666; font-size:18px;">Low Stock</p>
-        </div>
+        
+        <!-- Customer -->
+        <a href="customer.php" style="text-decoration:none; color:inherit;">
+            <div style="background:#f0f8ff; padding:25px; border-radius:8px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s;">
+                <h3 style="margin:0; font-size:42px; color:#17a2b8; font-weight:bold;"><?= $customer ?></h3>
+                <p style="margin:10px 0 0; color:#666; font-size:18px;">Customers</p>
+            </div>
+        </a>
+
+        <!-- Product -->
+        <a href="product.php" style="text-decoration:none; color:inherit;">
+            <div style="background:#f0fff0; padding:25px; border-radius:8px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s;">
+                <h3 style="margin:0; font-size:42px; color:#28a745; font-weight:bold;"><?= $product ?></h3>
+                <p style="margin:10px 0 0; color:#666; font-size:18px;">Products</p>
+            </div>
+        </a>
+
+        <!-- Orders -->
+        <a href="order.php" style="text-decoration:none; color:inherit;">
+            <div style="background:#fffbe6; padding:25px; border-radius:8px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s;">
+                <h3 style="margin:0; font-size:42px; color:#ffc107; font-weight:bold;"><?= $order ?></h3>
+                <p style="margin:10px 0 0; color:#666; font-size:18px;">Orders</p>
+            </div>
+        </a>
+
+        <!-- Low Stock -->
+        <a href="product.php?low_stock=1" style="text-decoration:none; color:inherit;">
+            <div style="background:#ffe6e6; padding:25px; border-radius:8px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s;">
+                <h3 style="margin:0; font-size:42px; color:#dc3545; font-weight:bold;"><?= $low_stock ?></h3>
+                <p style="margin:10px 0 0; color:#666; font-size:18px;">Low Stock Alert</p>
+            </div>
+        </a>
+        
     </div>
+
+    <!-- 加上 hover 效果的 CSS（可選） -->
+    <style>
+        .content a > div:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+    </style>
 
     <hr style="margin:50px 0; border:none; border-top:1px solid #eee;">
 
-    <!-- 圖表區：使用 flex + 固定容器高度 -->
+    <!-- 圖表區：保持原樣 -->
     <div style="display:flex; gap:40px; flex-wrap:wrap; justify-content:center;">
         <!-- 左：Order Status -->
         <div style="flex:1; min-width:300px; max-width:500px; background:white; padding:25px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
@@ -89,8 +114,7 @@ include '../_head.php';
             </div>
         </div>
     </div>
-
- </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

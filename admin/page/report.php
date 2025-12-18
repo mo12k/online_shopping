@@ -2,8 +2,8 @@
 require '../_base.php';
 admin_require_login();
 $_title = 'Sales Report';
+$current = 'report';
 
-/* ===== Date filter ===== */
 $date_from = req('date_from', date('Y-m-01'));
 $date_to   = req('date_to', date('Y-m-d'));
 

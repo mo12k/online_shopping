@@ -41,6 +41,12 @@ $sql = "SELECT p.*, c.*
 
 $params = [];
 
+$low_stock = req('low_stock');
+
+if ($low_stock) {
+    $sql .= " AND p.stock <= 10 AND p.status = 1";
+    $_title = 'Low Stock Products (≤ 10)';
+}
 
 
 if ($name !== '') {
