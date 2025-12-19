@@ -1097,3 +1097,31 @@ body.forgot-password-page {
     margin-top: 5px;
     display: block;
 }
+.profile-photo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+
+.profile-photo img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover; 
+    border: 3px solid #ddd;
+    display: block;
+}
+
+.file-upload-group {
+    text-align: center;
+}
+
+.file-upload-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
