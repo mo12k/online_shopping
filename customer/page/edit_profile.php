@@ -20,6 +20,9 @@ $stm = $_db->prepare('SELECT * FROM customer WHERE customer_id = ? ');
 $stm->execute([$customer_id]);
 $customer = $stm->fetch();
 
+$addresses = get_customer_addresses($customer_id);
+$address_count = count($addresses);
+
 
 if (is_post()) {
     
@@ -81,10 +84,18 @@ if (is_post()) {
     
     if (!$_err) {
          
-            if ($f) {
-                    unlink("../../images/profile/$photo_name");
+            if ($f && $f->size > 0) {
+                // Only delete customer-specific images; never delete shared defaults.
+                $oldPhoto = $photo_name ? basename($photo_name) : '';
+                if ($oldPhoto && $oldPhoto !== 'default_pic.jpg') {
+                    $oldPath = "../../images/profile/$oldPhoto";
+                    if (is_file($oldPath)) {
+                        @unlink($oldPath);
+                    }
+                }
+
                 $photo_name = save_photo($f, '../../images/profile');
-            } 
+            }
             
         $_db->prepare(
             "UPDATE customer 
@@ -101,6 +112,7 @@ if (is_post()) {
         
         $_SESSION['username'] = $username;
         $_SESSION['email'] = $email;
+        $_SESSION['profile_picture'] = $photo_name ?: 'default_pic.jpg';
         
         temp('info', "Profile updated successfully!");
         redirect('profile.php'); 
@@ -188,7 +200,42 @@ else {
             </tr>
 
         </table>
-        
+
+        <h2>Address Information</h2>
+        <table>
+            <tr>
+                <th style="vertical-align:top;">Saved Addresses:</th>
+                <td>
+                    <?php if (empty($addresses)): ?>
+                        <div style="color:#666;">No address saved yet.</div>
+                    <?php else: ?>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <?php foreach ($addresses as $i => $address): ?>
+                                <div>
+                                    <strong>Address <?= $i + 1 ?>:</strong>
+                                    <?= encode($address->address) ?>,
+                                    <?= encode($address->city) ?>,
+                                    <?= encode($address->state) ?>,
+                                    <?= encode($address->postcode) ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <div style="margin-top:12px; color:#666;">
+                        Maximum 3 addresses (<?= $address_count ?>/3).
+                    </div>
+
+                    <div style="margin-top:12px;">
+                        <?php if ($address_count < 3): ?>
+                            <a href="add_address.php?return=profile" class="button-secondary">Add Address</a>
+                        <?php else: ?>
+                            <span style="color:#b00020;">Address limit reached.</span>
+                        <?php endif; ?>
+                    </div>
+                </td>
+            </tr>
+        </table>
         <div class="actions" style="margin-top: 30px;">
             <button type="submit" class="button-primary">Save Changes</button>
             <a href="profile.php" class="button-secondary">Cancel</a>

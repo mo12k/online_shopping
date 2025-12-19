@@ -36,10 +36,15 @@ if (!$admin) {
 
 
 <div class="profile">
-    <h1>Admin Profile</h1>   
-    
-    
-     
+    <h1>Admin Profile</h1>
+    <div class="profile-photo">
+
+        <?php if ($admin->photo): ?>
+            <img src="../images/profile/<?= $admin->photo?>">
+        <?php else: ?>
+            <img src="../images/profile/default_pic.jpg">   
+        <?php endif; ?>
+        <div>
     <table>
         <tr>
             <th>Admin ID:</th>
@@ -53,15 +58,15 @@ if (!$admin) {
             <th>Email Address:</th>
             <td><?= encode($admin->email) ?></td>
         </tr>
-        <tr>
-            <th>Last Login:</th>
-            <td><?= encode($admin->last_login_at ?? 'N/A') ?></td>
-        </tr>
     </table>
-    
+
+    <div class="actions" style="margin-top: 30px;">
+        <a href="editadminprofile.php" class="button-secondary">Edit Profile</a>
+    </div>
     <div class="actions" style="margin-top: 30px;">
         <a href="changeadminpassword.php" class="button-secondary">Change Password</a>
     </div>
+    
         
 </div>
 

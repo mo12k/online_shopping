@@ -206,7 +206,7 @@ include '../../_header.php';
                     <h3>Delivery Address</h3>
                     <?php if (empty($addresses)): ?>
                         <div class="alert alert-warning">
-                            No address found. <a href="add_address.php">Add a new address</a>
+                            No address found. <a href="add_address.php?return=checkout">Add a new address</a>
                         </div>
                     <?php else: ?>
                         <div class="address-list">

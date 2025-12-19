@@ -570,3 +570,68 @@ body.forgot-password-page {
     font-weight: 300;
     box-shadow: 0 20px 50px rgba(0,0,0,0.15);
 }
+
+/* temp  */
+
+/* Message top  */
+.alert-success-fixed {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    background: #d4edda;
+    color: #155724;
+    padding: 16px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    font-size: 17px;
+    font-weight: 500;
+    border: 1px solid #c3e6cb;
+    animation: slideDown 0.5s ease, fadeOut 0.6s ease 4s forwards;
+    max-width: 90%;
+}
+
+.alert-error-fixed {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    background: #cc0711;
+    color: white;
+    padding: 16px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    font-size: 17px;
+    font-weight: 500;
+    border: 1px solid #c3e6cb;
+    animation: slideDown 0.5s ease, fadeOut 0.6s ease 4s forwards;
+    max-width: 90%;
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.alert-close {
+    margin-left: 20px;
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
+    opacity: 0.7;
+}
+
+.alert-close:hover { opacity: 1; }
+
+@keyframes slideDown {
+    from { top: -100px; opacity: 0; }
+    to   { top: 20px; opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}
