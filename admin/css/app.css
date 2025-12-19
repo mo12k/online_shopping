@@ -258,6 +258,22 @@ body {
 .btn           { background: #3498db; }
 .btn.edit      { background: #ffa502; color: black; }
 .btn.delete    { background: #e74c3c; }
+.btn-print {
+    background-color: #6c757d;
+    color: white;
+}
+
+
+.btn-ship {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-arrived {
+    background-color: #28a745;
+    color: white;
+}
+
 
 /* seaching */
 .search-bar {

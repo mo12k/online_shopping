@@ -29,7 +29,7 @@ if(is_post()){
             $_SESSION['admin_id'] = $user->admin_id;
             $_SESSION['admin_username'] = $user->username;
             $_SESSION['profile_picture'] = $user->photo ?? 'default_pic.jpg';
-            redirect('../index.php');
+            redirect('../page/dashboard.php');
 
         } else {
             //Login failed

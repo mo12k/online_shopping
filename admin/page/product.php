@@ -74,7 +74,7 @@ $info = temp('info');
 include '../_head.php';
 ?>
 
-<!-- 按鈕樣式（無脈動） -->
+
 <style>
 .low-stock-btn {
     padding: 14px 32px;
@@ -110,7 +110,7 @@ include '../_head.php';
                     Search
                 </button>
 
-                <!-- Reset 按鈕：根據當前模式決定 -->
+             
                 <a href="<?= $low_stock ? 'product.php?low_stock=1' : 'product.php' ?>"
                    style="padding:14px 32px; background:yellow; color:black; border:none; border-radius:16px; text-decoration:none;">
                     Reset
@@ -118,26 +118,26 @@ include '../_head.php';
             </form>
         </div>
 
-        <!-- 右邊：Add New Book + Low Stock 相關按鈕 -->
+    
         <div style="display:flex; align-items:center; flex-wrap:wrap; gap:15px;">
             <a href="/admin/product/insert.php" class="btn-add">+ Add New Book</a>
 
             <?php
-            // 計算實際低庫存數量
+        
             $low_stock_count = $_db->query("SELECT COUNT(*) FROM product WHERE stock <= 10 AND status = 1")->fetchColumn();
             ?>
 
             <?php 
-            // 關鍵修正：只要 URL 有 low_stock=1，就算 count=0 也要顯示「回到全部」的按鈕
+            
             if ($low_stock || $low_stock_count > 0): 
             ?>
                 <?php if ($low_stock): ?>
-                    <!-- 正在 Low Stock 模式（無論是否有資料）→ 顯示回到全部按鈕 -->
+                   
                     <a href="product.php" class="all-products-btn">
                         <?= $low_stock_count > 0 ? "All Products ($low_stock_count low stock)" : "All Products (No low stock)" ?>
                     </a>
                 <?php else: ?>
-                    <!-- 一般模式且有低庫存 → 顯示紅色警示按鈕 -->
+                   
                     <a href="product.php?low_stock=1" class="low-stock-btn">
                         Low Stock Alert (<?= $low_stock_count ?> items)
                     </a>
