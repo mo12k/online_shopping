@@ -211,12 +211,19 @@ else {
                     <?php else: ?>
                         <div style="display:flex; flex-direction:column; gap:10px;">
                             <?php foreach ($addresses as $i => $address): ?>
-                                <div>
-                                    <strong>Address <?= $i + 1 ?>:</strong>
-                                    <?= encode($address->address) ?>,
-                                    <?= encode($address->city) ?>,
-                                    <?= encode($address->state) ?>,
-                                    <?= encode($address->postcode) ?>
+                                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                                    <div style="flex:1 1 auto; min-width:0;">
+                                        <strong>Address <?= $i + 1 ?>:</strong>
+                                        <?= encode($address->address) ?>,
+                                        <?= encode($address->city) ?>,
+                                        <?= encode($address->state) ?>,
+                                        <?= encode($address->postcode) ?>
+                                    </div>
+
+                                    <form method="post" action="delete_address.php" style="margin:0; flex:0 0 auto;">
+                                        <input type="hidden" name="address_id" value="<?= $address->address_id ?>">
+                                        <button type="submit" class="button-secondary" style="width:90px;" onclick="return confirm('Delete this address?');">Delete</button>
+                                    </form>
                                 </div>
                             <?php endforeach; ?>
                         </div>

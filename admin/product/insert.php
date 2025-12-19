@@ -4,7 +4,7 @@ require '../_base.php';
 $current = 'product';
 $_title = 'Add New Product';
 
-
+admin_require_login();
 
 if (is_post()) {
     $title       = trim(req('title'));

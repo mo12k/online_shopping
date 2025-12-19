@@ -3,7 +3,7 @@ include '../_base.php';
 $current = 'product';
 
 // ----------------------------------------------------------------------------
-
+admin_require_login();
 if (is_post()) {
     $id = req('id');
 

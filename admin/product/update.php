@@ -227,12 +227,12 @@ include '../_head.php';
                     <div class="row">
                         <div>
                             <label><span class="req">*</span> Price</label>
-                            <?= html_number('price', 1.00, 99, '0.01', "value='$price' step='0.01' min='1.00' required") ?>
+                            <?= html_number('price', 1.00, 99999, '0.01', "value='$price' step='0.01' min='1.00' required") ?>
                             <?= err('price') ?>
                         </div>
                         <div>
                             <label><span class="req">*</span> Stock</label>
-                            <?= html_number('stock', 0, 99, 1, "value='$stock' min='0' required") ?>
+                            <?= html_number('stock', 0, 99999, 1, "value='$stock' min='0' required") ?>
                             <?= err('stock') ?>
                         </div>
                     </div>

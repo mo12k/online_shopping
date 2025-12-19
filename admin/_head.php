@@ -37,6 +37,9 @@
             <li class="<?= $current == 'order' ? 'active' : '' ?>">
                 <a href="/admin/page/order.php">Order List</a>
             </li>
+            <li class="<?= $current == 'report' ? 'active' : '' ?>">
+                <a href="/admin/page/report.php">Report List</a>
+            </li>
             
         </ul>
     </div>
@@ -52,4 +55,4 @@
                 <a href="/admin/page/adminlogout.php" class="logout">Logout</a>
             </div>
         </div>
-<?php endif; ?>
+        <?php endif; ?>

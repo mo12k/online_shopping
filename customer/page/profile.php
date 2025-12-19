@@ -4,8 +4,10 @@ $_body_class = 'profile-page';
 $_page_title = "My Profile";
 $_title = $_page_title;
 
+require '../_base.php';
+include '../../_head.php';
+include '../../_header.php';
 
-require '../_base.php'; 
 
 $customer_id = $_SESSION['customer_id'];
 
