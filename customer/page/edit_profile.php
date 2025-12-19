@@ -81,10 +81,18 @@ if (is_post()) {
     
     if (!$_err) {
          
-            if ($f) {
-                    unlink("../../images/profile/$photo_name");
+            if ($f && $f->size > 0) {
+                // Only delete customer-specific images; never delete shared defaults.
+                $oldPhoto = $photo_name ? basename($photo_name) : '';
+                if ($oldPhoto && $oldPhoto !== 'default_pic.jpg') {
+                    $oldPath = "../../images/profile/$oldPhoto";
+                    if (is_file($oldPath)) {
+                        @unlink($oldPath);
+                    }
+                }
+
                 $photo_name = save_photo($f, '../../images/profile');
-            } 
+            }
             
         $_db->prepare(
             "UPDATE customer 
@@ -101,6 +109,7 @@ if (is_post()) {
         
         $_SESSION['username'] = $username;
         $_SESSION['email'] = $email;
+        $_SESSION['profile_picture'] = $photo_name ?: 'default_pic.jpg';
         
         temp('info', "Profile updated successfully!");
         redirect('profile.php'); 

@@ -42,7 +42,7 @@ $customer = $stm->fetch();
         <?php else: ?>
             <img src="../../images/profile/default_pic.jpg">
         <?php endif; ?>
-        <div>
+        </div>
 
         <h2>Your Information</h2>
          
