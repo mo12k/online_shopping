@@ -90,9 +90,6 @@ include '../../_head.php';
 include '../../_header.php';
 ?>
 
-<!-- =====================
-     PAYMENT FORM UI
-===================== -->
 <div style="max-width:600px;margin:40px auto;background:#fff;padding:30px;border-radius:10px">
     <h2>Complete Payment</h2>
 

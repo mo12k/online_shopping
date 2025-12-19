@@ -372,7 +372,7 @@ $order_items = $stm->fetchAll();
                     <?php foreach ($order_items as $item): ?>
                         <div class="order-item">
                             <?php if ($item->photo_name): ?>
-                                <img src="../upload/<?= htmlspecialchars($item->photo_name) ?>"
+                                <img src="../../admin/upload/<?= htmlspecialchars($item->photo_name) ?>"
                                      alt="<?= htmlspecialchars($item->title) ?>"
                                      class="item-image">
                             <?php else: ?>
