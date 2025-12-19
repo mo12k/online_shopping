@@ -58,8 +58,6 @@ include '../../_head.php';
 include '../../_header.php';
 
 ?>
-<link rel="stylesheet" href="../../css/app.css">
-<link rel="stylesheet" href="../../css/customer.css">
 
 <style>
     .container {
