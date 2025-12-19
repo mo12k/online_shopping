@@ -161,17 +161,12 @@ include '../../_header.php';
         text-transform: uppercase;
     }
 
-    .status-paid {
-        background: #d4edda;
-        color: #155724;
-    }
-
     .status-pending {
         background: #fff3cd;
         color: #856404;
     }
 
-    .status-shipped {
+    .status-shipping {
         background: #cce5ff;
         color: #004085;
     }
@@ -179,11 +174,6 @@ include '../../_header.php';
     .status-completed {
         background: #d1ecf1;
         color: #0c5460;
-    }
-
-    .status-cancelled {
-        background: #f8d7da;
-        color: #721c24;
     }
 
     .actions {
