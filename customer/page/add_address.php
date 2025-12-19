@@ -11,7 +11,19 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
+// Where to go after cancel/save (safe whitelist)
+$return = req('return') ?? 'checkout';
+$return_to = $return === 'profile' ? 'edit_profile.php' : 'checkout.php';
+
+$addresses = get_customer_addresses($customer_id);
+$address_count = count($addresses);
+$limit_reached = $address_count >= 3;
+
 if (is_post()) {
+    if ($limit_reached) {
+        $limit_reached = true;
+    }
+
     $address = trim(req('address'));
     $city = trim(req('city'));
     $state = trim(req('state'));
@@ -21,12 +33,14 @@ if (is_post()) {
         redirect();
     }
     
-    $stm = $_db->prepare('
-        INSERT INTO customer_address (customer_id, address, city, state, postcode) 
-        VALUES (?, ?, ?, ?, ?)
-    ');
-    $stm->execute([$customer_id, $address, $city, $state, $postcode]);
-    redirect('checkout.php');
+    if (!$limit_reached) {
+        $stm = $_db->prepare('
+            INSERT INTO customer_address (customer_id, address, city, state, postcode) 
+            VALUES (?, ?, ?, ?, ?)
+        ');
+        $stm->execute([$customer_id, $address, $city, $state, $postcode]);
+        redirect($return_to);
+    }
 }
 
 ?>
@@ -107,33 +121,41 @@ if (is_post()) {
 
 <div class="container">
     <h1>Add New Address</h1>
+
+    <?php if ($limit_reached): ?>
+        <div style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; padding:12px 14px; border-radius:8px; margin:15px 0;">
+            You have reached the maximum of 3 saved addresses.
+        </div>
+    <?php endif; ?>
     
     <form method="post" class="address-form">
         <div class="form-group">
             <label for="address">Full Address *</label>
-            <textarea id="address" name="address" rows="3" required></textarea>
+            <textarea id="address" name="address" rows="3" required <?= $limit_reached ? 'disabled' : '' ?>></textarea>
         </div>
         
         <div class="form-row">
             <div class="form-group">
                 <label for="city">City *</label>
-                <input type="text" id="city" name="city" required>
+                <input type="text" id="city" name="city" required <?= $limit_reached ? 'disabled' : '' ?>>
             </div>
             
             <div class="form-group">
                 <label for="state">State *</label>
-                <input type="text" id="state" name="state" required>
+                <input type="text" id="state" name="state" required <?= $limit_reached ? 'disabled' : '' ?>>
             </div>
             
             <div class="form-group">
                 <label for="postcode">Postcode *</label>
-                <input type="text" id="postcode" name="postcode" required>
+                <input type="text" id="postcode" name="postcode" required <?= $limit_reached ? 'disabled' : '' ?>>
             </div>
         </div>
         
         <div class="form-actions">
-            <button type="submit" class="btn-primary">Save Address</button>
-            <a href="checkout.php" class="btn-cancel">Cancel</a>
+            <?php if (!$limit_reached): ?>
+                <button type="submit" class="btn-primary">Save Address</button>
+            <?php endif; ?>
+            <a href="<?= $return_to ?>" class="btn-cancel">Cancel</a>
         </div>
     </form>
 </div>
