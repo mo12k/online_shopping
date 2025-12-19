@@ -34,6 +34,58 @@ if (!$admin) {
 </div>
 <?php endif; ?>
 
+<style>
+    /* Center the whole photo section */
+    .profile-photo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Restrict profile image size */
+    .profile-photo img {
+        width: 160px;
+        height: 160px;
+        border-radius: 8px;
+        object-fit: cover;
+        display: block;
+        border: 2px solid #ddd;
+        margin-bottom: 16px;
+    }
+
+    /* Keep the table full width under the centered image */
+    .profile-photo > div {
+        width: 100%;
+    }
+
+    /* Make the links look like buttons */
+    .button-secondary {
+        display: inline-block;
+        padding: 10px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        min-width: 220px;
+        text-align: center;
+        background: #ffa502;
+        color: #000;
+        border: 1px solid #ffa502;
+        transition: 0.2s ease;
+    }
+
+    .button-secondary:hover {
+        background: #ff8c00;
+        border-color: #ff8c00;
+    }
+
+    /* Optional: reduce spacing between the two action sections */
+    .actions {
+        margin-top: 18px !important;
+        text-align: center;
+    }
+</style>
+
 
 <div class="profile">
     <h1>Admin Profile</h1>

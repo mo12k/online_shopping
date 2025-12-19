@@ -55,8 +55,10 @@ if (is_post()) {
 
         $_SESSION['username'] = $username;
         $_SESSION['email'] = $email;
+        $_SESSION['profile_pic'] = $photo_name ?: $default_pic;
+
         
-        temp('info', "Profile updated successfully!");
+        temp('info', "Profile updated successfully!");      
         redirect('adminprofile.php'); 
     }
 } else {
@@ -74,6 +76,101 @@ if (is_post()) {
     </div>
 </div>
 <?php endif; ?>
+
+<style>
+    /* Center the photo section */
+    .profile-photo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    /* Restrict image size (square/rectangle, not circle) */
+    .profile-photo img {
+        width: 240px;
+        height: 240px;
+        border-radius: 8px;
+        object-fit: cover;
+        display: block;
+        border: 2px solid #ddd;
+        background: #fff;
+    }
+
+    /* Make the upload control not stretch too wide */
+    .file-upload-group {
+        width: min(520px, 100%);
+    }
+
+    .file-upload-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #444;
+    }
+
+    .file-upload-group input[type="file"] {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border: 2px solid #ffa502;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    /* Action buttons */
+    .actions {
+        margin-top: 22px !important;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .button-primary,
+    .button-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 22px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        width: 220px;
+        box-sizing: border-box;
+    }
+
+    /* Override any global submit button rule (e.g., width:100%) */
+    .actions .button-primary {
+        width: 220px !important;
+    }
+
+    .button-primary {
+        background: #2f3542;
+        color: #fff;
+        border-color: #2f3542;
+    }
+
+    .button-primary:hover {
+        background: #57606f;
+        border-color: #57606f;
+    }
+
+    .button-secondary {
+        background: #ffa502;
+        color: #000;
+        border-color: #ffa502;
+    }
+
+    .button-secondary:hover {
+        background: #ff8c00;
+        border-color: #ff8c00;
+    }
+</style>
 
 <div class="profile">
     <h1>Edit Account Profile</h1>   

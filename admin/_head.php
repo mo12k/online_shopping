@@ -14,9 +14,12 @@
 <body class="<?= htmlspecialchars($_body_class ?? '') ?>">
 
 <?php if (isset($_SESSION['admin_id'])): ?>
-    <?php
-        $profile_pic = glob('/../admin/images/profile/*.jpg');
-        $profile_pic = array_map('basename', $profile_pic);
+    <?php 
+        $admin_id = $_SESSION['admin_id'];
+        $stm = $_db->prepare('SELECT * FROM admin WHERE admin_id = ? ');
+        $stm->execute([$admin_id]);
+        $admin = $stm->fetch();
+        $profile_pic = $_SESSION['profile_pic'] = $admin->photo ?: 'default_pic.jpg';
     ?>  
     <div class="sidebar">
         <ul>
@@ -50,8 +53,14 @@
         <div class="header">
             <h2><?= $_title ?></h2>
             <div class="user-info">
-                <img src="/admin/images/profile/<?= htmlspecialchars($_SESSION['profile_picture']) ?>" alt="Profile">
-                <a href="/admin/page/adminprofile.php">
+            <img 
+            src="/admin/images/profile/<?= $profile_pic ?>" 
+            alt="<?= htmlspecialchars($_SESSION['admin_username']) ?>'s Profile"
+            class="img"
+            onclick="window.location.href='/admin/page/adminprofile.php'"
+            style="cursor:pointer;"
+            >
+            <a href="/admin/page/adminprofile.php">
                 <span><?= htmlspecialchars($_SESSION['admin_username']) ?></span>
                 <a href="/admin/page/adminlogout.php" class="logout">Logout</a>
             </div>
