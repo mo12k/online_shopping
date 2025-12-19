@@ -58,6 +58,8 @@ $cart_total = get_cart_total($cart_items);
 
     </style>
 
+    <link rel="stylesheet" href="/css/cart.css">
+
 <div class="cart-container">
 
     <div class="cart-header">
@@ -89,7 +91,7 @@ $cart_total = get_cart_total($cart_items);
 <div class="cart-item" data-stock="<?= $item->stock ?>">
 
     <div class="cart-item-image">
-        <?php if ($item->photo_name && file_exists("../upload/{$item->photo_name}")): ?>
+        <?php if ($item->photo_name && file_exists("../../admin/upload/{$item->photo_name}")): ?>
             <img src="../../admin/upload/<?= encode($item->photo_name) ?>">
         <?php endif; ?>
     </div>
