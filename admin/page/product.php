@@ -139,7 +139,7 @@ include '../_head.php';
                 <?php else: ?>
                     <!-- 一般模式且有低庫存 → 顯示紅色警示按鈕 -->
                     <a href="product.php?low_stock=1" class="low-stock-btn">
-                        ⚠️ Low Stock Alert (<?= $low_stock_count ?> items)
+                        Low Stock Alert (<?= $low_stock_count ?> items)
                     </a>
                 <?php endif; ?>
             <?php endif; ?>
@@ -169,7 +169,7 @@ include '../_head.php';
         <?php if (empty($arr)): ?>
             <tr>
                 <td colspan="9" class="no-find">
-                    <?= $low_stock ? 'No low stock products found (All stock > 10)' : 'NO PRODUCT FOUND' ?>
+                    <?= $low_stock ? 'No low stock products found ' : 'NO PRODUCT FOUND' ?>
                 </td>
             </tr>
         <?php else: ?>

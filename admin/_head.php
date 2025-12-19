@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($_title ?? 'Admin Panel') ?></title>
     <link rel="shortcut icon" href="/images/favicon.png">
@@ -25,8 +25,8 @@
             </li>
             <li class="<?= $current == 'customer' ? 'active' : '' ?>">
                 <a href="/admin/page/customer.php">Customer List</a>
-            </li>
-            <li class="<?= $current == 'product' ? 'active' : '' ?>">
+        </li>
+        <li class="<?= $current == 'product' ? 'active' : '' ?>">
                 <a href="/admin/page/product.php">Product List</a>
             </li>
 
@@ -45,7 +45,8 @@
     </div>
 
 
-    <main>
+<main>
+        
         <div class="header">
             <h2><?= $_title ?></h2>
             <div class="user-info">

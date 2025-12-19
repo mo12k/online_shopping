@@ -13,7 +13,7 @@ $order    = $_db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
 $low_stock = $_db->query("
     SELECT COUNT(*) 
     FROM product 
-    WHERE status = 1  -- 假設 1 = Published, 0 = Draft
+    WHERE status = 1 
       AND stock <= 10
 ")->fetchColumn();
 
