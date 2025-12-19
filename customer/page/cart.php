@@ -32,8 +32,6 @@ $cart_items = get_cart_items($_db, $customer_id);
 $cart_total = get_cart_total($cart_items);
 ?>
 
-<link rel="stylesheet" href="../../css/cart.css">
-<link rel="stylesheet" href="../../css/customer.css">
 
     <style>
     .cart-info-text {
@@ -92,7 +90,7 @@ $cart_total = get_cart_total($cart_items);
 
     <div class="cart-item-image">
         <?php if ($item->photo_name && file_exists("../upload/{$item->photo_name}")): ?>
-            <img src="../upload/<?= encode($item->photo_name) ?>">
+            <img src="../../admin/upload/<?= encode($item->photo_name) ?>">
         <?php endif; ?>
     </div>
 

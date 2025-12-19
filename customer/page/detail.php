@@ -204,7 +204,6 @@ $arr = $_db->query('SELECT * FROM product');
         cursor: not-allowed;
     }
 
-    /* Product actions spacing */
     .product-actions {
         margin-top: 25px;
     }
