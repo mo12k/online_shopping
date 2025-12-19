@@ -3,7 +3,7 @@ require '../_base.php';
 $current = 'product';
 $_title = 'Product Detail';
 
-
+admin_require_login();
 
 $id = get('id');
 if (!$id) redirect('../page/product.php');

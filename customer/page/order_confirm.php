@@ -17,10 +17,10 @@ if ($order_id <= 0) {
     exit;
 }
 
-$sql = 'SELECT o.*, ca.address, ca.city, ca.state, ca.postcode 
-        FROM orders o 
-        JOIN customer_address ca ON o.address_id = ca.address_id 
-        WHERE o.order_id = ? AND o.customer_id = ?';
+$sql = 'SELECT *
+        FROM orders
+        WHERE order_id = ? AND customer_id = ?';
+
 $stm = $_db->prepare($sql);
 $stm->execute([$order_id, $customer_id]);
 $order = $stm->fetch();
@@ -30,14 +30,16 @@ if (!$order) {
     exit;
 }
 
-$sql = 'SELECT oi.*, p.title, p.photo_name, oi.price_each 
-        FROM order_item oi 
-        JOIN product p ON oi.product_id = p.id 
-        WHERE oi.order_id = ? 
+$sql = 'SELECT oi.*, p.title, p.photo_name, oi.price_each
+        FROM order_item oi
+        JOIN product p ON oi.product_id = p.id
+        WHERE oi.order_id = ?
         ORDER BY oi.order_item_id';
+
 $stm = $_db->prepare($sql);
 $stm->execute([$order_id]);
 $order_items = $stm->fetchAll();
+
 ?>
 
     <style>
@@ -348,11 +350,12 @@ $order_items = $stm->fetchAll();
                         <span class="detail-value"><?= date('F j, Y, g:i a', strtotime($order->order_date)) ?></span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Delivery Address</span>
+                        <span class="detail-label">Shipping Address</span>
                         <span class="detail-value">
-                            <?= htmlspecialchars($order->address) ?><br>
-                            <?= htmlspecialchars($order->city) ?>, <?= htmlspecialchars($order->state) ?>
-                            <?= htmlspecialchars($order->postcode) ?>
+                            <?= nl2br(htmlspecialchars($order->shipping_address)) ?><br>
+                            <?= htmlspecialchars($order->shipping_postcode) ?>
+                            <?= htmlspecialchars($order->shipping_city) ?>,
+                            <?= htmlspecialchars($order->shipping_state) ?>
                         </span>
                     </div>
                 </div>

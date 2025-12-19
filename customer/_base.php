@@ -427,86 +427,108 @@ function table_headers($fields, $sort, $dir, $href = '') {
     }
 
     
-    function create_order($customer_id, $cart_items, $address_id, $payment_method) {  // 改为 $cart_items
-    global $_db;
-    
-    try {
-        $_db->beginTransaction();
-        
-        // validate address
-        $stm = $_db->prepare('SELECT address_id FROM customer_address WHERE address_id = ? AND customer_id = ?');
-        $stm->execute([$address_id, $customer_id]);
-        $address = $stm->fetch();
-        
-        if (!$address) {
-            throw new Exception('Invalid address selected');
-        }
-        
-        
-        $total_amount = get_cart_total($cart_items);  
-        
-        $methodMap = [
-            'credit_card'       => 'card',
-            'debit_card'        => 'card',
-            'online_banking'    => 'fpx',
-            'cash_on_delivery'  => 'ewallet'
-        ];
+    function create_order($customer_id, $cart_items, $address_id, $payment_method) {
+        global $_db;
 
-        $db_method = $methodMap[$payment_method] ?? null;
-        if (!$db_method) {
-            throw new Exception('Invalid payment method');
-        }
-        
-        $stm = $_db->prepare('
-            INSERT INTO orders (customer_id, address_id, total_amount, status, order_date) 
-            VALUES (?, ?, ?, "pending", NOW())
-        ');
-        $stm->execute([$customer_id, $address_id, $total_amount]);
-        $order_id = $_db->lastInsertId();
-        
-        
-        $stm = $_db->prepare('
-            INSERT INTO order_item (order_id, product_id, quantity, price_each, subtotal) 
-            VALUES (?, ?, ?, ?, ?)
-        ');
-        
-        foreach ($cart_items as $item) { 
-            // validate stock
-            $stm_check = $_db->prepare('SELECT stock FROM product WHERE id = ?');
-            $stm_check->execute([$item->id]);
-            $product = $stm_check->fetch();
-            
-            if (!$product || $item->quantity > $product->stock) {
-                throw new Exception("Insufficient stock for product ID: {$item->id}");
+        try {
+            $_db->beginTransaction();
+
+            $stm = $_db->prepare('
+                SELECT address, city, state, postcode
+                FROM customer_address
+                WHERE address_id = ? AND customer_id = ?
+            ');
+            $stm->execute([$address_id, $customer_id]);
+            $addr = $stm->fetch();
+
+            if (!$addr) {
+                throw new Exception('Invalid address selected');
             }
 
-            $subtotal = $item->price * $item->quantity;
-            $stm->execute([$order_id, $item->id, $item->quantity, $item->price, $subtotal]);
-            
-            // update stock
-            $stm_update = $_db->prepare('UPDATE product SET stock = stock - ? WHERE id = ?');
-            $stm_update->execute([$item->quantity, $item->id]);
+            $total_amount = get_cart_total($cart_items);
+
+            $methodMap = [
+                'credit_card'      => 'card',
+                'debit_card'       => 'card',
+                'online_banking'   => 'fpx',
+                'cash_on_delivery' => 'cod'
+            ];
+
+            $db_method = $methodMap[$payment_method] ?? null;
+            if (!$db_method) {
+                throw new Exception('Invalid payment method');
+            }
+
+            $stm = $_db->prepare('
+                INSERT INTO orders (
+                    customer_id, total_amount, status, order_date, 
+                    shipping_address, shipping_city, shipping_state, shipping_postcode
+                ) VALUES (?, ?, "pending", NOW(), ?, ?, ?, ?)
+            ');
+
+            $stm->execute([
+                $customer_id,
+                $total_amount,
+                $addr->address,
+                $addr->city,
+                $addr->state,
+                $addr->postcode
+            ]);
+
+            $order_id = $_db->lastInsertId();
+
+            $stm_item = $_db->prepare('
+                INSERT INTO order_item
+                (order_id, product_id, quantity, price_each, subtotal)
+                VALUES (?, ?, ?, ?, ?)
+            ');
+
+            foreach ($cart_items as $item) {
+
+                // check stock
+                $stm_check = $_db->prepare('SELECT stock FROM product WHERE id = ?');
+                $stm_check->execute([$item->id]);
+                $product = $stm_check->fetch();
+
+                if (!$product || $item->quantity > $product->stock) {
+                    throw new Exception("Insufficient stock for product ID: {$item->id}");
+                }
+
+                $subtotal = $item->price * $item->quantity;
+
+                $stm_item->execute([
+                    $order_id,
+                    $item->id,
+                    $item->quantity,
+                    $item->price,
+                    $subtotal
+                ]);
+
+                // update stock
+                $stm_update = $_db->prepare(
+                    'UPDATE product SET stock = stock - ? WHERE id = ?'
+                );
+                $stm_update->execute([$item->quantity, $item->id]);
+            }
+
+            $stm = $_db->prepare('
+                INSERT INTO payment (order_id, method, status, amount, paid_at)
+                VALUES (?, ?, "success", ?, NOW())
+            ');
+            $stm->execute([$order_id, $db_method, $total_amount]);
+
+            clear_cart($customer_id);
+
+            $_db->commit();
+            return $order_id;
+
+        } catch (Exception $e) {
+            $_db->rollBack();
+            error_log('Order creation failed: ' . $e->getMessage());
+            return false;
         }
-        
-        // create payment
-        $stm = $_db->prepare('
-            INSERT INTO payment (order_id, method, status, amount, paid_at) 
-            VALUES (?, ?, "success", ?, NOW())
-        ');
-        $stm->execute([$order_id, $db_method, $total_amount]);
-        
-        // clear
-        clear_cart($customer_id);
-        
-        $_db->commit();
-        return $order_id;
-        
-    } catch (Exception $e) {
-        $_db->rollBack();
-        error_log("Order creation failed: " . $e->getMessage());
-        return false;
     }
-}
+
 
     function get_customer_addresses($customer_id) {
     global $_db;
@@ -573,49 +595,49 @@ function get_order_items($order_id) {
 }
 
 
-function success() {
-    global $_db;
+    function success() {
+        global $_db;
 
-    if (!isset($_SESSION['pending_order'])) {
-        redirect('checkout.php');
+        if (!isset($_SESSION['pending_order'])) {
+            redirect('checkout.php');
+            exit;
+        }
+
+        $pending = $_SESSION['pending_order'];
+
+        $customer_id    = $pending['customer_id'];
+        $address_id     = $pending['address_id'];
+        $payment_method = $pending['payment_method'];
+
+        
+        $cart_items = get_cart_items($_db, $customer_id);
+
+        if (empty($cart_items)) {
+            temp('error', 'Cart is empty.');
+            redirect('cart.php');
+            exit;
+        }
+
+        $order_id = create_order(
+            $customer_id,
+            $cart_items,
+            $address_id,
+            $payment_method
+        );
+
+        if (!$order_id) {
+            temp('error', 'Failed to create order.');
+            redirect('checkout.php');
+            exit;
+        }
+
+        unset($_SESSION['pending_order']);
+        unset($_SESSION['payment_retry']);
+
+        
+        redirect('order_confirm.php?id=' . encode_id($order_id));
         exit;
     }
-
-    $pending = $_SESSION['pending_order'];
-
-    $customer_id    = $pending['customer_id'];
-    $address_id     = $pending['address_id'];
-    $payment_method = $pending['payment_method'];
-
-    
-    $cart_items = get_cart_items($_db, $customer_id);
-
-    if (empty($cart_items)) {
-        temp('error', 'Cart is empty.');
-        redirect('cart.php');
-        exit;
-    }
-
-    $order_id = create_order(
-        $customer_id,
-        $cart_items,
-        $address_id,
-        $payment_method
-    );
-
-    if (!$order_id) {
-        temp('error', 'Failed to create order.');
-        redirect('checkout.php');
-        exit;
-    }
-
-    unset($_SESSION['pending_order']);
-    unset($_SESSION['payment_retry']);
-
-    
-    redirect('order_confirm.php?id=' . encode_id($order_id));
-    exit;
-}
 
 
     function fail($message = 'Payment failed.') {

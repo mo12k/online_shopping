@@ -19,8 +19,7 @@ $max_price  = ($max_price !== '' && $max_price !== null) ? (float)$max_price : n
 $sql = "SELECT p.*, c.*
         FROM product p
         LEFT JOIN category c ON p.category_id = c.category_id
-        WHERE p.status = 1
-          AND p.stock > 0";
+        WHERE p.status = 1";
 
 $params = [];
 

@@ -265,7 +265,7 @@ $arr = $_db->query('SELECT * FROM product');
 
             <!-- left picture + summary + .. -->
             <div class="product-image-section">
-                <?php if ($s->photo_name && file_exists("../upload/{$s->photo_name}")): ?>
+                <?php if ($s->photo_name && file_exists("../../admin/upload/{$s->photo_name}")): ?>
                     <div class="product-image-frame">
                         <img src="../../admin/upload/<?= encode($s->photo_name) ?>" alt="<?= encode($s->title) ?>" class="product-image">
                     </div>

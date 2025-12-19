@@ -147,7 +147,15 @@ if (is_post()) {
             
             <div class="form-group">
                 <label for="postcode">Postcode *</label>
-                <input type="text" id="postcode" name="postcode" required <?= $limit_reached ? 'disabled' : '' ?>>
+                <input
+                    type="text"
+                    id="postcode"
+                    name="postcode"
+                    pattern="[0-9]+"
+                    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                    required
+                    <?= $limit_reached ? 'disabled' : '' ?>
+                >
             </div>
         </div>
         
