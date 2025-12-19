@@ -28,11 +28,16 @@ $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
     </nav>
     <?php endif; ?>
 
-   <?php if ($_SESSION['customer_username'] ?? false): ?>
+
+    <?php if ($_SESSION['customer_username'] ?? false): ?>
         <div class="header-right">
-            <a href="/customer/page/profile.php">
-                <img src="../../admin/images/profile/default_pic.jpg" alt="<?= htmlspecialchars($_SESSION['customer_username']) ?>'s Profile" class="profile-header-img">
-            </a>
+            <img 
+            src="/images/profile/<?= $profile_pic ?>" 
+            alt="<?= htmlspecialchars($_SESSION['customer_username']) ?>'s Profile"
+            class="img"
+            onclick="window.location.href='/customer/page/profile.php'"
+            style="cursor:pointer;"
+            >
             
             <a href="/customer/page/profile.php">
                 <span class="username"><?= htmlspecialchars($_SESSION['customer_username']) ?></span>
@@ -40,7 +45,7 @@ $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
             |
             <a href="/page/logout.php">Logout</a>
         </div>
+    </nav>
     <?php endif; ?>
-
 
 </header>
