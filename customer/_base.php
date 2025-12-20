@@ -11,11 +11,6 @@
     // General Page Functions
     // ============================================================================
 
-    // Is GET request?
-    function is_get() {
-        return $_SERVER['REQUEST_METHOD'] == 'GET';
-    }
-
     // Is POST request?
     function is_post() {
         return $_SERVER['REQUEST_METHOD'] == 'POST';
@@ -80,45 +75,6 @@
         return ctype_digit($id) ? (int)$id : 0;
     }
 
-    function html_textarea($key, $attr = '') {
-    $value = encode($GLOBALS[$key] ?? '');
-    echo "<textarea id='$key' name='$key' $attr>$value</textarea>";
-    }
-    
-    // Generate <input type='text'>
-    function html_text($key, $attr = '') {
-        $value = encode($GLOBALS[$key] ?? '');
-        echo "<input type='text' id='$key' name='$key' value='$value' $attr>";
-    }
-
-
-    // Generate <input type='number'>
-    function html_number($key, $min = '', $max = '', $step = '', $attr = '') {
-        $value = encode($GLOBALS[$key] ?? '');
-        echo "<input type='number' id='$key' name='$key' value='$value'
-                    min='$min' max='$max' step='$step' $attr>";
-    }
-    // Generate <input type='search'>
-    function html_search($key, $placeholder ,$attr = '') {
-        $value = encode($GLOBALS[$key] ?? '');
-        $ph = $placeholder ? "placeholder='$placeholder'" : '';
-        echo "<input type='search' id='$key' name='$key' value='$value' $ph $attr>";
-    }
-
-    // Generate <input type='radio'> list
-    function html_radios($key, $items, $br = false) {
-        $value = encode($GLOBALS[$key] ?? '');
-        echo '<div>';
-        foreach ($items as $id => $text) {
-            $state = $id == $value ? 'checked' : '';
-            echo "<label><input type='radio' id='{$key}_$id' name='$key' value='$id' $state>$text</label>";
-            if ($br) {
-                echo '<br>';
-            }
-        }
-        echo '</div>';
-    }
-
     // Generate <select>
     function html_select($key, $items, $default = '- Select One -', $attr = '', $auto_submit =false) {
         $value = encode($GLOBALS[$key] ?? '');
@@ -136,29 +92,6 @@
         echo '</select>';
     }
 
-    // Generate <input type='file'>
-    function html_file($key, $accept = '', $attr = '') {
-        echo "<input type='file' id='$key' name='$key' accept='$accept' $attr>";
-    }
-
-    function get_file($key) {
-        $f = $_FILES[$key] ?? null;
-        
-        if ($f && $f['error'] == 0) {
-            return (object)$f;
-        }
-
-        return null;
-    }
-
-    // Crop, resize and save photo
-    function save_photo($f, $folder) {
-        $photo = uniqid() . '.jpg';
-        move_uploaded_file($f->tmp_name, "$folder/$photo");
-
-        return $photo;
-    }
-
     function html_status_toggle($key, $default = 1) {
     $checked = ($GLOBALS[$key] ?? $default) == 1 ? 'checked' : '';
     echo <<<HTML
@@ -171,32 +104,7 @@
         <span style="color:#333; font-weight:500;">Active</span>
     </div>
     HTML;
-}
-
-
-    // Is money?
-    function is_money($value) {
-        return preg_match('/^\-?\d+(\.\d{1,2})?$/', $value);
     }
-
-
-
-function table_headers($fields, $sort, $dir, $href = '') {
-    foreach ($fields as $k => $v) {
-        $d = 'asc'; // Default direction
-        $c = '';    // Default class
-        
-        // TODO
-        if($k ==$sort){
-            $d = $dir =='asc'?'desc':'asc';
-            $c = $dir;
-
-        }
-
-        echo "<th><a href='?sort=$k&dir=$d&$href' class='$c'>$v</a></th>";
-    }
-}
-
 
     // ============================================================================
     // Error Handlings
@@ -216,51 +124,22 @@ function table_headers($fields, $sort, $dir, $href = '') {
         }
     }
 
-
-
-    // ============================================================================
+    // ===========================================================================
     // Database Setups and Functions
     // ============================================================================
-
 
     // Global PDO object
     $_db = new PDO('mysql:dbname=bookstore', 'root', '', [    
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
     ]);
 
-    // Is unique?
-    function is_unique($value, $table, $field) {
-        global $_db;
-        $stm = $_db->prepare("SELECT COUNT(*) FROM $table WHERE $field = ?");
-        $stm->execute([$value]);
-        return $stm->fetchColumn() == 0;
-    }
-
-    // Is exists?
-    function is_exists($value, $table, $field) {
-        global $_db;
-        $stm = $_db->prepare("SELECT COUNT(*) FROM $table WHERE $field = ?");
-        $stm->execute([$value]);
-        return $stm->fetchColumn() > 0;
-    }
-
-
-
     // ============================================================================
     // Global Constants and Variables
     // ============================================================================
 
-    $_genders = [
-        'F' => 'Female',
-        'M' => 'Male',
-    ];
-
     $_category = $_db->query('SELECT category_id, category_name FROM category ORDER BY sort_order')
                  ->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $_status = [1 => 'Published', 0 => 'Draft'];
-
-  
     // ============================================================================
     // Shopping Cart
     // ============================================================================
@@ -542,56 +421,6 @@ function table_headers($fields, $sort, $dir, $href = '') {
         return $stm->fetchAll();
     }
 
-    function get_address_by_id($address_id, $customer_id = null) {
-        global $_db;
-        
-        $sql = 'SELECT * FROM customer_address WHERE address_id = ?';
-        $params = [$address_id];
-        
-        if ($customer_id) {
-            $sql .= ' AND customer_id = ?';
-            $params[] = $customer_id;
-        }
-        
-        $stm = $_db->prepare($sql);
-        $stm->execute($params);
-        return $stm->fetch();
-    }
-    
-    function get_order_by_id($order_id, $customer_id = null) {
-        global $_db;
-        
-        $sql = 'SELECT o.*, ca.address, ca.city, ca.state, ca.postcode 
-                FROM orders o 
-                JOIN customer_address ca ON o.address_id = ca.address_id 
-                WHERE o.order_id = ?';
-        
-        $params = [$order_id];
-        
-        if ($customer_id) {
-            $sql .= ' AND o.customer_id = ?';
-            $params[] = $customer_id;
-        }
-        
-        $stm = $_db->prepare($sql);
-        $stm->execute($params);
-        return $stm->fetch();
-    }
-
-    function get_order_items($order_id) {
-        global $_db;
-        
-        $stm = $_db->prepare('
-            SELECT oi.*, p.title, p.photo_name,
-                oi.price_each as price 
-            FROM order_item oi 
-            JOIN product p ON oi.product_id = p.id 
-            WHERE oi.order_id = ? 
-            ORDER BY oi.order_item_id
-        ');
-        $stm->execute([$order_id]);
-        return $stm->fetchAll();
-    }
 
     function success() {
         global $_db;
@@ -663,5 +492,3 @@ function table_headers($fields, $sort, $dir, $href = '') {
 function is_email($value) {
     return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
 }
-
-   
