@@ -1,4 +1,5 @@
 <?php
+
 require '../_base.php';
 
 if (!isset($_SESSION['customer_id'])) {

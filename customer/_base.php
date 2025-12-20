@@ -451,7 +451,7 @@ function table_headers($fields, $sort, $dir, $href = '') {
                 'credit_card'      => 'card',
                 'debit_card'       => 'card',
                 'online_banking'   => 'fpx',
-                'cash_on_delivery' => 'cod'
+                'cash_on_delivery' => 'ewallet'
             ];
 
             $db_method = $methodMap[$payment_method] ?? null;
@@ -529,19 +529,18 @@ function table_headers($fields, $sort, $dir, $href = '') {
         }
     }
 
-
-    function get_customer_addresses($customer_id) {
-    global $_db;
-    
-    $stm = $_db->prepare('
-        SELECT address_id, address, city, state, postcode 
-        FROM customer_address 
-        WHERE customer_id = ? 
-        ORDER BY address_id
-    ');
-    $stm->execute([$customer_id]);
-    return $stm->fetchAll();
-}
+        function get_customer_addresses($customer_id) {
+        global $_db;
+        
+        $stm = $_db->prepare('
+            SELECT address_id, address, city, state, postcode 
+            FROM customer_address 
+            WHERE customer_id = ? 
+            ORDER BY address_id
+        ');
+        $stm->execute([$customer_id]);
+        return $stm->fetchAll();
+    }
 
     function get_address_by_id($address_id, $customer_id = null) {
         global $_db;
@@ -559,41 +558,40 @@ function table_headers($fields, $sort, $dir, $href = '') {
         return $stm->fetch();
     }
     
-function get_order_by_id($order_id, $customer_id = null) {
-    global $_db;
-    
-    $sql = 'SELECT o.*, ca.address, ca.city, ca.state, ca.postcode 
-            FROM orders o 
-            JOIN customer_address ca ON o.address_id = ca.address_id 
-            WHERE o.order_id = ?';
-    
-    $params = [$order_id];
-    
-    if ($customer_id) {
-        $sql .= ' AND o.customer_id = ?';
-        $params[] = $customer_id;
+    function get_order_by_id($order_id, $customer_id = null) {
+        global $_db;
+        
+        $sql = 'SELECT o.*, ca.address, ca.city, ca.state, ca.postcode 
+                FROM orders o 
+                JOIN customer_address ca ON o.address_id = ca.address_id 
+                WHERE o.order_id = ?';
+        
+        $params = [$order_id];
+        
+        if ($customer_id) {
+            $sql .= ' AND o.customer_id = ?';
+            $params[] = $customer_id;
+        }
+        
+        $stm = $_db->prepare($sql);
+        $stm->execute($params);
+        return $stm->fetch();
     }
-    
-    $stm = $_db->prepare($sql);
-    $stm->execute($params);
-    return $stm->fetch();
-}
 
-function get_order_items($order_id) {
-    global $_db;
-    
-    $stm = $_db->prepare('
-        SELECT oi.*, p.title, p.photo_name,
-               oi.price_each as price 
-        FROM order_item oi 
-        JOIN product p ON oi.product_id = p.id 
-        WHERE oi.order_id = ? 
-        ORDER BY oi.order_item_id
-    ');
-    $stm->execute([$order_id]);
-    return $stm->fetchAll();
-}
-
+    function get_order_items($order_id) {
+        global $_db;
+        
+        $stm = $_db->prepare('
+            SELECT oi.*, p.title, p.photo_name,
+                oi.price_each as price 
+            FROM order_item oi 
+            JOIN product p ON oi.product_id = p.id 
+            WHERE oi.order_id = ? 
+            ORDER BY oi.order_item_id
+        ');
+        $stm->execute([$order_id]);
+        return $stm->fetchAll();
+    }
 
     function success() {
         global $_db;
@@ -661,7 +659,6 @@ function get_order_items($order_id) {
     redirect();
     exit;
 }
-
 
 function is_email($value) {
     return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
