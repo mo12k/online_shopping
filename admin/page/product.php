@@ -8,9 +8,8 @@ $_title = 'Product List';
 
 $category_id = get('category_id');
 $name = trim(req('name') ?? '');
-$low_stock = req('low_stock');  // 從 dashboard 或手動輸入都會有
+$low_stock = req('low_stock'); 
 
-/* ===== $fields 定義 ===== */
 $fields = [
     'p.photo_name'     => 'Picture',
     'p.id'             => 'Id',
