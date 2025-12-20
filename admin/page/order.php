@@ -14,34 +14,8 @@ $date_from = req('date_from');
 $date_to   = req('date_to');
 $status    = req('status');
 
-/* =========================
-   Handle status change (POST actions)
-========================= */
-// Pending → Shipping
-if (is_post() && req('action') === 'ship') {
-    $id = req('id');
-    if ($id) {
-        $affected = $_db->prepare("UPDATE orders SET status = 'shipping' WHERE order_id = ? AND status = 'pending'")
-                        ->execute([$id]);
-        if ($affected) {
-            temp('info', "Order #$id has been shipped.");
-        }
-    }
-    redirect('order.php?' . http_build_query($_GET));
-}
 
-// Shipping → Completed
-if (is_post() && req('action') === 'arrived') {
-    $id = req('id');
-    if ($id) {
-        $affected = $_db->prepare("UPDATE orders SET status = 'completed' WHERE order_id = ? AND status = 'shipping'")
-                        ->execute([$id]);
-        if ($affected) {
-            temp('info', "Order #$id has arrived and marked as completed.");
-        }
-    }
-    redirect('order.php?' . http_build_query($_GET));
-}
+
 
 /* =========================
    Table headers & SQL
@@ -81,8 +55,7 @@ $params = [];
 $q = [];
 
 $status_list = [
-    'pending'   => 'Pending',
-    'delivery'  => 'Delivery',
+    'pending'   => 'Paid',
     'shipping'  => 'Shipping',
     'completed' => 'Completed',
 ];

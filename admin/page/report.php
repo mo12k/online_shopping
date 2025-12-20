@@ -13,69 +13,71 @@ $params = [
     $date_to . ' 23:59:59'
 ];
 
-/* ===== Top 5 Products ===== */
 $sql_product = "
-SELECT 
-    p.id,
-    p.title,
-    SUM(oi.quantity) total
-FROM order_item oi
-LEFT JOIN orders o ON oi.order_id = o.order_id
-LEFT JOIN product p ON oi.product_id = p.id
-WHERE $where
-GROUP BY oi.product_id
-ORDER BY total DESC
-LIMIT 5
-";
+            SELECT 
+                p.id,
+                p.title,
+                SUM(oi.quantity) total
+            FROM order_item oi
+            LEFT JOIN orders o ON oi.order_id = o.order_id
+            LEFT JOIN product p ON oi.product_id = p.id
+            WHERE $where 
+            AND o.status = 'completed'
+            GROUP BY oi.product_id
+            ORDER BY total DESC
+            LIMIT 5
+            ";
 $stm = $_db->prepare($sql_product);
 $stm->execute($params);
 $top_products = $stm->fetchAll();
 
-/* ===== Top 5 Categories ===== */
+
 $sql_category = "
-SELECT 
-    c.category_id,
-    c.category_name,
-    SUM(oi.quantity) total
-FROM order_item oi
-LEFT JOIN orders o ON oi.order_id = o.order_id
-LEFT JOIN product p ON oi.product_id = p.id
-LEFT JOIN category c ON p.category_id = c.category_id
-WHERE $where
-GROUP BY c.category_id
-ORDER BY total DESC
-LIMIT 5
-";
+            SELECT 
+                c.category_id,
+                c.category_name,
+                SUM(oi.quantity) total
+            FROM order_item oi
+            LEFT JOIN orders o ON oi.order_id = o.order_id
+            LEFT JOIN product p ON oi.product_id = p.id
+            LEFT JOIN category c ON p.category_id = c.category_id
+            WHERE $where
+            AND o.status = 'completed'
+            GROUP BY c.category_id
+            ORDER BY total DESC
+            LIMIT 5
+            ";
 $stm = $_db->prepare($sql_category);
 $stm->execute($params);
 $top_categories = $stm->fetchAll();
 
-/* ===== Order Item Chart ===== */
+
 $sql_chart = "
-SELECT 
-    DATE(o.order_date) d,
-    SUM(oi.quantity) total
-FROM order_item oi
-LEFT JOIN orders o ON oi.order_id = o.order_id
-WHERE $where
-GROUP BY DATE(o.order_date)
-ORDER BY d
-";
+            SELECT 
+                DATE(o.order_date) d,
+                SUM(oi.quantity) total
+            FROM order_item oi
+            LEFT JOIN orders o ON oi.order_id = o.order_id
+            WHERE $where
+            AND o.status = 'completed'
+            GROUP BY DATE(o.order_date)
+            ORDER BY d
+            ";
 $stm = $_db->prepare($sql_chart);
 $stm->execute($params);
 
 $labels = [];
 $data = [];
 while ($r = $stm->fetch(PDO::FETCH_OBJ)) {
-    if ($r->d && $r->total > 0) {  // 過濾掉可能的 NULL 日期或 0
-        $labels[] = $r->d;         // 格式如 '2025-12-16'
+    if ($r->d && $r->total > 0) {  
+        $labels[] = $r->d;         
         $data[]   = (int)$r->total;
     }
 }
 
-// 強制確保兩個陣列長度一致（防萬一）
+
 if (count($labels) !== count($data)) {
-    // 如果不一致，清空避免 Chart.js 錯誤
+   
     $labels = [];
     $data   = [];
 }
@@ -84,10 +86,10 @@ include '../_head.php';
 
 <div class="content">
 
-    <!-- ================= 上方三欄區域 ================= -->
+   
     <table style="width:100%; border-collapse: collapse; margin-bottom: 40px;">
         <tr>
-            <!-- 左：日期篩選 -->
+           
             <td style="width:30%; vertical-align: top; padding: 15px; background:#f9f9f9; border-radius:8px;">
                 <h4 style="margin-top:0; color:#333;">Date Filter</h4>
                 <form id="filterForm" method="get">
@@ -112,7 +114,7 @@ include '../_head.php';
               </a>
             </td>
 
-            <!-- 中：Top 5 Products -->
+            
             <td style="width:35%; vertical-align: top; padding: 15px;">
                 <h4 style="margin-top:0; color:#333;">Top 5 Products</h4>
                 <table style="width:100%; border-collapse:collapse; font-size:14px;">
@@ -142,7 +144,7 @@ include '../_head.php';
                 </table>
             </td>
 
-            <!-- 右：Top 5 Categories -->
+            
             <td style="width:35%; vertical-align: top; padding: 15px;">
                 <h4 style="margin-top:0; color:#333;">Top 5 Categories</h4>
                 <table style="width:100%; border-collapse:collapse; font-size:14px;">
@@ -174,7 +176,7 @@ include '../_head.php';
         </tr>
     </table>
 
-    <!-- ================= Chart 區域 ================= -->
+    
     <div style="background:white; padding:25px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
         <h4 style="margin-top:0; color:#333;">
             Order Item Trend 

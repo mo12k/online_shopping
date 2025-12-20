@@ -17,19 +17,16 @@ $stm = $_db->prepare("
     SELECT 
         o.order_id,
         o.total_amount,
-        o.status,
         o.order_date,
-
+        o.shipping_address,
+        0.shipping_city,
+        o.shipping_state,
+        o.shipping_postcode,
         c.username,
-        c.email,
+        c.email
 
-        a.address,
-        a.postcode,
-        a.city,
-        a.state
     FROM orders o
-    LEFT JOIN customer c ON o.customer_id = c.customer_id
-    LEFT JOIN customer_address a ON o.address_id = a.address_id
+    LEFT JOIN customer c ON o.customer_id = c.customer_id 
     WHERE o.order_id = ?
 ");
 $stm->execute([$order_id]);
@@ -54,7 +51,21 @@ $stm = $_db->prepare("
 ");
 $stm->execute([$order_id]);
 $items = $stm->fetchAll();
+
+
+$stm = $_db->prepare("
+    SELECT 
+        o.order_id,
+        p.method
+    FROM payment p
+    LEFT JOIN orders o ON o.order_id = p.order_id
+    WHERE p.order_id = ?
+");
+$stm->execute([$order_id]);
+$payment_method = $stm->fetch();
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -138,7 +149,7 @@ $items = $stm->fetchAll();
 
 <!-- Print Button -->
 <div class="no-print">
-    <button onclick="window.print()">🖨 Print</button>
+    <button onclick="window.print()"> Print</button>
 </div>
 
 <h2>Order #<?= encode($order->order_id) ?></h2>
@@ -153,8 +164,8 @@ $items = $stm->fetchAll();
         </td>
     </tr>
     <tr>
-        <th>Status</th>
-        <td><?= ucfirst($order->status) ?></td>
+        <th>Paymant Method</th>
+        <td><?= ucfirst($payment_method->method) ?></td>
     </tr>
     <tr>
         <th>Order Date</th>
@@ -163,9 +174,9 @@ $items = $stm->fetchAll();
     <tr>
         <th>Shipping Address</th>
         <td>
-            <?= encode($order->address) ?><br>
-            <?= encode($order->postcode) ?>, <?= encode($order->city) ?><br>
-            <?= encode($order->state) ?>
+            <?= encode($order->shipping_address) ?><br>
+            <?= encode($order->shipping_postcode) ?>, <?= encode($order->shipping_city) ?><br>
+            <?= encode($order->shipping_state) ?>
         </td>
     </tr>
 </table>
