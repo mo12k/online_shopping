@@ -20,7 +20,6 @@ $profile_pic = $_SESSION['profile_picture'] ?? 'default_pic.jpg';
     <?php if (!($_SESSION['customer_username'] ?? false)): ?>
         <div class="header-right">
             <ul>
-                <li><a href="/admin/page/dashboard.php">Admin Log in</a> </li>
                 <li><a href="/page/register.php">Sign up</a> </li>
                 <li><a href="/page/login.php">Log in</a> </li>
             </ul>
