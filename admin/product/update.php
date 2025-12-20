@@ -9,6 +9,15 @@ $_title = 'Edit Product';
 $id = req('id');
 
 
+$return_url = '../page/product.php';
+$query_params = $_GET;
+unset($query_params['id']);
+
+$return_url = '../page/product.php';
+if (!empty($query_params)) {
+    $return_url .= '?' . http_build_query($query_params);
+}
+
 $stm = $_db->prepare('SELECT * FROM product WHERE id = ?');
 $stm->execute([$id]);
 $p = $stm->fetch();
@@ -49,8 +58,8 @@ if (is_post()) {
         $_err['price'] = 'Required';
     } elseif (!is_money($price)) {
         $_err['price'] = 'Must be money';
-    } elseif ($price < 0.01 || $price > 9999.99) {
-        $_err['price'] = 'Must between 0.01 - 99.99';
+    } elseif ($price < 0.01 || $price > 99999.99) {
+        $_err['price'] = 'Must between 0.01 - 99999.99';
     }
 
     if ($stock === '') {
@@ -85,6 +94,8 @@ if (is_post()) {
     }
 
    
+
+   
     $isIdentityChanged =
         $title !== $p->title ||
         $author !== $p->author ||
@@ -106,8 +117,19 @@ if (is_post()) {
         }
     }
 
-    // ---------- Update ----------
+   
     if (!$_err) {
+        $has_changes =
+            $title !== $p->title ||
+            $author !== $p->author ||
+            $category_id != $p->category_id ||
+            $price != $p->price ||
+            $stock != $p->stock ||
+            $status != $p->status ||
+            $description !== $p->description ||
+            $photo_name !== $p->photo_name;
+
+        
         $_db->prepare(
             "UPDATE product 
              SET title=?, author=?, category_id=?, price=?, stock=?, status=?, description=?, photo_name=? 
@@ -118,8 +140,12 @@ if (is_post()) {
             $description, $photo_name, $id
         ]);
 
-        temp('info', "Product ID $id updated successfully!");
-        redirect('../page/product.php');
+       if ($has_changes) {
+            temp('info', "Product ID $id updated successfully!");
+        }
+
+        
+        redirect($return_url);
     }
 
 }
@@ -245,7 +271,7 @@ include '../_head.php';
 
                     <div class="actions">
                         <button  class="btn-primary">Update Product</button>
-                        <a href="/admin/page/product.php" class="btn-cancel">Cancel</a>
+                        <a href=<?= $return_url?> class="btn-cancel">Cancel</a>
                         
                     </div>
                 </div>

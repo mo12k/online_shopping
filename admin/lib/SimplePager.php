@@ -11,32 +11,29 @@ class SimplePager {
     public function __construct($query, $params, $limit, $page) {
             global $_db;
 
-        // Set [limit] and [page]
-        $this->limit = ctype_digit($limit) ? max($limit, 1) : 10;
-        $this->page = ctype_digit($page) ? max($page, 1) : 1;
+            $this->limit = ctype_digit((string)$limit) ? max((int)$limit, 1) : 10;
+            $this->page  = ctype_digit((string)$page)  ? max((int)$page, 1)   : 1;
 
-        // Set [item count]
+            
             $count_query = $query;
             $count_query = preg_replace('/\s+ORDER\s+BY\s+.*$/i', '', $count_query); 
             $count_query = preg_replace('/^SELECT\s+.+?\s+FROM/i', 'SELECT COUNT(*) FROM', $count_query, 1);
 
-             $stm = $_db->prepare($count_query);
+            $stm = $_db->prepare($count_query);
             $stm->execute($params);
             $this->item_count = (int)$stm->fetchColumn();
 
-             $this->page_count = ceil($this->item_count / $this->limit);
+            $this->page_count = ceil($this->item_count / $this->limit);
             $this->page = min($this->page, max(1, $this->page_count));
 
-        // Set [result]
-        $offset = ($this->page - 1) * $this->limit;
+            $offset = ($this->page - 1) * $this->limit;
           
             $final_query = $query . " LIMIT $offset, {$this->limit}";
             $stm = $_db->prepare($final_query);
             $stm->execute($params);
             $this->result = $stm->fetchAll();
 
-        // Set [count]
-        $this->count = count($this->result);
+            $this->count = count($this->result);
     }
 
     public function html($query = '') {
@@ -83,6 +80,7 @@ class SimplePager {
 
     echo '</div></div>';
 }
+
 }
 
 
