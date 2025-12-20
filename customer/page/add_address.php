@@ -15,15 +15,15 @@ $customer_id = $_SESSION['customer_id'];
 $return = req('return') ?? 'checkout';
 $return_to = $return === 'profile' ? 'edit_profile.php' : 'checkout.php';
 
-// Pending changes (profile flow only)
-$pending_add_key = 'profile_pending_address_add';
-$pending_del_key = 'profile_pending_address_delete';
-
 $addresses = get_customer_addresses($customer_id);
 $address_count = count($addresses);
 $limit_reached = $address_count >= 3;
 
 if (is_post()) {
+    if ($limit_reached) {
+        $limit_reached = true;
+    }
+
     $address = trim(req('address'));
     $city = trim(req('city'));
     $state = trim(req('state'));
@@ -33,41 +33,13 @@ if (is_post()) {
         redirect();
     }
     
-    // only commit on Save Changes
-    if ($return === 'profile') {
-        $pending_add = $_SESSION[$pending_add_key] ?? [];
-        $pending_del = $_SESSION[$pending_del_key] ?? [];
-        $pending_del = array_values(array_unique(array_map('intval', (array)$pending_del)));
-
-        $db_kept = array_filter($addresses, function ($a) use ($pending_del) {
-            return !in_array((int)$a->address_id, $pending_del, true);
-        });
-        $effective_count = count($db_kept) + count($pending_add);
-
-        if ($effective_count >= 3) {
-            $limit_reached = true;
-        }
-        else {
-            $pending_add[] = [
-                'address'  => $address,
-                'city'     => $city,
-                'state'    => $state,
-                'postcode' => $postcode,
-            ];
-            $_SESSION[$pending_add_key] = $pending_add;
-            redirect($return_to);
-        }
-    }
-    // For checkout flow: keep current behavior (insert immediately).
-    else {
-        if (!$limit_reached) {
-            $stm = $_db->prepare('
-                INSERT INTO customer_address (customer_id, address, city, state, postcode) 
-                VALUES (?, ?, ?, ?, ?)
-            ');
-            $stm->execute([$customer_id, $address, $city, $state, $postcode]);
-            redirect($return_to);
-        }
+    if (!$limit_reached) {
+        $stm = $_db->prepare('
+            INSERT INTO customer_address (customer_id, address, city, state, postcode) 
+            VALUES (?, ?, ?, ?, ?)
+        ');
+        $stm->execute([$customer_id, $address, $city, $state, $postcode]);
+        redirect($return_to);
     }
 }
 

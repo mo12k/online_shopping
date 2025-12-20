@@ -8,16 +8,6 @@ require '../_base.php';
 
 $customer_id = $_SESSION['customer_id'];
 
-// Pending address changes (only committed when Save Changes is clicked)
-$pending_add_key = 'profile_pending_address_add';
-$pending_del_key = 'profile_pending_address_delete';
-
-// Cancel should discard any staged address changes
-if (is_get() && get('cancel')) {
-    unset($_SESSION[$pending_add_key], $_SESSION[$pending_del_key]);
-    redirect('profile.php');
-}
-
 include '../../_head.php';
 include '../../_header.php';
 
@@ -30,35 +20,7 @@ $stm = $_db->prepare('SELECT * FROM customer WHERE customer_id = ? ');
 $stm->execute([$customer_id]);
 $customer = $stm->fetch();
 
-$addresses_db = get_customer_addresses($customer_id);
-$pending_add = $_SESSION[$pending_add_key] ?? [];
-$pending_del = $_SESSION[$pending_del_key] ?? [];
-$pending_del = array_values(array_unique(array_map('intval', (array)$pending_del)));
-
-$addresses = array_values(array_filter($addresses_db, function ($a) use ($pending_del) {
-    return !in_array((int)$a->address_id, $pending_del, true);
-}));
-
-foreach ((array)$pending_add as $p) {
-    $o = (object)[
-        'address_id' => null,
-        'address' => $p['address'] ?? '',
-        'city' => $p['city'] ?? '',
-        'state' => $p['state'] ?? '',
-        'postcode' => $p['postcode'] ?? '',
-        '_pending_index' => null,
-    ];
-    $addresses[] = $o;
-}
-
-// attach pending index for delete forms
-for ($i = 0, $pi = 0; $i < count($addresses); $i++) {
-    if ($addresses[$i]->address_id === null) {
-        $addresses[$i]->_pending_index = $pi;
-        $pi++;
-    }
-}
-
+$addresses = get_customer_addresses($customer_id);
 $address_count = count($addresses);
 
 
@@ -121,9 +83,7 @@ if (is_post()) {
     
     
     if (!$_err) {
-        try {
-            $_db->beginTransaction();
-
+         
             if ($f && $f->size > 0) {
                 // Only delete customer-specific images; never delete shared defaults.
                 $oldPhoto = $photo_name ? basename($photo_name) : '';
@@ -137,77 +97,25 @@ if (is_post()) {
                 $photo_name = save_photo($f, '../../images/profile');
             }
             
-            $_db->prepare(
-                "UPDATE customer 
-                 SET username=?, email=?, photo=?, phone=? 
-                 WHERE customer_id=?"
-            )->execute([
-                $username, 
-                $email, 
-                $photo_name, 
-                $phone,      
-                $customer_id
-            ]);
+        $_db->prepare(
+            "UPDATE customer 
+             SET username=?, email=?, photo=?, phone=? 
+             WHERE customer_id=?"
+        )->execute([
+            $username, 
+            $email, 
+            $photo_name, 
+            $phone,      
+            $customer_id
+        ]);
 
-            // Apply staged address changes (commit on Save Changes)
-            $pending_add = $_SESSION[$pending_add_key] ?? [];
-            $pending_del = $_SESSION[$pending_del_key] ?? [];
-            $pending_del = array_values(array_unique(array_map('intval', (array)$pending_del)));
-
-            if (!empty($pending_del)) {
-                $stm_del = $_db->prepare('DELETE FROM customer_address WHERE address_id = ? AND customer_id = ?');
-                foreach ($pending_del as $aid) {
-                    if ($aid > 0) {
-                        $stm_del->execute([$aid, $customer_id]);
-                    }
-                }
-            }
-
-            if (!empty($pending_add)) {
-                $stm_ins = $_db->prepare('
-                    INSERT INTO customer_address (customer_id, address, city, state, postcode)
-                    VALUES (?, ?, ?, ?, ?)
-                ');
-
-                // enforce max 3 at commit time
-                $after = get_customer_addresses($customer_id);
-                $remaining_slots = 3 - count($after);
-                if ($remaining_slots < 0) $remaining_slots = 0;
-
-                $i = 0;
-                foreach ($pending_add as $p) {
-                    if ($i >= $remaining_slots) break;
-                    $addr = trim($p['address'] ?? '');
-                    $city = trim($p['city'] ?? '');
-                    $state = trim($p['state'] ?? '');
-                    $postcode = trim($p['postcode'] ?? '');
-                    if ($addr === '' || $city === '' || $state === '' || $postcode === '') {
-                        continue;
-                    }
-                    $stm_ins->execute([$customer_id, $addr, $city, $state, $postcode]);
-                    $i++;
-                }
-            }
-
-            $_db->commit();
-
-            unset($_SESSION[$pending_add_key], $_SESSION[$pending_del_key]);
-
-            $_SESSION['username'] = $username;
-            $_SESSION['email'] = $email;
-            $_SESSION['profile_picture'] = $photo_name ?: 'default_pic.jpg';
-
-            temp('info', "Profile updated successfully!");
-            redirect('profile.php');
-
-        } catch (Exception $e) {
-            if ($_db->inTransaction()) {
-                $_db->rollBack();
-            }
-            error_log('Edit profile save failed: ' . $e->getMessage());
-            temp('error', 'Failed to save changes. Please try again.');
-            redirect('edit_profile.php');
-        }
+        
+        $_SESSION['username'] = $username;
+        $_SESSION['email'] = $email;
+        $_SESSION['profile_picture'] = $photo_name ?: 'default_pic.jpg';
+        
+        temp('info', "Profile updated successfully!");
+        redirect('profile.php'); 
     }
 
 }
@@ -312,13 +220,10 @@ else {
                                         <?= encode($address->postcode) ?>
                                     </div>
 
-                                    <button
-                                        type="submit"
-                                        class="button-secondary"
-                                        style="width:90px;"
-                                        form="<?= $address->address_id ? ('delete_address_' . $address->address_id) : ('delete_pending_address_' . $address->_pending_index) ?>"
-                                        onclick="return confirm('Delete this address?');"
-                                    >Delete</button>
+                                    <form method="post" action="delete_address.php" style="margin:0; flex:0 0 auto;">
+                                        <input type="hidden" name="address_id" value="<?= $address->address_id ?>">
+                                        <button type="submit" class="button-secondary" style="width:90px;" onclick="return confirm('Delete this address?');">Delete</button>
+                                    </form>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -340,24 +245,10 @@ else {
         </table>
         <div class="actions" style="margin-top: 30px;">
             <button type="submit" class="button-primary">Save Changes</button>
-            <a href="edit_profile.php?cancel=1" class="button-secondary">Cancel</a>
+            <a href="profile.php" class="button-secondary">Cancel</a>
         </div>
         
     </form>
-
-    <?php if (!empty($addresses)): ?>
-        <?php foreach ($addresses as $address): ?>
-            <?php if ($address->address_id): ?>
-                <form id="delete_address_<?= $address->address_id ?>" method="post" action="delete_address.php" style="display:none;">
-                    <input type="hidden" name="address_id" value="<?= $address->address_id ?>">
-                </form>
-            <?php else: ?>
-                <form id="delete_pending_address_<?= $address->_pending_index ?>" method="post" action="delete_address.php" style="display:none;">
-                    <input type="hidden" name="pending_index" value="<?= $address->_pending_index ?>">
-                </form>
-            <?php endif; ?>
-        <?php endforeach; ?>
-    <?php endif; ?>
 </div>
 
 </main>
