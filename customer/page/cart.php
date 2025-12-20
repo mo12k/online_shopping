@@ -30,8 +30,30 @@ if (is_post()) {
 
 $cart_items = get_cart_items($_db, $customer_id);
 $cart_total = get_cart_total($cart_items);
-?>
 
+$can_checkout = true;
+$has_stock_issue = false;
+
+foreach ($cart_items as $item) {
+    if ($item->quantity > $item->stock) {
+        $can_checkout = false;
+        $has_stock_issue = true;
+        break;
+    }
+}
+
+if ($has_stock_issue) {
+    temp('error', 'Some items are out of stock. Please update your cart.');
+}
+
+foreach ($cart_items as $item) {
+    if ($item->quantity > $item->stock) {
+        update_cart($item->cart_item_id, $item->stock, $customer_id);
+        $item->quantity = $item->stock;
+    }
+}
+
+?>
 
     <style>
     .cart-info-text {
@@ -60,35 +82,53 @@ $cart_total = get_cart_total($cart_items);
 
     <link rel="stylesheet" href="/css/cart.css">
 
-<div class="cart-container">
+    <div class="cart-container">
+        <?php if ($msg = temp('error')): ?>
+                    <div class="message error" style="
+                        max-width: 800px;
+                        margin: 20px auto;
+                        background: #f8d7da;
+                        color: #721c24;
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        border: 1px solid #f5c6cb;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span><?= $msg ?></span>
+                    </div>
 
-    <div class="cart-header">
-        <h1>Shopping Cart</h1>
-        <div class="cart-count">
-            <?= count($cart_items) ?> item<?= count($cart_items) !== 1 ? 's' : '' ?>
+                    <button style="margin-top: 2px"onclick="this.parentElement.remove()">x</button>
+            </div>
+        <?php endif; ?>
+        <div class="cart-header">
+            <h1>Shopping Cart</h1>
+            <div class="cart-count">
+                <?= count($cart_items) ?> item<?= count($cart_items) !== 1 ? 's' : '' ?>
+            </div>
         </div>
-    </div>
 
-    <p class="cart-info-text">
-        Showing <?= count($cart_items) ?> item<?= count($cart_items) !== 1 ? 's' : '' ?>
-        in your cart
-    </p>
+        <p class="cart-info-text">
+            Showing <?= count($cart_items) ?> item<?= count($cart_items) !== 1 ? 's' : '' ?>
+            in your cart
+        </p>
 
-<?php if (empty($cart_items)): ?>
+    <?php if (empty($cart_items)): ?>
 
-    <div class="cart-empty">
-        <h2>Your cart is empty</h2>
-        <a href="../page/product.php" class="continue-shopping">Continue Shopping</a>
-    </div>
+        <div class="cart-empty">
+            <h2>Your cart is empty</h2>
+            <a href="../page/product.php" class="continue-shopping">Continue Shopping</a>
+        </div>
 
-<?php else: ?>
+    <?php else: ?>
 
-<div class="cart-content">
+    <div class="cart-content">
 
-<div class="cart-items">
+    <div class="cart-items">
 
-<?php foreach ($cart_items as $item): ?>
-<div class="cart-item" data-stock="<?= $item->stock ?>">
+    <?php foreach ($cart_items as $item): ?>
+    <div class="cart-item" data-stock="<?= $item->stock ?>">
 
     <div class="cart-item-image">
         <?php if ($item->photo_name && file_exists("../../admin/upload/{$item->photo_name}")): ?>
@@ -104,7 +144,7 @@ $cart_total = get_cart_total($cart_items);
         <div class="cart-item-actions">
             <form method="post" class="update-form">
                 <input type="hidden" name="action" value="update">
-                <input type="hidden" name="id" value="<?= $item->id ?>">
+                <input type="hidden" name="id" value="<?= $item->cart_item_id ?>">
 
                 <div class="quantity-control-cart">
                     <button type="button" class="qty-dec">−</button>
@@ -117,65 +157,72 @@ $cart_total = get_cart_total($cart_items);
 
             <form method="post" onsubmit="return confirm('Remove this item from cart?')">
                 <input type="hidden" name="action" value="remove">
-                <input type="hidden" name="id" value="<?= $item->id ?>">
+                <input type="hidden" name="id" value="<?= $item->cart_item_id ?>">
                 <button class="remove-btn">Remove</button>
             </form>
         </div>
                 <div class="stock-info">
-                    <?php if ($item->stock > 0): ?>
-                        <span class="in-stock">Max: <?= $item->stock ?> available</span>
-                    <?php else: ?>
+                    <?php if ($item->stock == 0): ?>
                         <span class="out-of-stock">Out of stock</span>
+                    <?php elseif ($item->quantity > $item->stock): ?>
+                        <span class="out-of-stock">
+                            Only <?= $item->stock ?> left, please reduce quantity
+                        </span>
+                    <?php else: ?>
+                        <span class="in-stock">
+                            In stock (<?= $item->stock ?> available)
+                        </span>
                     <?php endif; ?>
                 </div>
-    </div>
+            </div>
 
-    <div class="cart-item-subtotal">
-        <span class="subtotal-label">Subtotal</span>
-        <div class="subtotal-amount">
-            RM <?= number_format($item->subtotal,2) ?>
-        </div>
-    </div>
+                <div class="cart-item-subtotal">
+                    <span class="subtotal-label">Subtotal</span>
+                    <div class="subtotal-amount">
+                        RM <?= number_format($item->subtotal,2) ?>
+                    </div>
+                </div>
 
-</div>
-<?php endforeach; ?>
+            </div>
+            <?php endforeach; ?>
 
-<div class="cart-actions">
-    <a href="../page/product.php" class="continue-shopping">← Continue Shopping</a>
+            <div class="cart-actions">
+                <a href="../page/product.php" class="continue-shopping">← Continue Shopping</a>
 
-    <form method="post">
-        <input type="hidden" name="action" value="clear">
-        <button class="clear-cart-btn" onclick="return confirm('Clear cart?')">
-            Clear Cart
-        </button>
-    </form>
-</div>
+                <form method="post">
+                    <input type="hidden" name="action" value="clear">
+                    <button class="clear-cart-btn" onclick="return confirm('Clear cart?')">
+                        Clear Cart
+                    </button>
+                </form>
+            </div>
 
-</div>
+            </div>
 
-<div class="cart-summary">
-    <h2 class="summary-title">Order Summary</h2>
+            <div class="cart-summary">
+                <h2 class="summary-title">Order Summary</h2>
 
-    <div class="summary-row">
-        <span>Subtotal</span>
-        <span>RM <?= number_format($cart_total,2) ?></span>
-    </div>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>RM <?= number_format($cart_total,2) ?></span>
+                </div>
 
-    <div class="summary-total">
-        <strong>Total</strong>
-        <strong>RM <?= number_format($cart_total,2) ?></strong>
-    </div>
+                <div class="summary-total">
+                    <strong>Total</strong>
+                    <strong>RM <?= number_format($cart_total,2) ?></strong>
+                </div>
 
-    <form action="../page/checkout.php" method="post">
-        <button type="submit" class="checkout-btn">
-            Proceed to Checkout
-        </button>
-    </form>
-</div>
+                <form action="../page/checkout.php" method="post">
+                    <button type="submit" class="checkout-btn">
+                        Proceed to Checkout
+                    </button>
 
-</div>
-<?php endif; ?>
-</div>
+                </form>
+            </div>
+
+            </div>
+            <?php endif; ?>
+            </div>
 
 <script>
 $(function () {
@@ -186,12 +233,28 @@ $(function () {
         const input = item.find('.qty-input');
         const dec = item.find('.qty-dec');
         const inc = item.find('.qty-inc');
-        const max = parseInt(item.data('stock')) || 1;
+        const max = parseInt(item.data('stock')) || 0;
 
         function normalize() {
+
+            if (max === 0) {
+                input.val(0);
+                input.prop('disabled', true);
+                dec.prop('disabled', true);
+                inc.prop('disabled', true);
+                return 0;
+            }
+
             let v = parseInt(input.val());
             if (isNaN(v) || v < 1) v = 1;
             if (v > max) v = max;
+            
+            if (v > max) {
+                v = max;
+                input.val(v);
+                form.submit(); 
+            }
+
             input.val(v);
             dec.prop('disabled', v <= 1);
             inc.prop('disabled', v >= max);

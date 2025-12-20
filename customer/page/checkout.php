@@ -43,6 +43,13 @@ if (is_post()) {
     exit;
 }
 
+foreach ($cart_items as $item) {
+    if ($item->quantity > $item->stock) {
+        redirect('cart.php');
+        exit;
+    }
+}
+
 include '../../_head.php';
 include '../../_header.php';
 

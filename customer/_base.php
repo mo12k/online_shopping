@@ -144,50 +144,25 @@
     // Shopping Cart
     // ============================================================================
  
-    function update_cart($product_id, $quantity, $customer_id = null, $mode = 'add') {
-    global $_db;
+    function update_cart($cart_item_id, $quantity, $customer_id = null) {
+        global $_db;
 
-    if (!$customer_id && isset($_SESSION['customer_id'])) {
-        $customer_id = $_SESSION['customer_id'];
+        if (!$customer_id && isset($_SESSION['customer_id'])) {
+            $customer_id = $_SESSION['customer_id'];
+        }
+
+        $quantity = (int)$quantity;
+        if ($quantity < 1 || !$customer_id) return;
+
+        $stm = $_db->prepare("
+            UPDATE cart_item ci
+            JOIN cart c ON ci.cart_id = c.cart_id
+            SET ci.quantity = ?
+            WHERE ci.cart_item_id = ?
+            AND c.customer_id = ?
+        ");
+        $stm->execute([$quantity, $cart_item_id, $customer_id]);
     }
-
-    $quantity = (int)$quantity;
-    if ($quantity < 1 || !$customer_id) return;
-
-    // cart
-    $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
-    $stm->execute([$customer_id]);
-    $cart = $stm->fetch();
-
-    if (!$cart) {
-        $stm = $_db->prepare('INSERT INTO cart (customer_id) VALUES (?)');
-        $stm->execute([$customer_id]);
-        $cart_id = $_db->lastInsertId();
-    } else {
-        $cart_id = $cart->cart_id;
-    }
-
-    if ($mode === 'update') {
-        
-        $stm = $_db->prepare('
-            INSERT INTO cart_item (cart_id, product_id, quantity)
-            VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE quantity = VALUES(quantity)
-        ');
-        $stm->execute([$cart_id, $product_id, $quantity]);
-    } else {
-        
-        $stm = $_db->prepare('
-            INSERT INTO cart_item (cart_id, product_id, quantity)
-            VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)
-        ');
-        $stm->execute([$cart_id, $product_id, $quantity]);
-    }
-
-    $stm = $_db->prepare('UPDATE cart SET updated_at = NOW() WHERE cart_id = ?');
-    $stm->execute([$cart_id]);
-}
 
 
 
@@ -222,7 +197,8 @@
             // call user cart and product
             $stm = $db->prepare("
                 SELECT ci.cart_item_id, ci.quantity, 
-                    p.*, cat.category_name,
+                    p.id, p.stock, p.price, p.title, p.author, p.photo_name,
+                    cat.category_name,
                     c.cart_id
                 FROM cart c
                 JOIN cart_item ci ON c.cart_id = ci.cart_id
