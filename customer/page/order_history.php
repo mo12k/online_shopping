@@ -11,12 +11,7 @@ $search = trim(req('search') ?? '');
 $order_date = req('order_date');
 
 $sql = "
-    SELECT 
-        o.order_id,
-        o.total_amount,
-        o.status,
-        o.order_date,
-        (SELECT COUNT(*) FROM order_item oi WHERE oi.order_id = o.order_id) as item_count
+    SELECT DISTINCT o.order_id
     FROM orders o
     WHERE o.customer_id = ?
 ";
@@ -24,10 +19,7 @@ $sql = "
 $params = [$customer_id];
 
 if ($search !== '') {
-    $sql .= " AND (
-        o.order_id LIKE ?
-        OR o.status LIKE ?
-    )";
+    $sql .= " AND (o.order_id LIKE ? OR o.status LIKE ?)";
     $params[] = "%$search%";
     $params[] = "%$search%";
 }
@@ -37,54 +29,58 @@ if ($order_date !== '' && $order_date !== null) {
     $params[] = $order_date;
 }
 
-// collect number of page
-$count_sql = "
+$sql .= " ORDER BY o.order_date DESC";
+
+$stm = $_db->prepare("
     SELECT COUNT(*)
     FROM orders
     WHERE customer_id = ?
-";
-$count_params = [$customer_id];
+");
+$stm->execute([$customer_id]);
+$total_orders = $stm->fetchColumn();
 
-if ($search !== '') {
-    $count_sql .= " AND (
-        order_id LIKE ?
-        OR status LIKE ?
-    )";
-    $count_params[] = "%$search%";
-    $count_params[] = "%$search%";
-}
-
-if ($order_date !== '' && $order_date !== null) {
-    $count_sql .= " AND DATE(order_date) = ?";
-    $count_params[] = $order_date;
-}
-
-$stm = $_db->prepare($count_sql);
-$stm->execute($count_params);
-$total_items = $stm->fetchColumn();
-
-// calculate page
-$per_page = 5;
 $page = req('page', 1);
-$offset = ($page - 1) * $per_page;
-$total_pages = ceil($total_items / $per_page);
 
-// order by date, only show intval(per_page), skip the intval($offset) page
-$sql .= " ORDER BY o.order_date DESC LIMIT " . intval($per_page) . " OFFSET " . intval($offset);
+require_once '../lib/SimplePager.php';
+$p = new SimplePager($sql, $params, 5, $page);
+$order_ids = array_column($p->result, 'order_id');
 
-$stm = $_db->prepare($sql);
-$stm->execute($params);
-$orders = $stm->fetchAll();
+$p->item_count = $total_orders;
+$p->page_count = ceil($total_orders / 5);
 
-$query = [];
+$q = [];
+
+if ($order_ids) {
+    $in = implode(',', array_fill(0, count($order_ids), '?'));
+
+    $stm = $_db->prepare("
+        SELECT 
+            o.order_id,
+            o.total_amount,
+            o.status,
+            o.order_date,
+            COUNT(oi.order_item_id) AS item_count
+        FROM orders o
+        LEFT JOIN order_item oi ON oi.order_id = o.order_id
+        WHERE o.order_id IN ($in)
+        GROUP BY o.order_id
+        ORDER BY o.order_date DESC
+    ");
+    $stm->execute($order_ids);
+    $orders = $stm->fetchAll();
+} else {
+    $orders = [];
+}
+
 
 if ($search !== '') {
-    $query['search'] = $search;
+    $q['search'] = $search;
 }
 
 if ($order_date !== '' && $order_date !== null) {
-    $query['order_date'] = $order_date;
+    $q['order_date'] = $order_date;
 }
+
 
 include '../../_head.php';
 include '../../_header.php';
@@ -220,24 +216,24 @@ include '../../_header.php';
     }
 
     .btn-clear {
-    padding: 10px 18px;
-    border-radius: 30px;
-    background: #ecf0f1;
-    color: #555;
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 14px;
-    margin-top: 5px;
+        padding: 10px 18px;
+        border-radius: 30px;
+        background: #ecf0f1;
+        color: #555;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 14px;
+        margin-top: 5px;
     }
 
     .btn-clear:hover {
-    background: #dcdde1;
+        background: #dcdde1;
     }
 
     .date-row {
-    display: flex;
-    gap: 12px;
-    align-items: center;
+        display: flex;
+        gap: 12px;
+        align-items: center;
     }
 
     .date-row input[type="date"] {
@@ -247,6 +243,22 @@ include '../../_header.php';
         border: 1px solid #ddd;
         font-size: 14px;
     }
+    
+    .pager {
+        margin: 20px 0;
+        text-align: center;
+    }
+
+    .order-pager {
+        margin-top: 20px;
+        margin-bottom: 0;
+    }
+
+    .order-pager .pager,
+    .order-pager p {
+        margin: 0 !important;
+    }
+
 
 </style>
 
@@ -280,7 +292,7 @@ include '../../_header.php';
 </div>
 
 
-    <?php if ($total_items == 0): ?>
+    <?php if ($p->item_count == 0): ?>
         <div class="empty">
             <h2>No orders found</h2>
             <?php if ($search !== ''): ?>
@@ -297,9 +309,10 @@ include '../../_header.php';
         </div>
     <?php else: ?>
         <div class="page-info">
-            Showing <?= count($orders) ?> of <?= $total_items ?> order(s) |
-            Page <?= $page ?> of <?= $total_pages ?>
+            <?= $p->count ?> of <?= $p->item_count ?> order(s) |
+            Page <?= $p->page ?> of <?= $p->page_count ?>
         </div>
+
         
         <?php foreach ($orders as $o): ?>
             <div class="order-card">
@@ -332,61 +345,9 @@ include '../../_header.php';
             </div>
         <?php endforeach; ?>
         
-        
-        <div class="pager-container">
-            <div class="pager">
-                <?php
-                    $query = [];
-
-                    if ($search !== '') {
-                        $query['search'] = $search;
-                    }
-
-                    if ($order_date !== '' && $order_date !== null) {
-                        $query['order_date'] = $order_date;
-                    }
-                    ?>
-
-                    <?php if ($page > 1): ?>
-                        <a href="?<?= http_build_query(array_merge($query, ['page' => $page - 1])) ?>" class="pager-btn">
-                            &laquo;
-                        </a>
-                    <?php else: ?>
-                        <span class="pager-btn disabled">&laquo;</span>
-                    <?php endif; ?>
-
-                    <?php
-                    $start = max(1, $page - 2);
-                    $end = min($total_pages, $page + 2);
-
-                    if ($start > 1) {
-                        echo '<a href="?' . http_build_query(array_merge($query, ['page' => 1])) . '" class="pager-btn">1</a>';
-                        if ($start > 2) echo '<span class="pager-dots">...</span>';
-                    }
-
-                    for ($i = $start; $i <= $end; $i++) {
-                        if ($i == $page) {
-                            echo '<span class="pager-btn active">' . $i . '</span>';
-                        } else {
-                            echo '<a href="?' . http_build_query(array_merge($query, ['page' => $i])) . '" class="pager-btn">' . $i . '</a>';
-                        }
-                    }
-
-                    if ($end < $total_pages) {
-                        if ($end < $total_pages - 1) echo '<span class="pager-dots">...</span>';
-                        echo '<a href="?' . http_build_query(array_merge($query, ['page' => $total_pages])) . '" class="pager-btn">' . $total_pages . '</a>';
-                    }
-                    ?>
-
-                    <?php if ($page < $total_pages): ?>
-                        <a href="?<?= http_build_query(array_merge($query, ['page' => $page + 1])) ?>" class="pager-btn">
-                            &raquo;
-                        </a>
-                    <?php else: ?>
-                        <span class="pager-btn disabled">&raquo;</span>
-                <?php endif; ?>
-            </div>
-            </div>
+        <div class="order-pager">
+            <?= $p->html(http_build_query($q)) ?>
+        </div>
         <?php endif; ?>
 </div>
 
