@@ -11,21 +11,18 @@ if (!$order_id) {
     redirect('order.php');
 }
 
-/* =========================
-   Order + Customer + Address
-========================= */
+
 $stm = $_db->prepare("
     SELECT 
         o.*,
         c.username,
         c.email,
-        a.address,
-        a.postcode,
-        a.city,
-        a.state
+        o.shipping_address,
+        o.shipping_postcode,
+        o.shipping_city,
+        o.shipping_state
     FROM orders o
     LEFT JOIN customer c ON o.customer_id = c.customer_id
-    LEFT JOIN customer_address a ON o.address_id = a.address_id
     WHERE o.order_id = ?
 ");
 $stm->execute([$order_id]);
@@ -36,21 +33,29 @@ if (!$order) {
     redirect('order.php');
 }
 
-/* =========================
-   Order Items
-========================= */
+
 $stm = $_db->prepare("
     SELECT 
         oi.*,
         p.title,
         p.photo_name,
-        p.price
+        p.price AS price_each  
     FROM order_item oi
     LEFT JOIN product p ON oi.product_id = p.id
     WHERE oi.order_id = ?
 ");
 $stm->execute([$order_id]);
 $items = $stm->fetchAll();
+
+
+$stm = $_db->prepare("
+    SELECT method
+    FROM payment
+    WHERE order_id = ?
+    ORDER BY payment_id 
+");
+$stm->execute([$order_id]);
+$payments = $stm->fetchAll();
 
 include '../_head.php';
 ?>
@@ -59,9 +64,9 @@ include '../_head.php';
     <div style="margin-top:30px;">
         <a href="../page/order.php" class="btn">← Back to Order List</a>
     </div>
+
     <h2>Order #<?= encode($order->order_id) ?></h2>
 
-    <!-- ================= Order Info ================= -->
     <table class="product-table" style="margin-bottom:30px;">
         <tr>
             <th width="200">Order ID</th>
@@ -70,18 +75,30 @@ include '../_head.php';
         <tr>
             <th>Customer</th>
             <td>
-                <?= $order->username ?: '<em style="color:#999;">(guest)</em>' ?>
+                <?= encode($order->username) ?: '<em style="color:#999;">(guest)</em>' ?>
                 <br>
                 <small><?= encode($order->email) ?></small>
             </td>
         </tr>
+
         <tr>
             <th>Status</th>
-            <td><?= ucfirst($order->status) ?></td>
+            <td>
+                <?= encode($order->status) ?: '<em style="color:#999;">(guest)</em>' ?>
+            </td>
+        </tr>
+
+        <tr>
+            <th>Payment Method</th>
+            <td>
+                    <?php foreach ($payments as $p): ?>
+                        <strong><?= encode($p->method) ?></strong><br>
+                    <?php endforeach; ?> 
+            </td>
         </tr>
         <tr>
             <th>Order Date</th>
-            <td><?= $order->order_date ?></td>
+            <td><?= date('Y-m-d H:i:s', strtotime($order->order_date)) ?></td>
         </tr>
         <tr>
             <th>Total Amount</th>
@@ -90,47 +107,52 @@ include '../_head.php';
         <tr>
             <th>Shipping Address</th>
             <td>
-                <?= encode($order->address) ?><br>
-                <?= encode($order->postcode) ?>, <?= encode($order->city) ?><br>
-                <?= encode($order->state) ?>
+                <?= encode($order->shipping_address) ?><br>
+                <?= encode($order->shipping_postcode) ?>, <?= encode($order->shipping_city) ?><br>
+                <?= encode($order->shipping_state) ?>
             </td>
         </tr>
     </table>
 
-    <!-- ================= Items ================= -->
     <h3>Order Items</h3>
 
     <table class="product-table">
-        <tr>
-            <th width="80">Image</th>
-            <th>Product</th>
-            <th width="100">Price</th>
-            <th width="100">Qty</th>
-            <th width="120">Subtotal</th>
-        </tr>
-
-        <?php foreach ($items as $i): ?>
+        <thead>
             <tr>
-                <td>
-                    <?php if ($i->photo_name): ?>
-                        <img src="../upload/<?= encode($i->photo_name) ?>"
-                             style="width:60px;height:60px;object-fit:cover;border-radius:6px;">
-                    <?php else: ?>
-                        <span style="color:#aaa;">No image</span>
-                    <?php endif; ?>
-                </td>
-                <td><?= encode($i->title) ?></td>
-                <td>RM <?= number_format($i->price_each, 2) ?></td>
-                <td><?= $i->quantity ?></td>
-                <td>
-                    RM <?= number_format($i->subtotal , 2) ?>
-                </td>
+                <th width="80">Image</th>
+                <th>Product</th>
+                <th width="100">Price</th>
+                <th width="100">Qty</th>
+                <th width="120">Subtotal</th>
             </tr>
-        <?php endforeach; ?>
+        </thead>
+        <tbody>
+            <?php if (!empty($items)): ?>
+                <?php foreach ($items as $i): ?>
+                    <tr>
+                        <td>
+                            <?php if ($i->photo_name && file_exists("../upload/{$i->photo_name}")): ?>
+                                <img src="../upload/<?= encode($i->photo_name) ?>"
+                                     style="width:60px;height:60px;object-fit:cover;border-radius:6px;">
+                            <?php else: ?>
+                                <span style="color:#aaa;">No image</span>
+                            <?php endif; ?>
+                        </td>
+                        <td><?= encode($i->title) ?></td>
+                        <td>RM <?= number_format($i->price_each, 2) ?></td>
+                        <td><?= $i->quantity ?></td>
+                        <td>RM <?= number_format($i->price_each * $i->quantity, 2) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="5" style="text-align:center; color:#999; padding:20px;">
+                        No items in this order.
+                    </td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
     </table>
-
-    
-
 </div>
 
 <?php include '../_foot.php'; ?>

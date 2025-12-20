@@ -4,13 +4,13 @@ require '../_base.php';
 admin_require_login();
 
 $current = 'product';
-$_title = 'Product List';
 
 $category_id = get('category_id');
 $name = trim(req('name') ?? '');
-$low_stock = req('low_stock');  // 從 dashboard 或手動輸入都會有
+$low_stock = req('low_stock'); 
+$page = max(1, (int)req('page', 1));
 
-/* ===== $fields 定義 ===== */
+
 $fields = [
     'p.photo_name'     => 'Picture',
     'p.id'             => 'Id',
@@ -22,35 +22,6 @@ $fields = [
     'p.status'         => 'Status',
 ];
 
-$q = [];
-if ($name !== '')        $q[] = 'name=' . urlencode($name);
-if ($category_id !== '') $q[] = 'category_id=' . $category_id;
-if ($low_stock)          $q[] = 'low_stock=1';
-
-$qs = implode('&', $q);
-
-$sql = "SELECT p.*, c.*
-        FROM product p 
-        LEFT JOIN category c ON p.category_id = c.category_id 
-        WHERE 1=1";
-
-$params = [];
-
-if ($low_stock) {
-    $sql .= " AND p.stock <= 10 AND p.status = 1";
-    $_title = 'Low Stock Products (≤ 10)';
-}
-
-if ($name !== '') {
-    $sql .= " AND (p.title LIKE ? OR p.author LIKE ? OR p.id LIKE ?)";
-    $params[] = "%$name%";
-    $params[] = "%$name%";
-    $params[] = "%$name%";
-}
-if ($category_id !== '' && $category_id !== null) {
-    $sql .= " AND p.category_id = ?";
-    $params[] = $category_id;
-}
 
 $sort = req('sort');
 if (!array_key_exists($sort, $fields)) {
@@ -62,18 +33,85 @@ if (!in_array($dir, ['asc', 'desc'])) {
     $dir = 'asc';
 }
 
+
+$q = [];
+
+if ($name !== '' && $name !== null) {
+    $q[] = 'name=' . $name;
+}
+
+if ($category_id !== null && $category_id !== '') {
+    $q[] = 'category_id=' . $category_id;
+}
+
+if ($low_stock) {
+    $q[] = 'low_stock=1';
+}
+
+$qs = !empty($q) ? implode('&', $q) : '';
+
+
+$full_qs = $qs;
+
+if ($sort !== 'p.id' || $dir !== 'asc') {
+    $full_qs .= ($full_qs ? '&' : '') . 'sort=' . $sort . '&dir=' . $dir;
+}
+
+if ($page > 1) {
+    $full_qs .= ($full_qs ? '&' : '') . 'page=' . $page;
+}
+
+$sql = "SELECT p.*, c.*
+        FROM product p 
+        LEFT JOIN category c ON p.category_id = c.category_id 
+        WHERE 1=1";
+
+$params = [];
+
+
+if ($low_stock) {
+    $sql .= " AND p.stock <= 10 AND p.status = 1";
+}
+
+
+if ($category_id !== null && $category_id !== '') {
+    $sql .= " AND p.category_id = ?";
+    $params[] = $category_id;
+}
+
+
+if ($name !== '') {
+    $sql .= " AND (p.title LIKE ? OR p.author LIKE ? OR p.id LIKE ?)";
+    $params[] = "%$name%";
+    $params[] = "%$name%";
+    $params[] = "%$name%";
+}
+
+
 $sql .= " ORDER BY $sort $dir";
 
-$page = req('page', 1);
+
 require_once '../lib/SimplePager.php';
 $p = new SimplePager($sql, $params, 10, $page);
 $arr = $p->result;
 
 $info = temp('info');
 
+
+$title_parts = [];
+
+if ($low_stock) {
+    $title_parts[] = 'Low Stock Products (≤ 10)';
+}
+
+if ($category_id !== null && $category_id !== '' && isset($_category[$category_id])) {
+    $title_parts[] = $_category[$category_id];
+}
+
+$_title = $title_parts ? implode(' - ', $title_parts) : 'Product List';
+
 include '../_head.php';
 ?>
-
 
 <style>
 .low-stock-btn {
@@ -103,14 +141,18 @@ include '../_head.php';
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:20px;">
         
         <div class="search-bar">
-            <form method="get" class="search-form">                   
+            <form method="get" class="search-form">
+              
+                <?php if ($low_stock): ?>
+                    <input type="hidden" name="low_stock" value="1">
+                <?php endif; ?>
+                
                 <?= html_select('category_id', $_category, 'All category', '', true) ?>
                 <?= html_search('name','Searching by id , title , author') ?>
                 <button style="padding:14px 32px; background:yellow; color:black; border:none; border-radius:16px;">
                     Search
                 </button>
 
-             
                 <a href="<?= $low_stock ? 'product.php?low_stock=1' : 'product.php' ?>"
                    style="padding:14px 32px; background:yellow; color:black; border:none; border-radius:16px; text-decoration:none;">
                     Reset
@@ -118,26 +160,19 @@ include '../_head.php';
             </form>
         </div>
 
-    
         <div style="display:flex; align-items:center; flex-wrap:wrap; gap:15px;">
             <a href="/admin/product/insert.php" class="btn-add">+ Add New Book</a>
 
             <?php
-        
             $low_stock_count = $_db->query("SELECT COUNT(*) FROM product WHERE stock <= 10 AND status = 1")->fetchColumn();
             ?>
 
-            <?php 
-            
-            if ($low_stock || $low_stock_count > 0): 
-            ?>
+            <?php if ($low_stock || $low_stock_count > 0): ?>
                 <?php if ($low_stock): ?>
-                   
                     <a href="product.php" class="all-products-btn">
                         <?= $low_stock_count > 0 ? "All Products ($low_stock_count low stock)" : "All Products (No low stock)" ?>
                     </a>
                 <?php else: ?>
-                   
                     <a href="product.php?low_stock=1" class="low-stock-btn">
                         Low Stock Alert (<?= $low_stock_count ?> items)
                     </a>
@@ -169,7 +204,7 @@ include '../_head.php';
         <?php if (empty($arr)): ?>
             <tr>
                 <td colspan="9" class="no-find">
-                    <?= $low_stock ? 'No low stock products found ' : 'NO PRODUCT FOUND' ?>
+                    <?= $low_stock ? 'No low stock products found' : 'NO PRODUCT FOUND' ?>
                 </td>
             </tr>
         <?php else: ?>
@@ -194,8 +229,8 @@ include '../_head.php';
                     </span>
                 </td>
                 <td style="text-align:center;">
-                    <button data-get="../product/detail.php?id=<?= encode($s->id) ?>" class="btn">View</button>
-                    <button data-get="../product/update.php?id=<?= encode($s->id) ?>&<?= $qs ?>" class="btn edit">Edit</button>
+                    <button data-get="../product/detail.php?id=<?= encode($s->id) ?>&<?= $full_qs ?>" class="btn">View</button>
+                    <button data-get="../product/update.php?id=<?= encode($s->id) ?>&<?= $full_qs ?>" class="btn edit">Edit</button>
                 </td>
             </tr>
             <?php endforeach; ?>
