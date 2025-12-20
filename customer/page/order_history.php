@@ -166,6 +166,11 @@ include '../../_header.php';
         color: #856404;
     }
 
+    .status-paid {
+        background: #cce5ff;
+        color: #24db1eff;
+    }
+
     .status-shipping {
         background: #cce5ff;
         color: #004085;
@@ -222,6 +227,7 @@ include '../../_header.php';
     font-weight: 600;
     text-decoration: none;
     font-size: 14px;
+    margin-top: 5px;
     }
 
     .btn-clear:hover {
@@ -265,14 +271,12 @@ include '../../_header.php';
             <button type="submit" class="btn-search">
                 Search
             </button>
+            <a href="order_history.php" class="btn btn-clear">
+            Clear
+            </a>
         </div>
     </form>
 
-    <?php if ($search !== ''): ?>
-        <a href="order_history.php" class="btn btn-clear">
-            Clear
-        </a>
-    <?php endif; ?>
 </div>
 
 

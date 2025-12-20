@@ -23,7 +23,7 @@ $addresses = get_customer_addresses($customer_id);
 
 
 if (is_post()) {
-
+    
     $address_id = req('address_id');
     $payment_method = req('payment_method');
 
@@ -206,8 +206,22 @@ include '../../_header.php';
                     <h3>Delivery Address</h3>
                     <?php if (empty($addresses)): ?>
                         <div class="alert alert-warning">
-                            No address found. <a href="add_address.php?return=checkout">Add a new address</a>
-                        </div>
+                                No address found.
+                                <a href="add_address.php?return=checkout"
+                                style="
+                                    display: inline-block;
+                                    margin-left: 8px;
+                                    padding: 6px 12px;
+                                    background: #6d4c41;
+                                    color: #fff;
+                                    text-decoration: none;
+                                    border-radius: 6px;
+                                    font-size: 14px;
+                                    font-weight: 500;
+                                ">
+                                    Add a new address
+                                </a>
+                            </div>
                     <?php else: ?>
                         <div class="address-list">
                             <?php foreach ($addresses as $address): ?>

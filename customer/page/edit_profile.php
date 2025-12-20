@@ -220,13 +220,10 @@ else {
                                         <?= encode($address->postcode) ?>
                                     </div>
 
-                                    <button
-                                        type="submit"
-                                        class="button-secondary"
-                                        style="width:90px;"
-                                        form="delete_address_<?= $address->address_id ?>"
-                                        onclick="return confirm('Delete this address?');"
-                                    >Delete</button>
+                                    <form method="post" action="delete_address.php" style="margin:0; flex:0 0 auto;">
+                                        <input type="hidden" name="address_id" value="<?= $address->address_id ?>">
+                                        <button type="submit" class="button-secondary" style="width:90px;" onclick="return confirm('Delete this address?');">Delete</button>
+                                    </form>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -252,14 +249,6 @@ else {
         </div>
         
     </form>
-
-    <?php if (!empty($addresses)): ?>
-        <?php foreach ($addresses as $address): ?>
-            <form id="delete_address_<?= $address->address_id ?>" method="post" action="delete_address.php" style="display:none;">
-                <input type="hidden" name="address_id" value="<?= $address->address_id ?>">
-            </form>
-        <?php endforeach; ?>
-    <?php endif; ?>
 </div>
 
 </main>
