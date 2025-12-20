@@ -144,6 +144,54 @@
     // Shopping Cart
     // ============================================================================
  
+    function add_to_cart($product_id, $quantity, $customer_id = null, $mode = 'add') {
+        global $_db;
+
+        if (!$customer_id && isset($_SESSION['customer_id'])) {
+            $customer_id = $_SESSION['customer_id'];
+        }
+
+        $product_id = (int)$product_id;
+        $quantity   = (int)$quantity;
+
+        if ($product_id <= 0 || $quantity <= 0 || !$customer_id) return;
+
+        // get / create cart
+        $stm = $_db->prepare('SELECT cart_id FROM cart WHERE customer_id = ?');
+        $stm->execute([$customer_id]);
+        $cart = $stm->fetch();
+
+        if (!$cart) {
+            $stm = $_db->prepare('INSERT INTO cart (customer_id) VALUES (?)');
+            $stm->execute([$customer_id]);
+            $cart_id = $_db->lastInsertId();
+        } else {
+            $cart_id = $cart->cart_id;
+        }
+
+        if ($mode === 'update') {
+            
+            $stm = $_db->prepare('
+                INSERT INTO cart_item (cart_id, product_id, quantity)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE quantity = VALUES(quantity)
+            ');
+            $stm->execute([$cart_id, $product_id, $quantity]);
+        } else {
+            
+            $stm = $_db->prepare('
+                INSERT INTO cart_item (cart_id, product_id, quantity)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)
+            ');
+            $stm->execute([$cart_id, $product_id, $quantity]);
+        }
+
+        $stm = $_db->prepare('UPDATE cart SET updated_at = NOW() WHERE cart_id = ?');
+        $stm->execute([$cart_id]);
+    }
+
+
     function update_cart($cart_item_id, $quantity, $customer_id = null) {
         global $_db;
 
@@ -163,8 +211,6 @@
         ");
         $stm->execute([$quantity, $cart_item_id, $customer_id]);
     }
-
-
 
     function remove_from_cart($product_id, $customer_id = null) {
         global $_db;

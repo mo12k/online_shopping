@@ -48,7 +48,7 @@ if (is_post()) {
 
     if ($product && $quantity > 0 && $quantity <= $product->stock) {
 
-        update_cart($product_id, $quantity, $customer_id);
+        add_to_cart($product_id, $quantity, $customer_id);
 
         temp('success', "Added <strong>{$product->title}</strong> (x{$quantity}) to cart!");
 
