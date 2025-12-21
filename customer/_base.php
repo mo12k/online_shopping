@@ -52,9 +52,6 @@
             return $value;
         }
     }
-    function is_email($value) {
-        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
-    }
 
     function get_file($name) {
         if (isset($_FILES[$name]) && $_FILES[$name]['error'] != UPLOAD_ERR_NO_FILE) {
@@ -525,6 +522,9 @@
     temp('error', $message);
     redirect();
     exit;
+}
+function is_email($value) {
+    return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
 }
 
 
