@@ -14,6 +14,7 @@ $fields = [
     'username'      => 'Username',
     'email'         => 'Email',
     'is_verified'   => 'Verified',
+    'is_blocked'    => 'Status',
     'created_at'    => 'Created At',
 ];
 
@@ -74,6 +75,7 @@ include '../_head.php';
         <thead>
             <tr>
                 <?= table_headers($fields, $sort, $dir, "page=$page") ?>
+                <th>Action</th>
             </tr>
         </thead>
 
@@ -87,7 +89,26 @@ include '../_head.php';
                         <td><?= $customer->username ?></td>
                         <td><?= $customer->email ?></td>
                         <td><?= $customer->is_verified ? 'Yes' : 'No' ?></td>
+                        <td>
+                            <?php
+                                $is_blocked = isset($customer->is_blocked) && (int)$customer->is_blocked === 1;
+                                echo $is_blocked ? 'Blocked' : 'Active';
+                            ?>
+                        </td>
                         <td><?= $customer->created_at ?></td>
+                        <td>
+                            <?php if (isset($customer->is_blocked) && (int)$customer->is_blocked === 1): ?>
+                                <form method="post" action="unblock.php?sort=<?= encode($sort) ?>&dir=<?= encode($dir) ?>&page=<?= (int)$page ?>&keyword=<?= encode($keyword) ?>" style="display:inline;">
+                                    <input type="hidden" name="id" value="<?= (int)$customer->customer_id ?>">
+                                    <button type="submit">Unblock</button>
+                                </form>
+                            <?php else: ?>
+                                <form method="post" action="block.php?sort=<?= encode($sort) ?>&dir=<?= encode($dir) ?>&page=<?= (int)$page ?>&keyword=<?= encode($keyword) ?>" style="display:inline;">
+                                    <input type="hidden" name="id" value="<?= (int)$customer->customer_id ?>">
+                                    <button type="submit" onclick="return confirm('Block this customer?');">Block</button>
+                                </form>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>

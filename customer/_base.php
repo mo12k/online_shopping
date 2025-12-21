@@ -146,6 +146,24 @@
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
     ]);
 
+    // If customer is logged in but blocked by admin, force logout
+    if (isset($_SESSION['customer_id'])) {
+        $stm = $_db->prepare('SELECT is_blocked FROM customer WHERE customer_id = ?');
+        $stm->execute([$_SESSION['customer_id']]);
+        $is_blocked = $stm->fetchColumn();
+
+        if ($is_blocked !== false && (int)$is_blocked === 1) {
+            unset(
+                $_SESSION['customer_id'],
+                $_SESSION['customer_username'],
+                $_SESSION['profile_picture'],
+                $_SESSION['pending_order'],
+                $_SESSION['payment_retry']
+            );
+            redirect('/page/login.php');
+        }
+    }
+
     // ============================================================================
     // Global Constants and Variables
     // ============================================================================

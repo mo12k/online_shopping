@@ -164,10 +164,16 @@ if (!isset($_SESSION['customer_id']) && isset($_COOKIE['remember_me']) && isset(
     $row = $stmt->fetch();
 
     if ($row && $row->token_hash === sha1($token)) {
-        // Success → log in
-        $_SESSION['customer_id'] = $row->customer_id;
-        $_SESSION['customer_username'] = $row->username;
-        $_SESSION['profile_picture'] = $row->photo ?? 'default_pic.jpg';
+        // If blocked, do not log in
+        if (isset($row->is_blocked) && (int)$row->is_blocked === 1) {
+            setcookie('remember_me', '', time()-3600, '/');
+            setcookie('remember_me_user', '', time()-3600, '/');
+        } else {
+            // Success → log in
+            $_SESSION['customer_id'] = $row->customer_id;
+            $_SESSION['customer_username'] = $row->username;
+            $_SESSION['profile_picture'] = $row->photo ?? 'default_pic.jpg';
+        }
     } else {
         // Invalid or expired → clear cookies
         setcookie('remember_me', '', time()-3600, '/');

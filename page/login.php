@@ -48,6 +48,11 @@ if(is_post()) {
             $lastFailedLogin = $user->last_failed_at ? new DateTime($user->last_failed_at) : null;
             $failed_atttempt = $user->failed_attempt ?? 0;
 
+            // Check if account is blocked (admin)
+            if (isset($user->is_blocked) && (int)$user->is_blocked === 1) {
+                $_err['general'] = "Your account has been blocked. Please contact admin.";
+            }
+
             // Check if account is locked
             if($failed_atttempt >= 3 && $lastFailedLogin){
                 $diff = $current_Time->getTimestamp() - $lastFailedLogin->getTimestamp();
@@ -61,7 +66,7 @@ if(is_post()) {
                 }
             }
 
-            // Only proceed if account is not locked
+            // Only proceed if account is not locked / blocked
             if(empty($_err['general'])){
                 //Verify credentials
                 $valid_user = verify_credentials($username, $password);
