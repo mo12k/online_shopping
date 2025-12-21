@@ -152,21 +152,20 @@ else {
     
     <form action="edit_profile.php" method="POST" enctype="multipart/form-data">
 
-        <div class="profile-photo">
+        <div class="profile-photo" id="drop-zone" ondrop="dropHandler(event)" ondragover="dragoverHandler(event)">
                 <?php if ($customer->photo): ?>
             <img src="../../images/profile/<?= $customer->photo?>">
                 <?php else: ?>
             <img src="../../images/profile/default_pic.jpg">
                 <?php endif; ?>
             
-            <div class="file-upload-group" style="margin-top: 10px;">
-                <label for="photo">Change Photo:</label>
+        <div class="file-upload-group">
+                <label for="photo">Click or Drop Image Here</label>
                 <input type="file" id="photo" name="photo" accept="image/*">
-                <small style="display:block; color:#666;">Leave blank to keep current photo.</small>
                 <?php if (isset($_err['photo'])): ?>
-                    <span style="color:red; font-size:0.9em;"><?= encode($_err['photo']) ?></span>
+                    <span class="error"><?= encode($_err['photo']) ?></span>
                 <?php endif; ?>
-            </div>
+        
         </div>
 
         <h2>Update Information</h2>
@@ -252,5 +251,44 @@ else {
 </div>
 
 </main>
+<script>
+function dragoverHandler(ev) {
+    ev.preventDefault();
+    
+    document.getElementById('drop-zone').classList.add('drop-zone--over');
+}
+
+function dropHandler(ev) {
+    ev.preventDefault();
+    document.getElementById('drop-zone').classList.remove('drop-zone--over');
+    
+    
+    const files = ev.dataTransfer.files;
+    
+    if (files.length > 0 && files[0].type.startsWith('image/')) {
+        const fileInput = document.getElementById('photo');
+        
+        
+        fileInput.files = files;
+
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('preview').src = e.target.result;
+        };
+        reader.readAsDataURL(files[0]);
+    }
+}
+
+document.getElementById('photo').addEventListener('change', function(e) {
+    if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (res) => {
+            document.getElementById('preview').src = res.target.result;
+        };
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+</script>
 
 <?php include '../../_footer.php'; ?>
