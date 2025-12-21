@@ -11,7 +11,7 @@ $search = trim(req('search') ?? '');
 $order_date = req('order_date');
 
 $sql = "
-    SELECT DISTINCT o.order_id
+    SELECT o.order_id
     FROM orders o
     WHERE o.customer_id = ?
 ";
@@ -31,13 +31,29 @@ if ($order_date !== '' && $order_date !== null) {
 
 $sql .= " ORDER BY o.order_date DESC";
 
-$stm = $_db->prepare("
-    SELECT COUNT(*)
-    FROM orders
-    WHERE customer_id = ?
-");
-$stm->execute([$customer_id]);
-$total_orders = $stm->fetchColumn();
+$count_sql = "
+    SELECT COUNT(DISTINCT o.order_id)
+    FROM orders o
+    WHERE o.customer_id = ?
+";
+
+$count_params = [$customer_id];
+
+if ($search !== '') {
+    $count_sql .= " AND (o.order_id LIKE ? OR o.status LIKE ?)";
+    $count_params[] = "%$search%";
+    $count_params[] = "%$search%";
+}
+
+if ($order_date !== '' && $order_date !== null) {
+    $count_sql .= " AND DATE(o.order_date) = ?";
+    $count_params[] = $order_date;
+}
+
+$stm = $_db->prepare($count_sql);
+$stm->execute($count_params);
+$total_orders = (int)$stm->fetchColumn();
+
 
 $page = req('page', 1);
 
