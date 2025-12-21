@@ -527,6 +527,4 @@
     exit;
 }
 
-function is_email($value) {
-    return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
-}
+
