@@ -50,7 +50,7 @@ if(is_post()) {
 
             // Check if account is blocked (admin)
             if (isset($user->is_blocked) && (int)$user->is_blocked === 1) {
-                $_err['general'] = "Your account has been blocked. Please contact admin.";
+                $_err['general'] = "Your account has been blocked.";
             }
 
             // Check if account is locked
