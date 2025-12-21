@@ -9,16 +9,29 @@ $customer_id = $_SESSION['customer_id'];
 
 $return_to = 'edit_profile.php';
 
-if(is_post()) {
-    $address_id = req('address_id');
+if (!is_post()) {
+    redirect($return_to);
+}
 
-    if (!$address_id) {
-        redirect($return_to);
-    }
-    
-    // Delete address
+$address_id = (int)req('address_id');
+
+if ($address_id <= 0) {
+    temp('error', 'Invalid address.');
+    redirect($return_to);
+}
+
+try {
     $stm = $_db->prepare('DELETE FROM customer_address WHERE address_id = ? AND customer_id = ?');
     $stm->execute([$address_id, $customer_id]);
-    redirect($return_to);
 
+    if ($stm->rowCount() > 0) {
+        temp('info', 'Address deleted.');
+    } else {
+        temp('error', 'Address not found (or already deleted).');
+    }
+} catch (Throwable $e) {
+    error_log('Delete address failed: ' . $e->getMessage());
+    temp('error', 'Unable to delete this address right now.');
 }
+
+redirect($return_to);
