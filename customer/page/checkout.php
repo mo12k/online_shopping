@@ -187,6 +187,31 @@ include '../../_header.php';
     }
     </style>
 
+        <?php if ($msg = temp('error')): ?>
+            <div style="
+                max-width: 800px;
+                margin: 20px auto;
+                background: #f8d7da;
+                color: #721c24;
+                padding: 15px 20px;
+                border-radius: 8px;
+                border: 1px solid #f5c6cb;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;">
+                
+                <span><?= $msg ?></span>
+
+                <button onclick="this.parentElement.remove()" style="
+                    background: none;
+                    border: none;
+                    font-size: 20px;
+                    color: #721c24;
+                    cursor: pointer;
+                    margin-top: 0px;">x</button>
+            </div>
+        <?php endif; ?>
+
 <div class="checkout-container">
     <h1>Checkout</h1>
     

@@ -213,7 +213,7 @@ $arr = $_db->query('SELECT * FROM product');
     <div class="content">
         
         <?php if ($msg = temp('success')): ?>
-                    <div class="message success" style="
+                    <div style="
                         max-width: 800px;
                         margin: 20px auto;
                         background: #d4edda;
@@ -240,7 +240,7 @@ $arr = $_db->query('SELECT * FROM product');
             <?php endif; ?>
             
             <?php if ($msg = temp('error')): ?>
-                    <div class="message error" style="
+                    <div style="
                         max-width: 800px;
                         margin: 20px auto;
                         background: #f8d7da;

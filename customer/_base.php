@@ -537,12 +537,13 @@
     }
 
     
-    temp('error', $message);
-    redirect();
-    exit;
-}
-function is_email($value) {
-    return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
-}
+        temp('error', $message);
+        redirect();
+        exit;
+    }
+    
+    function is_email($value) {
+        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+    }
 
 

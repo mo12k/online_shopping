@@ -89,7 +89,31 @@ if (is_post()) {
 include '../../_head.php';
 include '../../_header.php';
 ?>
+    
+        <?php if ($msg = temp('error')): ?>
+            <div style="
+                max-width: 800px;
+                margin: 20px auto;
+                background: #f8d7da;
+                color: #721c24;
+                padding: 15px 20px;
+                border-radius: 8px;
+                border: 1px solid #f5c6cb;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;">
+                
+                <span><?= $msg ?></span>
 
+                <button onclick="this.parentElement.remove()" style="
+                    background: none;
+                    border: none;
+                    font-size: 20px;
+                    color: #721c24;
+                    cursor: pointer;
+                    margin-top: 0px;">x</button>
+            </div>
+        <?php endif; ?>
 <div style="max-width:600px;margin:40px auto;background:#fff;padding:30px;border-radius:10px">
     <h2>Complete Payment</h2>
 
@@ -100,16 +124,38 @@ include '../../_header.php';
         <?php if ($payment_method === 'credit_card' || $payment_method === 'debit_card'): ?>
 
             <label>Card Number</label>
-            <input type="text" name="card_number" maxlength="16" required>
+            <input type="text"
+                   name="card_number"
+                   maxlength="16"
+                   pattern="[0-9]{16}"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                   required>
 
             <label>Card Holder</label>
             <input type="text" name="card_holder" required>
 
             <label>Expiry (MM/YY)</label>
-            <input type="text" name="expiry" placeholder="12/27" required>
+            <input type="text"
+                   name="expiry"
+                   placeholder="MM/YY"
+                   maxlength="5"
+                   oninput="
+                    this.value = this.value
+                        .replace(/[^0-9]/g, '')
+                        .replace(/^(\d{2})(\d)/, '$1/$2')
+                        .slice(0,5);
+                   "
+                   required>
+
 
             <label>CVV</label>
-            <input type="password" name="cvv" maxlength="3" required>
+            <input type="password"
+                   name="cvv"
+                   maxlength="3"
+                   pattern="[0-9]{3}"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                   required>
+
 
         <?php elseif ($payment_method === 'online_banking'): ?>
 

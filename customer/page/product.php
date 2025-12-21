@@ -27,7 +27,6 @@ if ($name !== '') {
     $sql .= " AND (p.title LIKE ? OR p.author LIKE ? )";
     $params[] = "%$name%";
     $params[] = "%$name%";
-    
 }
 
 if ($category_id !== '' && $category_id !== null) {
@@ -71,6 +70,7 @@ if ($max_price !== null) {
 }
 
 $info = temp('info');
+
 ?>
 
 <style>
