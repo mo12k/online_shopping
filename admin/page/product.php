@@ -91,6 +91,8 @@ if ($name !== '') {
 $sql .= " ORDER BY $sort $dir";
 
 
+$low_stock_count = $_db->query("SELECT COUNT(*) FROM product WHERE stock <= 10 AND status = 1")->fetchColumn();
+
 require_once '../lib/SimplePager.php';
 $p = new SimplePager($sql, $params, 10, $page);
 $arr = $p->result;
@@ -163,9 +165,6 @@ include '../_head.php';
         <div style="display:flex; align-items:center; flex-wrap:wrap; gap:15px;">
             <a href="/admin/product/insert.php" class="btn-add">+ Add New Book</a>
 
-            <?php
-            $low_stock_count = $_db->query("SELECT COUNT(*) FROM product WHERE stock <= 10 AND status = 1")->fetchColumn();
-            ?>
 
             <?php if ($low_stock || $low_stock_count > 0): ?>
                 <?php if ($low_stock): ?>

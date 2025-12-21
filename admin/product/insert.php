@@ -87,9 +87,6 @@ if (is_post()) {
     if (!$_err) {
         $photo_name = save_photo($f,"../upload");
 
-        //檢查 database 有沒有 autoincrement 在合并的時候
-       
-
         $_db->prepare("
              INSERT INTO product (id, title, author, category_id, price, stock, status, description, photo_name)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
