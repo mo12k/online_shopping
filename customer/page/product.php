@@ -24,10 +24,10 @@ $sql = "SELECT p.*, c.*
 $params = [];
 
 if ($name !== '') {
-    $sql .= " AND (p.title LIKE ? OR p.author LIKE ? OR p.id LIKE ?)";
+    $sql .= " AND (p.title LIKE ? OR p.author LIKE ? )";
     $params[] = "%$name%";
     $params[] = "%$name%";
-    $params[] = "%$name%";
+    
 }
 
 if ($category_id !== '' && $category_id !== null) {
@@ -158,7 +158,7 @@ $info = temp('info');
                            type="search"
                            name="name"
                            value="<?= encode($name) ?>"
-                           placeholder="Searching by id, title, author">
+                           placeholder="Searching by title, author">
                     <i class='bx bx-search search-icon'
                        onclick="this.closest('form').submit();"></i>
                 </div>
