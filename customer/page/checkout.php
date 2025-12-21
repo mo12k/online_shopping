@@ -190,6 +190,7 @@ include '../../_header.php';
         <?php if ($msg = temp('error')): ?>
             <div style="
                 max-width: 800px;
+                mid-height: 100px;
                 margin: 20px auto;
                 background: #f8d7da;
                 color: #721c24;
