@@ -5,7 +5,6 @@ admin_require_login();
 $_title   = 'Dashboard';
 $current  = 'dashboard';
 
-/* ===== 統計數字 ===== */
 $customer = $_db->query("SELECT COUNT(*) FROM customer")->fetchColumn();
 $product  = $_db->query("SELECT COUNT(*) FROM product")->fetchColumn();
 $order    = $_db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
@@ -45,7 +44,6 @@ $today_data  = [$today_total];
 include '../_head.php';
 ?>
 <div class="content">
-    <!-- 四個統計卡片（改為可點擊） -->
     <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:20px; margin:30px 0 50px 0;">
         
         <!-- Customer -->
@@ -82,7 +80,6 @@ include '../_head.php';
         
     </div>
 
-    <!-- 加上 hover 效果的 CSS（可選） -->
     <style>
         .content a > div:hover {
             transform: translateY(-5px);
@@ -92,9 +89,7 @@ include '../_head.php';
 
     <hr style="margin:50px 0; border:none; border-top:1px solid #eee;">
 
-    <!-- 圖表區：保持原樣 -->
     <div style="display:flex; gap:40px; flex-wrap:wrap; justify-content:center;">
-        <!-- 左：Order Status -->
         <div style="flex:1; min-width:300px; max-width:500px; background:white; padding:25px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
             <h4 style="text-align:center; margin-bottom:20px; color:#333;">Order Status</h4>
             <div style="position:relative; height:350px; width:100%;">
@@ -102,7 +97,6 @@ include '../_head.php';
             </div>
         </div>
 
-        <!-- 右：Today Total Items Sold -->
         <div style="flex:1; min-width:300px; max-width:500px; background:white; padding:25px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
             <h4 style="text-align:center; margin-bottom:20px; color:#333;">Today Total Items Sold</h4>
             <div style="text-align:center; margin-bottom:30px;">
@@ -118,7 +112,7 @@ include '../_head.php';
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Order Status - 圓環圖
+// Order Status 
 new Chart(document.getElementById('statusChart'), {
     type: 'doughnut',
     data: {
@@ -143,7 +137,7 @@ new Chart(document.getElementById('statusChart'), {
     }
 });
 
-// Today Total Items Sold - 單一柱狀圖
+// Today Total Items Sold
 new Chart(document.getElementById('todayChart'), {
     type: 'bar',
     data: {

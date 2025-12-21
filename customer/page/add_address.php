@@ -11,7 +11,7 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
-// Where to go after cancel/save (safe whitelist)
+// Where to go after cancel/save
 $return = req('return') ?? 'checkout';
 $return_to = $return === 'profile' ? 'edit_profile.php' : 'checkout.php';
 
